@@ -16,7 +16,7 @@ Requires Python 3.11 or newer. No pip install, Node, database account, or paid s
 python3 app.py
 ```
 
-Open **http://127.0.0.1:8787**. On Windows, use `py app.py` if `python3` is unavailable. Stop with Ctrl+C. Restarting keeps locally saved projects in `prooflane.sqlite3`.
+Open **http://127.0.0.1:8787**. On Windows, use `python app.py` if `python3` is unavailable; `py app.py` also works when the launcher has an interpreter configured. Stop with Ctrl+C. Restarting keeps locally saved projects in `prooflane.sqlite3`.
 
 1. Draft the sample brief at USD 120.00.
 2. Review the five proposed checks and agree on them.
