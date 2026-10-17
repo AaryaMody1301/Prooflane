@@ -1,0 +1,276 @@
+"""Money/state/CSV checks plus a real localhost HTTP flow; no external credentials."""
+import copy
+import json
+import tempfile
+import threading
+import unittest
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from unittest.mock import patch
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+from http.server import ThreadingHTTPServer
+
+from app import Handler, PayPal, Problem, ROOT, SAMPLE_BRIEF, Store, doctor, draft_plan, money, sample_plan, validate_plan, verify_csv
+
+FAILED = (ROOT / "examples/failed.csv").read_text()
+PASSED = (ROOT / "examples/passed.csv").read_text()
+
+
+def new(store):
+    return store.create({"brief": SAMPLE_BRIEF, "price": "120.00"})
+
+
+def ready(store):
+    p = new(store)
+    for action, body in [("agree", {}), ("verify", {"csv": PASSED}), ("approve", {})]:
+        p = store.act(p["id"], action, body, "http://127.0.0.1:8787")
+    return p
+
+
+def order_result(p, state="COMPLETED", currency="USD", value="120.00"):
+    capture = {"id": "SANDBOX-CAPTURE", "status": state, "amount": {"currency_code": currency, "value": value}}
+    return {"id": p["order"]["id"], "status": "COMPLETED", "purchase_units": [{"custom_id": p["id"], "amount": {"currency_code": "USD", "value": "120.00"}, "payments": {"captures": [capture]}}]}
+
+
+class FakePayPal:
+    def __init__(self):
+        self.state, self.currency = "COMPLETED", "USD"
+        self.creates, self.captures = 0, 0
+
+    def create(self, p, origin):
+        self.creates += 1
+        return {"id": "SANDBOX-ORDER", "status": "CREATED", "purchase_units": [{"custom_id": p["id"], "amount": {"currency_code": "USD", "value": "120.00"}}], "links": [{"rel": "payer-action", "href": "https://www.sandbox.paypal.com/checkoutnow?token=SANDBOX-ORDER"}]}
+
+    def capture(self, p):
+        self.captures += 1
+        return order_result(p, self.state, self.currency)
+
+
+class Checks(unittest.TestCase):
+    def setUp(self):
+        self.store = Store(":memory:")
+
+    def tearDown(self):
+        self.store.db.close()
+
+    def test_money_boundaries(self):
+        self.assertEqual(money("120.01"), 12001)
+        for value in ["-1", "0", "0.99", "10000.01", "NaN", "1.234", "1e2", 120, None, "1;DROP"]:
+            with self.subTest(value=value), self.assertRaises(Problem):
+                money(value)
+
+    def test_ai_schema_fails_closed(self):
+        self.assertEqual(validate_plan(sample_plan(), SAMPLE_BRIEF), sample_plan())
+        for replacement in [[], [{"kind": "python", "source": SAMPLE_BRIEF}], [{"kind": "unique", "column": "order_id", "source": "invented"}], [{"kind": "row_count", "min": float("nan"), "source": "Include at least 3 rows."}], [{"kind": "row_count", "min": 2.5, "source": "Include at least 3 rows."}]]:
+            plan = sample_plan()
+            plan["checks"] = replacement
+            with self.subTest(replacement=replacement), self.assertRaises(Problem):
+                validate_plan(plan, SAMPLE_BRIEF)
+        plan = sample_plan()
+        plan["checks"][0]["send_payment"] = True
+        with self.assertRaises(Problem):
+            validate_plan(plan, SAMPLE_BRIEF)
+
+    def test_gemini_adapter_and_no_silent_fallback(self):
+        result = {"candidates": [{"content": {"parts": [{"text": json.dumps(sample_plan())}]}}]}
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", return_value=result) as call:
+            self.assertEqual(draft_plan(SAMPLE_BRIEF, "gemini", "gemini-2.5-flash"), sample_plan())
+            self.assertEqual(call.call_args.args[1]["generationConfig"]["responseMimeType"], "application/json")
+            self.assertNotIn("key=", call.call_args.args[0])
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", side_effect=Problem("Provider unavailable", 502)), self.assertRaises(Problem):
+            draft_plan(SAMPLE_BRIEF, "gemini", "gemini-2.5-flash")
+        with self.assertRaises(Problem):
+            draft_plan("A new custom brief", "sample", "gemini-2.5-flash")
+
+    def test_real_csv_checks_and_parser_limits(self):
+        failed = verify_csv(FAILED, sample_plan()["checks"])
+        self.assertFalse(failed["passed"])
+        self.assertEqual([r["passed"] for r in failed["checks"]], [True, False, False, False, True])
+        self.assertEqual(failed["checks"][1]["failed_rows"], [3])
+        self.assertTrue(verify_csv(PASSED, sample_plan()["checks"])["passed"])
+        for raw in ["", "a,a\n1,2", "a,b\n1", "a,b\n1,2,3", "a\n", "a\n" + "1\n" * 5001, "a\n" + "x" * 300_000]:
+            with self.subTest(raw=raw[:20]), self.assertRaises(Problem):
+                verify_csv(raw, sample_plan()["checks"])
+        for value in ["NaN", "Infinity", "-1", "abc"]:
+            self.assertFalse(verify_csv(PASSED.replace(",125", "," + value), sample_plan()["checks"])["passed"])
+
+    def test_failed_delivery_and_stale_approval_block_payment(self):
+        p = new(self.store)
+        with self.assertRaises(Problem):
+            self.store.act(p["id"], "order", {}, "")
+        self.store.act(p["id"], "agree", {}, "")
+        p = self.store.act(p["id"], "verify", {"csv": FAILED}, "")
+        self.assertEqual(p["status"], "BLOCKED")
+        with self.assertRaises(Problem):
+            self.store.act(p["id"], "approve", {}, "")
+        self.store.act(p["id"], "verify", {"csv": PASSED}, "")
+        self.store.act(p["id"], "approve", {}, "")
+        p = self.store.act(p["id"], "verify", {"csv": FAILED}, "")
+        self.assertIsNone(p["approval"])
+        with self.assertRaises(Problem):
+            self.store.act(p["id"], "order", {}, "")
+
+    def test_exactly_one_simulated_capture_and_frozen_delivery(self):
+        p = ready(self.store)
+        p = self.store.act(p["id"], "order", {}, "")
+        oid = p["order"]["id"]
+        with self.assertRaises(Problem):
+            self.store.act(p["id"], "verify", {"csv": PASSED}, "")
+        with self.assertRaises(Problem):
+            self.store.act(p["id"], "capture", {"order_id": "foreign-order"}, "")
+        p = self.store.act(p["id"], "capture", {"order_id": oid, "price": "1.00"}, "")
+        replay = self.store.act(p["id"], "capture", {"order_id": oid}, "")
+        self.assertEqual(p, replay)
+        self.assertEqual(p["receipt"]["amount"], "120.00")
+        self.assertEqual(p["receipt"]["delivery_sha256"], p["verification"]["sha256"])
+
+    def test_sandbox_pending_mismatch_and_mode_switch(self):
+        fake = FakePayPal()
+        self.store.payment_mode, self.store.paypal = "sandbox", fake
+        p = ready(self.store)
+        p = self.store.act(p["id"], "order", {}, "http://127.0.0.1:8787")
+        self.store.act(p["id"], "order", {}, "")
+        self.assertEqual(fake.creates, 1)
+        body = {"order_id": p["order"]["id"]}
+        fake.currency = "EUR"
+        with self.assertRaises(Problem):
+            self.store.act(p["id"], "capture", body, "")
+        self.assertIsNone(self.store.get(p["id"])["receipt"])
+        fake.currency, fake.state = "USD", "PENDING"
+        p = self.store.act(p["id"], "capture", body, "")
+        self.assertEqual(p["status"], "PAYMENT_PENDING")
+        self.assertIsNone(p["receipt"])
+        self.store.payment_mode = "simulation"
+        with self.assertRaises(Problem):
+            self.store.act(p["id"], "capture", body, "")
+        self.store.payment_mode, fake.state = "sandbox", "COMPLETED"
+        p = self.store.act(p["id"], "capture", body, "")
+        self.assertEqual(p["status"], "PAID")
+        self.assertEqual(p["receipt"]["mode"], "sandbox")
+
+    def test_capture_adapter_reconciles_before_retry(self):
+        p = ready(self.store)
+        p = self.store.act(p["id"], "order", {}, "")
+        adapter = PayPal("test", "test")
+        completed = order_result(p)
+        with patch.object(adapter, "call", return_value=completed) as call:
+            self.assertEqual(adapter.capture(p), completed)
+            self.assertEqual(call.call_count, 1)
+        approved = copy.deepcopy(completed)
+        approved["status"] = "APPROVED"
+        with patch.object(adapter, "call", side_effect=[approved, completed]) as call:
+            adapter.capture(p)
+            self.assertEqual(call.call_args.args[2], "px-" + p["id"])
+        mismatch = copy.deepcopy(approved)
+        mismatch["purchase_units"][0]["custom_id"] = "foreign-project"
+        with patch.object(adapter, "call", return_value=mismatch) as call, self.assertRaises(Problem):
+            adapter.capture(p)
+        self.assertEqual(call.call_count, 1)
+
+    def test_uncertain_checkout_freezes_delivery_before_retry(self):
+        fake = FakePayPal()
+        self.store.payment_mode, self.store.paypal = "sandbox", fake
+        p = ready(self.store)
+        with patch.object(fake, "create", side_effect=Problem("Provider timed out", 502)):
+            with self.assertRaises(Problem):
+                self.store.act(p["id"], "order", {}, "http://127.0.0.1:8787")
+        pending = self.store.get(p["id"])
+        self.assertEqual(pending["status"], "CHECKOUT_PENDING")
+        self.assertIsNone(pending["order"])
+        for action, body in [("verify", {"csv": FAILED}), ("approve", {})]:
+            with self.assertRaises(Problem):
+                self.store.act(p["id"], action, body, "")
+        # Projects saved by the older starter also stay frozen after an attempted checkout.
+        pending["status"] = "APPROVED"
+        self.store.save(pending)
+        with self.assertRaises(Problem):
+            self.store.act(p["id"], "verify", {"csv": FAILED}, "")
+        p = self.store.act(p["id"], "order", {}, "http://127.0.0.1:8787")
+        self.assertEqual(p["status"], "ORDER_CREATED")
+        self.assertEqual(p["approval"], pending["approval"])
+        self.assertEqual(p["checkout_attempted_at"], pending["checkout_attempted_at"])
+        self.assertEqual(fake.creates, 1)
+        self.assertEqual(sum(e["action"] == "CHECKOUT_STARTED" for e in p["events"]), 1)
+
+    def test_uncertain_checkout_stops_after_retry_window(self):
+        fake = FakePayPal()
+        self.store.payment_mode, self.store.paypal = "sandbox", fake
+        p = ready(self.store)
+        p["status"], p["checkout_attempted_at"] = "CHECKOUT_PENDING", 1
+        self.store.save(p)
+        with self.assertRaises(Problem) as error:
+            self.store.act(p["id"], "order", {}, "http://127.0.0.1:8787")
+        self.assertEqual(error.exception.status, 409)
+        self.assertEqual(fake.creates, 0)
+
+    def test_doctor_is_offline_by_default_and_never_creates_orders(self):
+        keys = {"GEMINI_API_KEY": "private-gemini-placeholder", "PAYPAL_CLIENT_ID": "private-id-placeholder", "PAYPAL_CLIENT_SECRET": "private-secret-placeholder"}
+        with patch.dict("os.environ", keys, clear=True), patch("app.draft_plan", return_value=sample_plan()) as ai, patch.object(PayPal, "authenticate") as auth, patch.object(PayPal, "create") as create:
+            report = doctor("gemini", "sandbox", "gemini-2.5-flash")
+            self.assertTrue(report["configured_for_real_services"])
+            self.assertFalse(report["provider_checks_passed"])
+            ai.assert_not_called()
+            auth.assert_not_called()
+            report = doctor("gemini", "sandbox", "gemini-2.5-flash", providers=True)
+            self.assertTrue(report["provider_checks_passed"])
+            ai.assert_called_once()
+            auth.assert_called_once()
+            create.assert_not_called()
+            for secret in keys.values():
+                self.assertNotIn(secret, json.dumps(report))
+        with patch.dict("os.environ", {}, clear=True), patch("app.draft_plan") as ai, patch.object(PayPal, "authenticate") as auth:
+            self.assertFalse(doctor("sample", "simulation", "gemini-2.5-flash", providers=True)["configured_for_real_services"])
+            ai.assert_not_called()
+            auth.assert_not_called()
+
+    def test_persistence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "test.sqlite3"
+            first = Store(path)
+            p = ready(first)
+            first.db.close()
+            second = Store(path)
+            self.assertEqual(second.get(p["id"]), p)
+            second.db.close()
+
+    def test_localhost_http_flow_and_concurrent_replays(self):
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        server.store = self.store
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        base = "http://127.0.0.1:" + str(server.server_port)
+        def post(path, body, extra=None):
+            req = Request(base + path, data=json.dumps(body).encode(), headers={"Content-Type": "application/json", "X-Prooflane-Request": "1", **(extra or {})})
+            with urlopen(req, timeout=5) as response:
+                return json.load(response)
+        try:
+            with urlopen(base) as response:
+                self.assertIn(b"See the proof. Then pay.", response.read())
+            with self.assertRaises(HTTPError) as error:
+                post("/api/projects", {"brief": SAMPLE_BRIEF, "price": "120.00"}, {"Origin": "https://evil.example"})
+            self.assertEqual(error.exception.code, 403)
+            p = post("/api/projects", {"brief": SAMPLE_BRIEF, "price": "120.00"})
+            path = "/api/projects/" + p["id"]
+            for action, body in [("agree", {}), ("verify", {"csv": FAILED}), ("verify", {"csv": PASSED}), ("approve", {}), ("order", {})]:
+                p = post(path + "/" + action, body)
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                results = list(pool.map(lambda _: post(path + "/capture", {"order_id": p["order"]["id"]}), range(8)))
+            self.assertTrue(all(result == results[0] for result in results))
+            self.assertEqual(sum(e["action"] == "PAYMENT_RECONCILED" for e in results[0]["events"]), 1)
+            with urlopen(base + path + "/evidence") as response:
+                evidence = json.load(response)
+                self.assertIn("attachment;", response.headers["Content-Disposition"])
+            self.assertEqual(evidence["format"], "prooflane-evidence-v1")
+            self.assertEqual(evidence["project"], results[0])
+            self.assertEqual(evidence["project"]["receipt"]["ai_mode"], "sample")
+            self.assertEqual(evidence["project"]["receipt"]["mode"], "simulation")
+            self.assertNotIn(PASSED, json.dumps(evidence))
+        finally:
+            server.shutdown()
+            server.server_close()
+            worker.join()
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

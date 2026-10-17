@@ -1,0 +1,4 @@
+order_id,customer_email,revenue
+ord_101,mila@example.com,125
+ord_101,,-10
+ord_103,lee@example.com,75
