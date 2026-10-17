@@ -83,6 +83,23 @@ node test_client.cjs
 
 This starts a temporary Python HTTP server and runs the actual client handlers against it using DOM stubs. It checks simulated checkout, saved-project selection, restored brief/price/receipt, cleared previews, fresh-page resume, return reconciliation and invalid-return recovery. It does not validate browser layout, native controls or accessibility. The Python app and core test suite do not require Node.
 
+### Real-browser Phase 1 check
+
+On Windows with Google Chrome installed, run from the repo in PowerShell:
+
+```powershell
+py -m pip install playwright
+py browser_check.py --channel chrome --headed
+```
+
+This is an optional development dependency; running Prooflane still needs only Python's standard library. The check opens a dedicated browser session, starts its own temporary localhost server and database, and uses sample AI plus simulated payments regardless of `.env`. It checks CSV upload, failure/correction, stale-preview guards, simulated capture, evidence download, project resume, restart recovery, valid/foreign return tokens, keyboard focus and horizontal overflow at desktop and 390px widths. External page requests are blocked. It does not use your regular browser profile, credentials or saved projects.
+
+If you prefer Playwright's bundled Chromium, run `py -m playwright install chromium`, then `py browser_check.py --channel chromium --headed`. With Edge already installed, use `--channel msedge`. On macOS/Linux, replace `py` with `python3`. Installation and browser-channel behavior follow the [official Playwright library](https://playwright.dev/python/docs/library) and [browser documentation](https://playwright.dev/python/docs/browsers).
+
+The runner prints `PASS` only after its assertions finish; failures exit with an error. It leaves no test CSV, database, download or screenshot in the repository. Manually review the visible layout and failure messages as well; a 390px viewport is not a real-device or full accessibility audit.
+
+**This browser runner has not been executed successfully in the current environment.** Compilation, server lifecycle, the core tests and the controller check pass; the available cloud browser could not reach the workspace's localhost server, and a local Chromium binary was unavailable. Phase 1's browser gate remains open until the runner and visual walkthrough pass on a machine with a working browser.
+
 ## Implementation
 
 - `app.py`: HTTP routes, SQLite state, acceptance-plan validation, CSV checks, Gemini REST and PayPal Orders v2 adapters.
@@ -90,6 +107,7 @@ This starts a temporary Python HTTP server and runs the actual client handlers a
 - `examples/`: synthetic faulty and corrected CSVs.
 - `test_app.py`: runnable checks.
 - `test_client.cjs`: optional controller regression check against the real localhost API.
+- `browser_check.py`: optional real-browser Phase 1 workflow, layout and restart check.
 - `docs/BUILD_PLAN.md`: immediate integration gates, project scope and submission checklist.
 
 Supported checks: required columns, unique nonempty values, nonempty values, numeric ranges and row counts. Up to 300 KB, 5,000 data rows, 30 columns and 20 checks. AI output is data only; no generated code is executed. Prices use integer cents, never floats. Deliveries cannot change after an order starts. A stable `PayPal-Request-Id` is reused for each create and capture action. Capture retries first retrieve the existing order. An uncertain create result older than 15 minutes requires manual inspection rather than blindly creating another order.

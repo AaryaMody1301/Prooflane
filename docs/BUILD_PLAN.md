@@ -32,9 +32,10 @@ Scope: Python 3.11+ standard library, SQLite, one HTML client, one local operato
 - [x] Saved-project picker restores the brief, amount, review state, receipt and activity. Switching clears unsaved CSV previews.
 - [x] Persistence, HTTP, money, payment-state and provider contract tests.
 - [x] Client handler check against the real HTTP API: project switching, restored fields/receipt, cleared previews and valid/invalid PayPal returns. Uses DOM stubs; no visual verification claim.
+- [x] Add the optional `browser_check.py` runner for a reproducible real-browser sample workflow, file upload, evidence download, restart recovery and desktop/390px checks. Runner added; browser execution remains unverified.
 - [ ] Complete the actual desktop/mobile visual walkthrough. Chromium was unavailable here; syntax and controller checks do not count as visual QA.
 
-Run `python3 app.py`, complete the sample journey in the README, restart, select the saved project and download its evidence. Check the approved hash, amount and explicit simulation label. Until this walkthrough passes, Phase 1 remains open.
+Run `python3 app.py`, complete the sample journey in the README, restart, select the saved project and download its evidence. Check the approved hash, amount and explicit simulation label. On Windows with Chrome, install the optional Playwright package and run `py browser_check.py --channel chrome --headed`; the README contains the exact commands and alternative browser options. Review the visible desktop/narrow layouts and failure messages. The cloud browser could not reach the workspace server, so the remaining check must run on a machine with browser access to its own local server. Until the automated browser check and visual walkthrough pass, Phase 1 remains open.
 
 ## Phase 2 — real AI
 

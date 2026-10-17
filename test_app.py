@@ -265,7 +265,7 @@ class Checks(unittest.TestCase):
             self.assertEqual(evidence["project"], results[0])
             self.assertEqual(evidence["project"]["receipt"]["ai_mode"], "sample")
             self.assertEqual(evidence["project"]["receipt"]["mode"], "simulation")
-            self.assertNotIn(PASSED, json.dumps(evidence))
+            self.assertNotIn(json.dumps(PASSED), json.dumps(evidence))
             # The saved-project picker lists recent projects and restores an older receipt.
             other = post("/api/projects", {"brief": SAMPLE_BRIEF, "price": "75.50"})
             with urlopen(base + "/api/projects") as response:
