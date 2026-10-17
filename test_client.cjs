@@ -88,8 +88,9 @@ async function main() {
     assert.equal(invalid.elements.draft.disabled,false);
     const foreignReturn=await client(base,'/return?project='+paidId+'&token=foreign-order');
     assert.match(foreignReturn.elements.error.textContent,/does not match/);
+    assert.doesNotMatch(foreignReturn.elements.error.textContent,/Start the local app/);
     assert.equal(foreignReturn.requests.filter(r=>r.method==='POST').length,0);
-    console.log('PASS: sample checkout, two-project resume, restored price/brief/receipt, cleared preview, fresh-page resume, return reconciliation, unknown-project recovery and foreign-token rejection. DOM stubs; visual QA pending.');
+    console.log('PASS: sample checkout, two-project resume, restored price/brief/receipt, cleared preview, fresh-page resume, return reconciliation, unknown-project recovery and foreign-token rejection. DOM stubs; use browser_check.py for browser/layout checks.');
   } finally {
     server.kill('SIGTERM');
   }

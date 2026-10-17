@@ -12,8 +12,8 @@ Dates are working targets in IST, not automatic phase transitions. Keep 12 Novem
 
 | Phase | Target | Build | Completion gate | Current state |
 | --- | --- | --- | --- | --- |
-| 1. Local MVP | 17–18 October | Sample brief, review, CSV checks, approval, simulated receipt, saved-project resume, evidence export | Reproducible local flow; faulty file blocked; corrected file paid in simulation; restart/resume preserves evidence | Implemented; automated checks passing, visual walkthrough pending |
-| 2. Real AI | 19–21 October | Gemini configuration and custom measurable briefs with human review | Actual provider responses for measurable and ambiguous briefs; errors never silently use the sample fixture | Adapter implemented; credential-backed validation pending |
+| 1. Local MVP | 17–18 October | Sample brief, review, CSV checks, approval, simulated receipt, saved-project resume, evidence export | Reproducible local flow; faulty file blocked; corrected file paid in simulation; restart/resume preserves evidence | Complete 17 October; headed Edge and desktop/390px visual gates passed |
+| 2. Real AI | 19–21 October | Gemini configuration and custom measurable briefs with human review | Actual provider responses for measurable and ambiguous briefs; errors never silently use the sample fixture | Active after Phase 1 gate; offline checks pass, local Gemini key missing |
 | 3. PayPal sandbox | 22–25 October | Actual create, buyer approval, capture/readback, cancellation and retry | One real sandbox capture linked to the approved hash; cancellation unpaid; retry and amount mismatch handled | Adapter implemented; credentials and real checkout pending |
 | 4. Usability and reliability | 26 October–4 November | Desktop/mobile QA, a second use case, fresh setup, user feedback, final recovery checks | Another person completes the judge path; evidence agrees with the provider; issues fixed | Planned |
 | 5. Submission | 5–11 November | Feature freeze, demonstration, project description, judge instructions and submission | Public links work; video under 3 minutes; Devpost submission confirmed | Planned |
@@ -32,10 +32,19 @@ Scope: Python 3.11+ standard library, SQLite, one HTML client, one local operato
 - [x] Saved-project picker restores the brief, amount, review state, receipt and activity. Switching clears unsaved CSV previews.
 - [x] Persistence, HTTP, money, payment-state and provider contract tests.
 - [x] Client handler check against the real HTTP API: project switching, restored fields/receipt, cleared previews and valid/invalid PayPal returns. Uses DOM stubs; no visual verification claim.
-- [x] Add the optional `browser_check.py` runner for a reproducible real-browser sample workflow, file upload, evidence download, restart recovery and desktop/390px checks. Runner added; browser execution remains unverified.
-- [ ] Complete the actual desktop/mobile visual walkthrough. Chromium was unavailable here; syntax and controller checks do not count as visual QA.
+- [x] Run the optional `browser_check.py` real-browser sample workflow, file upload, evidence download, restart recovery and desktop/390px checks in installed Edge.
+- [x] Inspect rendered desktop/390px pages: usable native controls, readable failures/errors, receipt modes, wrapped hashes and visible keyboard focus. No document overflow or cards outside the grid in tested states.
 
-Run `python3 app.py`, complete the sample journey in the README, restart, select the saved project and download its evidence. Check the approved hash, amount and explicit simulation label. On Windows with Chrome, install the optional Playwright package and run `py browser_check.py --channel chrome --headed`; the README contains the exact commands and alternative browser options. Review the visible desktop/narrow layouts and failure messages. The cloud browser could not reach the workspace server, so the remaining check must run on a machine with browser access to its own local server. Until the automated browser check and visual walkthrough pass, Phase 1 remains open.
+Completion evidence, 17 October 2026: clean initial checkout `051065a` on `main`; no AGENTS.md found in the repository or its parent directories. Windows 10.0.26300, PowerShell 7.6.7, Python 3.14.7 (`python`; the `py` launcher found no interpreter), Node 24.20.0, installed Edge 155.0.4283.45. Optional Playwright 1.64.0 is confined to ignored `.venv`; application runtime remains standard-library-only.
+
+Actual checks:
+
+- `python -m unittest -v test_app.py`: 14 tests pass, including real HTTP/SQLite persistence and concurrent simulated capture replays.
+- `$env:PYTHON = (Get-Command python).Source; node test_client.cjs`: passes against the actual localhost API.
+- `.\.venv\Scripts\python.exe browser_check.py --channel msedge --headed --screenshots .venv/visual-qa`: passes. The faulty file has exactly three failures and checkout is blocked. Corrected upload passes; edits before approval and checkout require new checks. The exported approval, verification and receipt hashes equal the actual CSV SHA-256; simulated order/capture IDs and USD amount match, without raw CSV/customer emails. Two projects restore different prices and states; switching clears previews. Reopening SQLite in a new server preserves records. A valid return captures an unpaid second order; paid-order replay is safe; foreign tokens make no capture request.
+- Desktop (1280px) and narrow (390px) pages checked at initial, scope, blocked, changed-preview, approved, paid and error states. Screenshots inspected for controls, readable failure details, simulation labels, hash wrapping and focus. Keyboard traversal reaches brief, price and draft with a visible outline. The misleading restart advice on project/return errors was removed and regression checked.
+
+**Phase 1 gate passed.** Synthetic screenshots remain under ignored `.venv/visual-qa`; test databases/downloads are temporary. No actual AI or PayPal request was made by these checks. Chrome, Safari, Firefox, physical mobile devices and screen readers remain untested; Phase 4 retains the broader usability gate.
 
 ## Phase 2 — real AI
 
@@ -48,6 +57,12 @@ Start with the existing adapter and validation. Recheck model availability and s
 5. Record the model, synthetic brief, reviewed output, correction needed and final outcome. Keep credentials out of evidence and videos.
 
 Gate: credential-backed results for a measurable and an ambiguous brief; reviewed checks and honest limitations. The existing `doctor --providers` checks both Gemini and PayPal, so reserve that combined check for Phase 3 when both are configured. CSV contents stay local.
+
+17 October progress, started only after Phase 1's gate passed:
+
+- Offline `python app.py doctor` reports `AI_MODE=sample`, `PAYMENT_MODE=simulation`, model `gemini-2.5-flash`, and `GEMINI_API_KEY` absent (values never printed). Its exit status 1 is expected until both real-service modes are configured, not a failure of sample mode. No local `.env` exists and no provider call was attempted.
+- Added offline Gemini contract coverage for this synthetic measurable brief: “Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.” Test-double checks cover all four requirements with exact quotations, accept quantity bounds 0 and 100, and block 101. Appending “Make the data insightful.” produces a test-double clarification that blocks agreement. Invented quotes create no project; empty/malformed responses and provider errors have no sample fallback. These results verify adapter/state handling, not Gemini's ability to interpret briefs; actual coverage must still be reviewed by a human.
+- **Blocked input:** a local free-tier Gemini API key. Follow the README's Phase 2 setup: create `.env` from `.env.example` only if absent, set `AI_MODE=gemini`, `GEMINI_API_KEY` locally and keep `PAYMENT_MODE=simulation`; restart with `python app.py`. Try the two briefs above and record model, actual checks/quotes, missing obligations, clarifications, provider errors and outcome here. No genuine provider results or current model/quota availability are claimed. Phase 2 remains incomplete; PayPal sandbox testing has not begun.
 
 ## Phase 3 — PayPal sandbox
 
@@ -88,7 +103,7 @@ Gate: submitted project with functioning access, working links and evidence supp
 
 ## Scope rules and blockers
 
-The next active work stays in Phase 1 until its visual walkthrough is complete. Real Gemini and sandbox credentials are the external inputs for Phases 2 and 3. Configure them locally; do not paste them into chat or commit `.env`.
+Phase 1 is complete. The next active work is Phase 2's actual Gemini interpretation and clarification review, waiting for a local key. Keep payments simulated; sandbox credentials and transaction testing belong to Phase 3. Configure credentials locally; do not paste them into chat or commit `.env`.
 
 Keep one delivery, one agreed amount and one capture. Defer escrow, automatic payouts, refunds, multi-milestone work, arbitrary generated code, additional file formats, marketplace features and sponsor integrations. Add an item only if observed user feedback or a broken completion gate requires it.
 

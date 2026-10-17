@@ -82,6 +82,45 @@ class Checks(unittest.TestCase):
             draft_plan(SAMPLE_BRIEF, "gemini", "gemini-2.5-flash")
         with self.assertRaises(Problem):
             draft_plan("A new custom brief", "sample", "gemini-2.5-flash")
+        for response in [{}, {"candidates": []}, {"candidates": [{"content": {"parts": [{"text": "not JSON"}]}}]}]:
+            with self.subTest(response=response), patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", return_value=response), self.assertRaises(Problem):
+                draft_plan(SAMPLE_BRIEF, "gemini", "gemini-2.5-flash")
+
+    def test_gemini_custom_scope_and_clarifications(self):
+        # Provider responses below are test doubles, not evidence of real Gemini interpretation.
+        requirements = ["Deliver an inventory CSV with sku and quantity columns.", "Every sku must be unique.", "Quantity must be a number between 0 and 100.", "Include exactly 2 rows."]
+        brief = " ".join(requirements)
+        plan = {"title": "Inventory handover", "clarifications": [], "checks": [
+            {"kind": "required_columns", "columns": ["sku", "quantity"], "source": requirements[0]},
+            {"kind": "unique", "column": "sku", "source": requirements[1]},
+            {"kind": "number_range", "column": "quantity", "min": 0, "max": 100, "source": requirements[2]},
+            {"kind": "row_count", "min": 2, "max": 2, "source": requirements[3]},
+        ]}
+        self.store.ai_mode = "gemini"
+        for ambiguous in (False, True):
+            current_brief = brief + (" Make the data insightful." if ambiguous else "")
+            plan["clarifications"] = ["What measurable CSV checks define insightful?"] if ambiguous else []
+            response = {"candidates": [{"content": {"parts": [{"text": json.dumps(plan)}]}}]}
+            with patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", return_value=response):
+                project = self.store.create({"brief": current_brief, "price": "42.50"})
+            self.assertEqual(project["plan"], plan)
+            self.assertEqual(project["payment_mode"], "simulation")
+            if ambiguous:
+                with self.assertRaises(Problem):
+                    self.store.act(project["id"], "agree", {}, "")
+                self.assertEqual(self.store.get(project["id"])["status"], "DRAFT")
+                self.assertIsNone(self.store.get(project["id"])["order"])
+            else:
+                self.store.act(project["id"], "agree", {}, "")
+                passed = self.store.act(project["id"], "verify", {"csv": "sku,quantity\nA,0\nB,100\n"}, "")
+                self.assertEqual(passed["status"], "VERIFIED")
+                failed = self.store.act(project["id"], "verify", {"csv": "sku,quantity\nA,101\nB,100\n"}, "")
+                self.assertEqual(failed["status"], "BLOCKED")
+        plan["checks"][0]["source"] = "Invented requirement."
+        response = {"candidates": [{"content": {"parts": [{"text": json.dumps(plan)}]}}]}
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", return_value=response), self.assertRaises(Problem):
+            self.store.create({"brief": brief, "price": "42.50"})
+        self.assertEqual(self.store.db.execute("SELECT COUNT(*) FROM projects").fetchone()[0], 2)
 
     def test_real_csv_checks_and_parser_limits(self):
         failed = verify_csv(FAILED, sample_plan()["checks"])
@@ -250,6 +289,7 @@ class Checks(unittest.TestCase):
             with self.assertRaises(HTTPError) as error:
                 post("/api/projects", {"brief": SAMPLE_BRIEF, "price": "120.00"}, {"Origin": "https://evil.example"})
             self.assertEqual(error.exception.code, 403)
+            error.exception.close()
             p = post("/api/projects", {"brief": SAMPLE_BRIEF, "price": "120.00"})
             path = "/api/projects/" + p["id"]
             for action, body in [("agree", {}), ("verify", {"csv": FAILED}), ("verify", {"csv": PASSED}), ("approve", {}), ("order", {})]:

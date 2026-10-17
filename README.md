@@ -6,7 +6,7 @@ Prooflane is an outcome checkout for independent data freelancers and small anal
 
 New project started on 11 October 2026 for the [PayPal AI Hackathon](https://paypalaihackathon.devpost.com/). Built with the Ponytail approach: Python's standard library, SQLite, and a buildless HTML client.
 
-Follow the [five-phase build plan](docs/BUILD_PLAN.md): local MVP → real AI → PayPal sandbox → usability/reliability → submission. **Phase 1 is the active phase.** Its implementation is in place; the actual browser/mobile walkthrough remains open. Later integrations have adapters, with real credential-backed validation still pending.
+Follow the [five-phase build plan](docs/BUILD_PLAN.md): local MVP → real AI → PayPal sandbox → usability/reliability → submission. **Phase 1 is complete:** its real-browser workflow and desktop/390px visual gates passed on 17 October. **Phase 2 is active**, with offline adapter checks passing and actual Gemini validation waiting for a local API key. PayPal sandbox validation remains Phase 3.
 
 ## Run
 
@@ -65,6 +65,25 @@ Restart after configuration changes and create a **new project**. During checkou
 
 Both adapters have local contract tests. Neither provider has been called with actual credentials in the 17 October update. This is a working starter, not a hackathon-ready submission until the real AI and PayPal sandbox flow has been demonstrated.
 
+### Next local step: Phase 2 only
+
+The offline `python app.py doctor` check on 17 October found no `GEMINI_API_KEY` in the process environment or local `.env`; no provider request was made. From PowerShell, create the ignored configuration only if it does not already exist:
+
+```powershell
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+```
+
+Edit `.env` locally to set these values, replacing the key placeholder with your free-tier AI Studio key:
+
+```dotenv
+AI_MODE=gemini
+PAYMENT_MODE=simulation
+GEMINI_API_KEY=your_local_key
+GEMINI_MODEL=gemini-2.5-flash
+```
+
+Restart with `python app.py` and draft a new project. Review a synthetic inventory brief: “Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.” Expect required columns, unique sku, quantity bounds 0–100 and exactly two rows, each quoting its requirement. Then append “Make the data insightful.” and check for clarification or rejection, with agreement blocked. Record actual returned checks, omissions, model, provider errors and outcome in the build plan. Schema validation checks quotations and supported types; human review must still catch omitted or misinterpreted obligations. Real model availability, quota and interpretation remain unverified without the key. Keep billing disabled and payments simulated. Reserve `doctor --providers`, which also contacts PayPal, for Phase 3.
+
 If order creation times out, the delivery freezes immediately in `CHECKOUT_PENDING`. Retry the same checkout within 15 minutes; its request ID and approved hash remain unchanged. After that window, inspect orders in the sandbox dashboard before starting another project. Editing or replacing a CSV preview requires fresh checks before the UI permits approval or checkout.
 
 ## Verify
@@ -73,7 +92,7 @@ If order creation times out, the delivery freezes immediately in `CHECKOUT_PENDI
 python3 -m unittest -v test_app.py
 ```
 
-Thirteen tests cover malformed plans and CSVs, exact money values, failed deliveries, stale approvals, frozen checkout evidence after a provider timeout, the retry window, pending and mismatched captures, repeated requests, persistence, offline/provider setup diagnostics, and a localhost HTTP flow with concurrent capture replays and an evidence download. Tests do not require network access or credentials.
+Fourteen tests cover malformed plans and CSVs, exact money values, failed deliveries, stale approvals, frozen checkout evidence after a provider timeout, the retry window, pending and mismatched captures, repeated requests, persistence, offline/provider setup diagnostics, and a localhost HTTP flow with concurrent capture replays and an evidence download. Gemini test doubles also cover a custom inventory plan, exact source quotations, bounds, clarification-blocked agreement, empty/malformed provider output and no silent fallback. These are offline contract checks, not actual provider results. Tests do not require network access or credentials.
 
 Optional client controller check with Node 20 or newer (no npm packages):
 
@@ -81,24 +100,27 @@ Optional client controller check with Node 20 or newer (no npm packages):
 node test_client.cjs
 ```
 
+On Windows, select the interpreter explicitly if `python3` is unavailable: `$env:PYTHON = (Get-Command python).Source; node test_client.cjs`.
+
 This starts a temporary Python HTTP server and runs the actual client handlers against it using DOM stubs. It checks simulated checkout, saved-project selection, restored brief/price/receipt, cleared previews, fresh-page resume, return reconciliation and invalid-return recovery. It does not validate browser layout, native controls or accessibility. The Python app and core test suite do not require Node.
 
 ### Real-browser Phase 1 check
 
-On Windows with Google Chrome installed, run from the repo in PowerShell:
+On Windows, use an ignored virtual environment for the optional browser tools. The verified machine has Python 3.14.7, PowerShell 7.6.7, Node 24.20.0 and Edge 155.0.4283.45; `py` reports no installed interpreter and Chrome was unavailable. Run from the repo in PowerShell:
 
 ```powershell
-py -m pip install playwright
-py browser_check.py --channel chrome --headed
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install playwright
+.\.venv\Scripts\python.exe browser_check.py --channel msedge --headed --screenshots .venv/visual-qa
 ```
 
 This is an optional development dependency; running Prooflane still needs only Python's standard library. The check opens a dedicated browser session, starts its own temporary localhost server and database, and uses sample AI plus simulated payments regardless of `.env`. It checks CSV upload, failure/correction, stale-preview guards, simulated capture, evidence download, project resume, restart recovery, valid/foreign return tokens, keyboard focus and horizontal overflow at desktop and 390px widths. External page requests are blocked. It does not use your regular browser profile, credentials or saved projects.
 
-If you prefer Playwright's bundled Chromium, run `py -m playwright install chromium`, then `py browser_check.py --channel chromium --headed`. With Edge already installed, use `--channel msedge`. On macOS/Linux, replace `py` with `python3`. Installation and browser-channel behavior follow the [official Playwright library](https://playwright.dev/python/docs/library) and [browser documentation](https://playwright.dev/python/docs/browsers).
+Reuse `.venv` if it already exists. With Chrome installed, use `--channel chrome`. For bundled Chromium, run `.\.venv\Scripts\python.exe -m playwright install chromium`, then use `--channel chromium`. On macOS/Linux, create the environment with `python3 -m venv .venv` and use `.venv/bin/python`. Installation and browser-channel behavior follow the [official Playwright library](https://playwright.dev/python/docs/library) and [browser documentation](https://playwright.dev/python/docs/browsers).
 
-The runner prints `PASS` only after its assertions finish; failures exit with an error. It leaves no test CSV, database, download or screenshot in the repository. Manually review the visible layout and failure messages as well; a 390px viewport is not a real-device or full accessibility audit.
+The runner prints `PASS` only after its assertions finish; failures exit with an error. Test databases and downloads are temporary. The optional `--screenshots` directory keeps synthetic desktop/390px pages for visual inspection; `.venv/visual-qa` is ignored. Without that option, no screenshots are retained. Review the rendered pages and failure messages as well; a 390px viewport is not a real-device or full accessibility audit.
 
-**This browser runner has not been executed successfully in the current environment.** Compilation, server lifecycle, the core tests and the controller check pass; the available cloud browser could not reach the workspace's localhost server, and a local Chromium binary was unavailable. Phase 1's browser gate remains open until the runner and visual walkthrough pass on a machine with a working browser.
+**Verified 17 October 2026:** all 14 Python tests, the Node controller check and the headed Edge runner pass (Playwright 1.64.0). Rendered desktop/390px screenshots were inspected for scope, failure details, changed-preview guidance, receipt labels, errors, hash wrapping and keyboard focus. Assertions check overflow/card boundaries throughout the workflow, exact CSV/approval/receipt hashes and payment IDs, absence of CSV contents/customer emails in evidence, two-price project restore, server restart, a new capture through a valid return and foreign-token rejection. The return error no longer suggests restarting an already running app. Phase 1's completion gate passes. Chrome, Safari, Firefox, physical-device and screen-reader checks were not performed; broader usability work remains in Phase 4.
 
 ## Implementation
 
@@ -118,7 +140,7 @@ The server intentionally binds to localhost and uses one operator to demonstrate
 
 Before public hosting, add authenticated buyer/seller roles, authorization on every project route, HTTPS, CSRF/session controls, durable storage and verified webhook reconciliation. Do not expose this starter through a tunnel or change its host guards. The hosted implementation and integration checks are mapped in the accompanying research report.
 
-Visual browser QA has not been performed in this environment. The client JavaScript passes syntax validation, and the server/client HTML route is covered by the HTTP test.
+The local browser/visual gate is verified above. Real Gemini responses and PayPal sandbox transactions are still pending their separate phase gates.
 
 ## License
 

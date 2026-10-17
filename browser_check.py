@@ -1,5 +1,6 @@
 """Optional real-browser check. Uses synthetic data, sample AI and simulated payments."""
 import argparse
+import hashlib
 import json
 import tempfile
 import threading
@@ -31,6 +32,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--channel", choices=["chrome", "msedge", "chromium"], default="chrome")
     parser.add_argument("--headed", action="store_true", help="Show the dedicated test browser")
+    parser.add_argument("--screenshots", type=Path, help="Save synthetic desktop/390px pages here for visual review")
     args = parser.parse_args()
     try:
         from playwright.sync_api import expect, sync_playwright
@@ -57,14 +59,28 @@ def main():
             context.route("**/*", guard)
             page = context.new_page()
             page.on("pageerror", lambda error: errors.append(str(error)))
+
+            def layout(stage):
+                for width in (1280, 390):
+                    page.set_viewport_size({"width": width, "height": 844})
+                    assert page.evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth"), f"Horizontal overflow: {stage} at {width}px"
+                    assert page.evaluate("() => {const right=document.querySelector('.grid').getBoundingClientRect().right; return [...document.querySelectorAll('.main,.side,.main>.card,.side>.card')].every(el=>el.getBoundingClientRect().right<=right+1);}"), f"Cards exceed their grid: {stage} at {width}px"
+                    expect(page.get_by_label("Resume a saved project")).to_be_visible()
+                    if args.screenshots:
+                        args.screenshots.mkdir(parents=True, exist_ok=True)
+                        page.screenshot(path=args.screenshots / f"{stage}-{width}.png", full_page=True)
+                page.set_viewport_size({"width": 1280, "height": 960})
+
             db_path = Path(directory) / "check.sqlite3"
             with local_app(db_path) as base:
                 allowed_ports.add(urlparse(base).port)
                 page.goto(base)
                 expect(page.locator("#mode-title")).to_contain_text("Sample AI fixture")
+                layout("initial")
                 page.locator("#draft").click()
                 expect(page.locator("#status")).to_have_text("DRAFT")
                 project_id = parse_qs(urlparse(page.url).query)["project"][0]
+                layout("scope")
                 page.locator("#agree").click()
                 page.locator("#failed").click()
                 page.locator("#verify").click()
@@ -72,6 +88,7 @@ def main():
                 expect(page.locator("#results .pill.fail")).to_have_count(3)
                 expect(page.locator("#order")).to_be_disabled()
                 expect(page.locator("#approve")).to_be_hidden()
+                layout("blocked")
 
                 passed = (ROOT / "examples/passed.csv").read_text()
                 page.locator("#upload").set_input_files(ROOT / "examples/passed.csv")
@@ -81,6 +98,7 @@ def main():
                 page.locator("#csv").fill(passed + "\n")
                 expect(page.locator("#approve")).to_be_disabled()
                 expect(page.locator("#dirty-note")).to_be_visible()
+                layout("changed-preview")
                 page.locator("#verify").click()
                 page.locator("#approve").click()
                 expect(page.locator("#status")).to_have_text("APPROVED")
@@ -88,6 +106,7 @@ def main():
                 expect(page.locator("#order")).to_be_disabled()
                 page.locator("#verify").click()
                 page.locator("#approve").click()
+                layout("approved")
                 page.locator("#order").click()
                 expect(page.locator("#status")).to_have_text("ORDER CREATED")
                 expect(page.locator("#csv")).not_to_be_editable()
@@ -100,14 +119,30 @@ def main():
                 download = download_event.value
                 evidence = json.loads(Path(download.path()).read_text())
                 receipt = evidence["project"]["receipt"]
+                saved_project = evidence["project"]
                 assert receipt["amount"] == "120.00" and receipt["mode"] == "simulation"
-                assert receipt["delivery_sha256"] == evidence["project"]["verification"]["sha256"]
+                assert receipt["delivery_sha256"] == saved_project["verification"]["sha256"] == saved_project["approval"]["sha256"] == hashlib.sha256(passed.encode()).hexdigest()
+                assert receipt["order_id"] == saved_project["order"]["id"] == "SIM-ORDER-" + project_id
+                assert receipt["capture_id"] == "SIM-CAPTURE-" + project_id
+                assert receipt["currency"] == "USD" and receipt["ai_mode"] == "sample"
                 assert json.dumps(passed) not in json.dumps(evidence)
+                assert all(email not in json.dumps(evidence) for email in ("mila@example.com", "arun@example.com", "lee@example.com"))
+                layout("paid")
 
                 page.locator("#price").fill("75.50")
                 page.locator("#draft").click()
                 expect(page.locator("#status")).to_have_text("DRAFT")
-                assert parse_qs(urlparse(page.url).query)["project"][0] != project_id
+                draft_id = parse_qs(urlparse(page.url).query)["project"][0]
+                assert draft_id != project_id
+                page.locator("#projects").select_option(project_id)
+                expect(page.locator("#status")).to_have_text("PAID")
+                page.locator("#projects").select_option(draft_id)
+                expect(page.locator("#status")).to_have_text("DRAFT")
+                expect(page.locator("#price")).to_have_value("75.50")
+                expect(page.locator("#receipt")).to_be_empty()
+                page.locator("#agree").click()
+                page.locator("#passed").click()
+                expect(page.locator("#csv")).to_have_value(passed)
                 page.locator("#projects").select_option(project_id)
                 expect(page.locator("#status")).to_have_text("PAID")
                 expect(page.locator("#brief")).to_have_value(SAMPLE_BRIEF)
@@ -115,13 +150,26 @@ def main():
                 expect(page.locator("#csv")).to_have_value("")
                 page.reload()
                 expect(page.locator("#status")).to_have_text("PAID")
-                for width in (1280, 390):
-                    page.set_viewport_size({"width": width, "height": 844})
-                    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), f"Horizontal overflow at {width}px"
-                    expect(page.get_by_label("Resume a saved project")).to_be_visible()
+                page.set_viewport_size({"width": 390, "height": 844})
                 page.locator("#projects").focus()
                 page.locator("#projects").press("Tab")
                 expect(page.locator("#brief")).to_be_focused()
+                page.locator("#brief").press("Tab")
+                expect(page.locator("#price")).to_be_focused()
+                page.locator("#price").press("Tab")
+                expect(page.locator("#draft")).to_be_focused()
+                assert page.locator("#draft").evaluate("el => el.matches(':focus-visible') && getComputedStyle(el).outlineStyle !== 'none'")
+                if args.screenshots:
+                    page.screenshot(path=args.screenshots / "keyboard-focus-390.png")
+
+                # Leave a second, differently priced order unpaid for a genuine return reconciliation after restart.
+                page.locator("#projects").select_option(draft_id)
+                expect(page.locator("#status")).to_have_text("AGREED")
+                page.locator("#passed").click()
+                page.locator("#verify").click()
+                page.locator("#approve").click()
+                page.locator("#order").click()
+                expect(page.locator("#status")).to_have_text("ORDER CREATED")
 
             # Reopen the same SQLite file in a new server to check actual restart recovery.
             with local_app(db_path) as base:
@@ -138,12 +186,20 @@ def main():
                 expect(page.locator("#error")).to_be_hidden()
                 expect(page.locator("#capture")).to_be_hidden()
                 assert len(captures) == 1
+                page.goto(base + "/return?project=" + draft_id + "&token=SIM-ORDER-" + draft_id)
+                expect(page.locator("#status")).to_have_text("PAID")
+                expect(page.locator("#price")).to_have_value("75.50")
+                expect(page.locator("#receipt")).to_contain_text("75.50 USD")
+                assert len(captures) == 2
                 page.goto(base + "/return?project=" + project_id + "&token=foreign-order")
                 expect(page.locator("#error")).to_contain_text("does not match")
-                assert len(captures) == 1
+                expect(page.locator("#error")).not_to_contain_text("Start the local app")
+                assert len(captures) == 2
+                layout("foreign-token")
                 page.goto(base + "/?project=" + "0" * 32)
                 expect(page.locator("#error")).to_contain_text("Project not found")
                 expect(page.locator("#draft")).to_be_enabled()
+                layout("missing-project")
             assert not errors, errors
             assert not external, external
             print("PASS: real-browser sample flow, upload, approval guards, simulated checkout, evidence download, saved-project resume, desktop/390px layout, keyboard focus, restart and return recovery.")
