@@ -6,6 +6,8 @@ Prooflane is an outcome checkout for independent data freelancers and small anal
 
 New project started on 11 October 2026 for the [PayPal AI Hackathon](https://paypalaihackathon.devpost.com/). Built with the Ponytail approach: Python's standard library, SQLite, and a buildless HTML client.
 
+Follow the [five-phase build plan](docs/BUILD_PLAN.md): local MVP → real AI → PayPal sandbox → usability/reliability → submission. **Phase 1 is the active phase.** Its implementation is in place; the actual browser/mobile walkthrough remains open. Later integrations have adapters, with real credential-backed validation still pending.
+
 ## Run
 
 Requires Python 3.11 or newer. No pip install, Node, database account, or paid service is needed for sample mode.
@@ -22,6 +24,7 @@ Open **http://127.0.0.1:8787**. On Windows, use `py app.py` if `python3` is unav
 4. Load the corrected example and run checks again.
 5. Approve that delivery, create checkout, and complete the simulated payment.
 6. Inspect the receipt and activity ledger, then download the evidence JSON. Its delivery hash matches the approved CSV; the export contains the plan and results, without CSV contents.
+7. Restart the app, then use **Resume a saved project** to reopen the receipt. Its brief, price, checks and payment state are restored. CSV previews are not saved; upload again if you need to replace a delivery before checkout starts. Switching projects clears unsaved CSV previews. Drafting a new plan creates a separate project.
 
 **Default mode is a fixed acceptance-plan fixture plus a payment simulator. It does not call an AI model or PayPal.** The UI and receipts label both modes. The CSV evaluation, state transitions, hashes, persistence, and HTTP requests work in either mode.
 
@@ -72,12 +75,21 @@ python3 -m unittest -v test_app.py
 
 Thirteen tests cover malformed plans and CSVs, exact money values, failed deliveries, stale approvals, frozen checkout evidence after a provider timeout, the retry window, pending and mismatched captures, repeated requests, persistence, offline/provider setup diagnostics, and a localhost HTTP flow with concurrent capture replays and an evidence download. Tests do not require network access or credentials.
 
+Optional client controller check with Node 20 or newer (no npm packages):
+
+```bash
+node test_client.cjs
+```
+
+This starts a temporary Python HTTP server and runs the actual client handlers against it using DOM stubs. It checks simulated checkout, saved-project selection, restored brief/price/receipt, cleared previews, fresh-page resume, return reconciliation and invalid-return recovery. It does not validate browser layout, native controls or accessibility. The Python app and core test suite do not require Node.
+
 ## Implementation
 
 - `app.py`: HTTP routes, SQLite state, acceptance-plan validation, CSV checks, Gemini REST and PayPal Orders v2 adapters.
 - `static/index.html`: responsive client with scope review, CSV loading, delivery evidence, checkout, receipt, and activity.
 - `examples/`: synthetic faulty and corrected CSVs.
 - `test_app.py`: runnable checks.
+- `test_client.cjs`: optional controller regression check against the real localhost API.
 - `docs/BUILD_PLAN.md`: immediate integration gates, project scope and submission checklist.
 
 Supported checks: required columns, unique nonempty values, nonempty values, numeric ranges and row counts. Up to 300 KB, 5,000 data rows, 30 columns and 20 checks. AI output is data only; no generated code is executed. Prices use integer cents, never floats. Deliveries cannot change after an order starts. A stable `PayPal-Request-Id` is reused for each create and capture action. Capture retries first retrieve the existing order. An uncertain create result older than 15 minutes requires manual inspection rather than blindly creating another order.

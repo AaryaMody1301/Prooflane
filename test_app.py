@@ -266,6 +266,16 @@ class Checks(unittest.TestCase):
             self.assertEqual(evidence["project"]["receipt"]["ai_mode"], "sample")
             self.assertEqual(evidence["project"]["receipt"]["mode"], "simulation")
             self.assertNotIn(PASSED, json.dumps(evidence))
+            # The saved-project picker lists recent projects and restores an older receipt.
+            other = post("/api/projects", {"brief": SAMPLE_BRIEF, "price": "75.50"})
+            with urlopen(base + "/api/projects") as response:
+                saved = json.load(response)
+            self.assertEqual([item["id"] for item in saved], [other["id"], p["id"]])
+            with urlopen(base + path) as response:
+                resumed = json.load(response)
+            self.assertEqual(resumed, results[0])
+            self.assertEqual(resumed["receipt"]["amount"], "120.00")
+            self.assertEqual(saved[0]["cents"], 7550)
         finally:
             server.shutdown()
             server.server_close()
