@@ -1,0 +1,133 @@
+{
+  "format": "prooflane-phase2-provider-review-v1",
+  "review_date_ist": "2026-10-18",
+  "payment_mode": "simulation",
+  "phase2_gate_passed": false,
+  "note": "Actual Gemini REST responses to synthetic briefs. Parsed plans shown below are not approved scopes. No CSV contents or credentials were sent in the briefs. No PayPal calls or payments were made.",
+  "attempts": [
+    {
+      "model": "gemini-2.5-flash",
+      "results": {
+        "measurable": {
+          "ok": false,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+          "error": "Provider returned HTTP 404. Check credentials, quota, or sandbox approval; no simulated fallback was used."
+        },
+        "ambiguous": {
+          "ok": false,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows. Make the data insightful.",
+          "error": "Provider returned HTTP 404. Check credentials, quota, or sandbox approval; no simulated fallback was used."
+        }
+      },
+      "review": "Both requests returned HTTP 404. Google documents restricted access to 2.5 models for new users; the key could list models."
+    },
+    {
+      "model": "gemini-3.5-flash-lite",
+      "results": {
+        "measurable": {
+          "ok": false,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+          "error": "Provider response unavailable. Retry the same action; payment status has not been assumed."
+        },
+        "ambiguous": {
+          "ok": false,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows. Make the data insightful.",
+          "plan": {
+            "title": "Inventory CSV Acceptance Plan",
+            "checks": [
+              {
+                "kind": "required_columns",
+                "source": "Deliver an inventory CSV with sku and quantity columns.",
+                "columns": [
+                  "sku",
+                  "quantity"
+                ]
+              },
+              {
+                "kind": "unique",
+                "source": "Every sku must be unique.",
+                "column": "sku"
+              },
+              {
+                "kind": "number_range",
+                "source": "Quantity must be a number between 0 and 100.",
+                "column": "quantity",
+                "min": 0.0
+              },
+              {
+                "kind": "row_count",
+                "source": "Include exactly 2 rows.",
+                "min": 2.0
+              }
+            ],
+            "clarifications": [
+              "Clarification needed for what constitutes insightful data."
+            ]
+          },
+          "coverage": {
+            "required_columns": true,
+            "unique_sku": true,
+            "quantity_0_100": false,
+            "exactly_2_rows": false
+          }
+        }
+      },
+      "review": "Measurable request timed out after 60 seconds. Ambiguous response quoted all sources exactly and requested clarification, but omitted quantity max=100 and row-count max=2. Raw numeric literals contained thousands of trailing zeros. Coverage failed."
+    },
+    {
+      "model": "gemini-3.8-flash",
+      "results": {
+        "measurable": {
+          "ok": false,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+          "plan": {
+            "title": "Inventory CSV Acceptance Plan",
+            "checks": [
+              {
+                "kind": "required_columns",
+                "source": "sku and quantity columns",
+                "columns": [
+                  "sku",
+                  "quantity"
+                ]
+              },
+              {
+                "kind": "unique",
+                "source": "Every sku must be unique.",
+                "column": "sku"
+              },
+              {
+                "kind": "number_range",
+                "source": "Quantity must be a number between 0 and 100.",
+                "column": "quantity",
+                "min": 1e-62
+              }
+            ],
+            "clarifications": []
+          },
+          "coverage": {
+            "required_columns": true,
+            "unique_sku": true,
+            "quantity_0_100": false,
+            "exactly_2_rows": false
+          }
+        },
+        "ambiguous": {
+          "ok": false,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows. Make the data insightful.",
+          "error": "AI did not return a usable plan. No project or payment was created."
+        }
+      },
+      "review": "Measurable response omitted quantity max=100 and exactly-two-row check, and invented a lower bound of 1e-62 instead of 0. Ambiguous response was rejected as unusable. Coverage failed; a schema-valid response did not establish correct interpretation."
+    }
+  ],
+  "last_provider_result": {
+    "model": "gemini-3.8-flash",
+    "http_status": 503,
+    "consecutive_requests": 2,
+    "fallback_used": false
+  },
+  "clarification_handling": "A clarification appeared in genuine Flash-Lite responses. Agreement blocking is verified by offline Store/UI contract tests; no accepted real-AI browser workflow was completed.",
+  "next_action": "When provider availability recovers, run python app.py doctor --ai. Require all four coverage flags and appropriate clarification state, review exact source quotations and any extra checks, then verify the actual browser/API workflow before closing Phase 2.",
+  "coverage_note": "Coverage flags replay the captured genuine plans through the final diagnostic; this review made no new provider requests."
+}

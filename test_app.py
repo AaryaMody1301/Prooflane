@@ -78,6 +78,7 @@ class Checks(unittest.TestCase):
             self.assertEqual(draft_plan(SAMPLE_BRIEF, "gemini", "gemini-2.5-flash"), sample_plan())
             self.assertEqual(call.call_args.args[1]["generationConfig"]["responseMimeType"], "application/json")
             self.assertNotIn("key=", call.call_args.args[0])
+            self.assertEqual(call.call_args.kwargs["timeout"], 60)
         with patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", side_effect=Problem("Provider unavailable", 502)), self.assertRaises(Problem):
             draft_plan(SAMPLE_BRIEF, "gemini", "gemini-2.5-flash")
         with self.assertRaises(Problem):
@@ -262,6 +263,49 @@ class Checks(unittest.TestCase):
             self.assertFalse(doctor("sample", "simulation", "gemini-2.5-flash", providers=True)["configured_for_real_services"])
             ai.assert_not_called()
             auth.assert_not_called()
+
+    def test_ai_only_doctor_probes_both_briefs_without_paypal(self):
+        measurable = {"title": "Inventory handover", "clarifications": [], "checks": [
+            {"kind": "required_columns", "columns": ["quantity", "sku"], "source": "sku and quantity columns"},
+            {"kind": "unique", "column": "sku", "source": "Every sku must be unique."},
+            {"kind": "number_range", "column": "quantity", "min": 0, "max": 100, "source": "Quantity must be a number between 0 and 100."},
+            {"kind": "row_count", "min": 2, "max": 2, "source": "Include exactly 2 rows."},
+        ]}
+        ambiguous = copy.deepcopy(measurable)
+        ambiguous["clarifications"] = ["What measurable CSV checks define insightful?"]
+        incomplete = copy.deepcopy(measurable)
+        incomplete["checks"][2].pop("max")
+        incomplete["checks"].pop()
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "private-gemini-placeholder"}, clear=True), patch.object(PayPal, "authenticate") as auth, patch.object(PayPal, "create") as create, patch.object(PayPal, "capture") as capture:
+            for responses, expected in [([measurable, ambiguous], True), ([measurable, measurable], False), ([ambiguous, ambiguous], False), ([incomplete, ambiguous], False), ([Problem("Provider returned HTTP 429.", 502), ambiguous], False)]:
+                with self.subTest(expected=expected), patch("app.draft_plan", side_effect=responses) as ai:
+                    report = doctor("gemini", "simulation", "gemini-3.8-flash", ai_only=True)
+                self.assertEqual(report["provider_checks_passed"], expected)
+                self.assertFalse(report["configured_for_real_services"])
+                self.assertIn("review_required", report)
+                self.assertEqual(ai.call_count, 2)
+                first, second = [call.args[0] for call in ai.call_args_list]
+                self.assertIn("sku and quantity", first)
+                self.assertIn("between 0 and 100", first)
+                self.assertEqual(second, first + " Make the data insightful.")
+                self.assertEqual(report["provider_checks"]["gemini"]["ambiguous"]["plan"], responses[1])
+                self.assertNotIn("private-gemini-placeholder", json.dumps(report))
+                if responses[0] is incomplete:
+                    coverage = report["provider_checks"]["gemini"]["measurable"]["coverage"]
+                    self.assertFalse(coverage["quantity_0_100"])
+                    self.assertFalse(coverage["exactly_2_rows"])
+            auth.assert_not_called()
+            create.assert_not_called()
+            capture.assert_not_called()
+
+    def test_ai_only_doctor_blocks_missing_key_and_wrong_modes(self):
+        for ai_mode, payment_mode, keys in [("gemini", "simulation", {}), ("sample", "simulation", {"GEMINI_API_KEY": "test-placeholder"}), ("gemini", "sandbox", {"GEMINI_API_KEY": "test-placeholder"})]:
+            with self.subTest(ai_mode=ai_mode, payment_mode=payment_mode), patch.dict("os.environ", keys, clear=True), patch("app.draft_plan") as ai, patch.object(PayPal, "authenticate") as auth:
+                report = doctor(ai_mode, payment_mode, "gemini-2.5-flash", ai_only=True)
+                self.assertFalse(report["provider_checks_passed"])
+                self.assertIn("blocked:", report["provider_checks"])
+                ai.assert_not_called()
+                auth.assert_not_called()
 
     def test_persistence(self):
         with tempfile.TemporaryDirectory() as directory:

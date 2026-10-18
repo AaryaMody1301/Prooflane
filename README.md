@@ -6,7 +6,7 @@ Prooflane is an outcome checkout for independent data freelancers and small anal
 
 New project started on 11 October 2026 for the [PayPal AI Hackathon](https://paypalaihackathon.devpost.com/). Built with the Ponytail approach: Python's standard library, SQLite, and a buildless HTML client.
 
-Follow the [five-phase build plan](docs/BUILD_PLAN.md): local MVP → real AI → PayPal sandbox → usability/reliability → submission. **Phase 1 is complete:** its real-browser workflow and desktop/390px visual gates passed on 17 October. **Phase 2 is active**, with offline adapter checks passing and actual Gemini validation waiting for a local API key. PayPal sandbox validation remains Phase 3.
+Follow the [five-phase build plan](docs/BUILD_PLAN.md): local MVP → real AI → PayPal sandbox → usability/reliability → submission. **Phase 1 is complete. Phase 2 is active:** actual Gemini requests have been made, but returned plans failed requirement coverage and the latest diagnostic requests returned HTTP 503. The real-AI gate remains open. PayPal sandbox validation remains Phase 3.
 
 ## Run
 
@@ -37,7 +37,7 @@ For real AI, set:
 ```dotenv
 AI_MODE=gemini
 GEMINI_API_KEY=your_local_key
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-3.8-flash
 ```
 
 Use [Google AI Studio](https://aistudio.google.com/apikey) and confirm your project's current [free-tier availability](https://ai.google.dev/gemini-api/docs/pricing) without enabling billing. The model name is configurable. Only the brief goes to Gemini; CSV contents are evaluated locally. Use synthetic briefs because free-tier inputs may be used for product improvement. Unsupported or ambiguous obligations produce clarifications or a rejected plan; revise the brief and draft a new project. Review every proposed check for missing or misunderstood requirements.
@@ -56,18 +56,23 @@ Check configuration before starting a new project:
 
 ```bash
 python3 app.py doctor
+python3 app.py doctor --ai
 python3 app.py doctor --providers
 ```
 
-The first command runs offline and reports modes and whether each credential is present, without printing values. It exits with status 1 until both real-service modes and all credentials are configured; sample mode still runs normally. The second command explicitly sends a synthetic brief to Gemini and authenticates with PayPal's sandbox. It never creates an order or captures a payment. Successful provider checks still require the full checkout test below. Keep billing disabled for a zero-cost setup; a free-tier quota failure is an explicit error.
+The first command runs offline and reports modes and whether credentials are present, without printing values. Its status 1 is expected during Phase 2 because `configured_for_real_services` requires PayPal as well. Sample mode still runs normally.
+
+`doctor --ai` is the Phase 2 check: it requires Gemini mode, a local key and simulated payments. It sends a measurable inventory brief and an ambiguous variant, prints the returned plans and checks all four known requirements: columns, unique sku, quantity 0–100 and exactly two rows. It also checks the expected clarification state. Errors or missing coverage exit with status 1; passing probes still require human review for exact quotations, extra restrictions and interpretation. This command never contacts PayPal or creates a database, project, order or payment.
+
+Reserve `doctor --providers` for Phase 3. It sends a synthetic brief to Gemini and authenticates with PayPal's sandbox, without creating orders or capturing payments. Authentication alone does not complete the checkout gate. Keep billing disabled; provider and quota failures have no simulated fallback.
 
 Restart after configuration changes and create a **new project**. During checkout, the browser opens PayPal's sandbox approval page and returns to this localhost app. The callback's token must match the stored order. The backend checks the order's project ID and USD amount before capture, then checks the capture amount and completion status before recording payment. A cancelled or pending transaction is not marked paid. Reconcile again to inspect a pending capture.
 
-Both adapters have local contract tests. Neither provider has been called with actual credentials in the 17 October update. This is a working starter, not a hackathon-ready submission until the real AI and PayPal sandbox flow has been demonstrated.
+Both adapters have local contract tests. Actual Gemini results from 18 October are recorded in [the provider review](docs/PHASE2_AI_RESULTS.json): incomplete bounds/row-count coverage, rejected output, timeouts and provider errors. No real-AI plan has passed the completion gate, and no credential-backed PayPal request has been made. This is a working starter, not a hackathon-ready submission.
 
 ### Next local step: Phase 2 only
 
-The offline `python app.py doctor` check on 17 October found no `GEMINI_API_KEY` in the process environment or local `.env`; no provider request was made. From PowerShell, create the ignored configuration only if it does not already exist:
+On 18 October a local Gemini key was configured, with payments kept simulated. The current blocker is provider availability and plan quality, not a missing key. For a fresh setup, create the ignored configuration only if it does not already exist:
 
 ```powershell
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
@@ -79,10 +84,12 @@ Edit `.env` locally to set these values, replacing the key placeholder with your
 AI_MODE=gemini
 PAYMENT_MODE=simulation
 GEMINI_API_KEY=your_local_key
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-3.8-flash
 ```
 
-Restart with `python app.py` and draft a new project. Review a synthetic inventory brief: “Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.” Expect required columns, unique sku, quantity bounds 0–100 and exactly two rows, each quoting its requirement. Then append “Make the data insightful.” and check for clarification or rejection, with agreement blocked. Record actual returned checks, omissions, model, provider errors and outcome in the build plan. Schema validation checks quotations and supported types; human review must still catch omitted or misinterpreted obligations. Real model availability, quota and interpretation remain unverified without the key. Keep billing disabled and payments simulated. Reserve `doctor --providers`, which also contacts PayPal, for Phase 3.
+Run `python app.py doctor --ai` when provider availability recovers. Then restart with `python app.py` and draft a new project. The probe uses: “Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.” Expect all four obligations with exact source quotations. Appending “Make the data insightful.” must ask for clarification or reject the plan, with agreement blocked. Inspect actual returned checks, missing obligations, extra restrictions and provider errors; schema validation alone does not prove correct interpretation. Complete the real browser/API walkthrough before closing Phase 2.
+
+The default model is now `gemini-3.8-flash`. The previous `gemini-2.5-flash` returned HTTP 404 for this key; [Google documents restricted 2.5 access for new users](https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash). The [current model supports structured output](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash), with a [listed free tier](https://ai.google.dev/gemini-api/docs/pricing). Actual plan quality remains unverified. The adapter uses the model's default temperature, an 8,192-token output limit and a 60-second AI timeout. Keep billing disabled and payments simulated.
 
 If order creation times out, the delivery freezes immediately in `CHECKOUT_PENDING`. Retry the same checkout within 15 minutes; its request ID and approved hash remain unchanged. After that window, inspect orders in the sandbox dashboard before starting another project. Editing or replacing a CSV preview requires fresh checks before the UI permits approval or checkout.
 
@@ -92,7 +99,7 @@ If order creation times out, the delivery freezes immediately in `CHECKOUT_PENDI
 python3 -m unittest -v test_app.py
 ```
 
-Fourteen tests cover malformed plans and CSVs, exact money values, failed deliveries, stale approvals, frozen checkout evidence after a provider timeout, the retry window, pending and mismatched captures, repeated requests, persistence, offline/provider setup diagnostics, and a localhost HTTP flow with concurrent capture replays and an evidence download. Gemini test doubles also cover a custom inventory plan, exact source quotations, bounds, clarification-blocked agreement, empty/malformed provider output and no silent fallback. These are offline contract checks, not actual provider results. Tests do not require network access or credentials.
+Sixteen tests cover malformed plans and CSVs, exact money values, failed deliveries, stale approvals, frozen checkout evidence after a provider timeout, the retry window, pending and mismatched captures, repeated requests, persistence, offline/provider setup diagnostics, and a localhost HTTP flow with concurrent capture replays and an evidence download. Gemini test doubles cover a custom inventory plan, exact source quotations, bounds, clarification-blocked agreement, empty/malformed output and no silent fallback. The AI-only diagnostic tests cover missing keys, wrong modes, provider errors, incomplete coverage and no PayPal calls. These are offline contract checks, not actual provider results. Tests do not require network access or credentials.
 
 Optional client controller check with Node 20 or newer (no npm packages):
 
@@ -131,6 +138,7 @@ The runner prints `PASS` only after its assertions finish; failures exit with an
 - `test_client.cjs`: optional controller regression check against the real localhost API.
 - `browser_check.py`: optional real-browser Phase 1 workflow, layout and restart check.
 - `docs/BUILD_PLAN.md`: immediate integration gates, project scope and submission checklist.
+- `docs/PHASE2_AI_RESULTS.json`: actual synthetic Gemini responses, reviewed gaps and provider errors; Phase 2 is incomplete.
 
 Supported checks: required columns, unique nonempty values, nonempty values, numeric ranges and row counts. Up to 300 KB, 5,000 data rows, 30 columns and 20 checks. AI output is data only; no generated code is executed. Prices use integer cents, never floats. Deliveries cannot change after an order starts. A stable `PayPal-Request-Id` is reused for each create and capture action. Capture retries first retrieve the existing order. An uncertain create result older than 15 minutes requires manual inspection rather than blindly creating another order.
 

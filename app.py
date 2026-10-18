@@ -137,11 +137,11 @@ def sample_plan():
     }
 
 
-def json_request(url, body=None, headers=None, method=None):
+def json_request(url, body=None, headers=None, method=None, timeout=25):
     raw = None if body is None else json.dumps(body).encode()
     request = Request(url, data=raw, headers={"Content-Type": "application/json", **(headers or {})}, method=method)
     try:
-        with urlopen(request, timeout=25) as response:
+        with urlopen(request, timeout=timeout) as response:
             return json.loads(response.read(4_000_000))
     except HTTPError as exc:
         raise Problem(f"Provider returned HTTP {exc.code}. Check credentials, quota, or sandbox approval; no simulated fallback was used.", 502) from None
@@ -159,13 +159,17 @@ def draft_plan(brief, ai_mode, model):
         "Use only required_columns, unique, not_empty, number_range, row_count. Never generate code, money, payment actions or invented obligations. "
         "Each check source must be an EXACT substring from the brief. Preserve CSV column names. "
         "For any vague or unsupported obligation, add a clarification; do not silently drop it. "
+        "Keep every supported measurable check even when another obligation needs clarification. "
+        "number_range uses inclusive limits: a stated interval needs BOTH min and max. "
+        "row_count IS supported: exactly N data rows means min=N and max=N; at least N means min=N. "
+        "Write concise numeric literals, without unnecessary trailing decimal zeros. "
         "Do not infer an upper bound or row count absent from the brief. Return only the supplied JSON schema.\n"
         + json.dumps({"client_brief": brief})
     )
     result = json_request(
         f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-        {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"temperature": 0.1, "responseMimeType": "application/json", "responseSchema": PLAN_SCHEMA}},
-        {"x-goog-api-key": os.environ["GEMINI_API_KEY"]},
+        {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"maxOutputTokens": 8192, "responseMimeType": "application/json", "responseSchema": PLAN_SCHEMA}},
+        {"x-goog-api-key": os.environ["GEMINI_API_KEY"]}, timeout=60,
     )
     try:
         output = "".join(part.get("text", "") for part in result["candidates"][0]["content"]["parts"] if not part.get("thought"))
@@ -282,7 +286,7 @@ def validate_order(order, project):
 
 
 class Store:
-    def __init__(self, db_path, ai_mode="sample", payment_mode="simulation", model="gemini-2.5-flash", paypal=None):
+    def __init__(self, db_path, ai_mode="sample", payment_mode="simulation", model="gemini-3.8-flash", paypal=None):
         self.db = sqlite3.connect(db_path, check_same_thread=False)
         self.db.execute("CREATE TABLE IF NOT EXISTS projects (id TEXT PRIMARY KEY, data TEXT NOT NULL)")
         # ponytail: one process, one operator, <=5k rows; use transactional row locks and authentication for public multi-user hosting.
@@ -469,10 +473,34 @@ class Handler(BaseHTTPRequestHandler):
         self.dispatch("POST")
 
 
-def doctor(ai_mode, payment_mode, model, providers=False):
+def doctor(ai_mode, payment_mode, model, providers=False, ai_only=False):
     credentials = {key: bool(os.getenv(key)) for key in ("GEMINI_API_KEY", "PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET")}
     ready = ai_mode == "gemini" and payment_mode == "sandbox" and all(credentials.values())
-    report = {"ai_mode": ai_mode, "payment_mode": payment_mode, "model": model, "credentials_present": credentials, "configured_for_real_services": ready, "provider_checks": "not requested; use doctor --providers to send a synthetic brief and authenticate with the sandbox", "provider_checks_passed": False}
+    report = {"ai_mode": ai_mode, "payment_mode": payment_mode, "model": model, "credentials_present": credentials, "configured_for_real_services": ready, "provider_checks": "not requested; use doctor --ai for Gemini only, or doctor --providers for Gemini + PayPal sandbox", "provider_checks_passed": False}
+    if ai_only:
+        report["review_required"] = "Review requirement coverage, bounds and exact quotations in both returned plans. Passing probes alone do not complete Phase 2."
+        if ai_mode != "gemini" or payment_mode != "simulation" or not credentials["GEMINI_API_KEY"]:
+            report["provider_checks"] = "blocked: select AI_MODE=gemini, keep PAYMENT_MODE=simulation and set GEMINI_API_KEY locally"
+            return report
+        brief = ("Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. "
+                 "Quantity must be a number between 0 and 100. Include exactly 2 rows.")
+        results = {}
+        for name, current_brief in (("measurable", brief), ("ambiguous", brief + " Make the data insightful.")):
+            try:
+                plan = draft_plan(current_brief, ai_mode, model)
+                checks = plan["checks"]
+                coverage = {
+                    "required_columns": any(c["kind"] == "required_columns" and set(c["columns"]) == {"sku", "quantity"} for c in checks),
+                    "unique_sku": any(c["kind"] == "unique" and c["column"] == "sku" for c in checks),
+                    "quantity_0_100": any(c["kind"] == "number_range" and c["column"] == "quantity" and c.get("min") == 0 and c.get("max") == 100 for c in checks),
+                    "exactly_2_rows": any(c["kind"] == "row_count" and c.get("min") == c.get("max") == 2 for c in checks),
+                }
+                results[name] = {"ok": all(coverage.values()) and bool(plan["clarifications"]) == (name == "ambiguous"), "brief": current_brief, "coverage": coverage, "plan": plan}
+            except Problem as exc:
+                results[name] = {"ok": False, "brief": current_brief, "error": str(exc)}
+        report["provider_checks"] = {"gemini": results}
+        report["provider_checks_passed"] = all(result["ok"] for result in results.values())
+        return report
     if providers and ready:
         results = {}
         try:
@@ -495,10 +523,12 @@ def doctor(ai_mode, payment_mode, model, providers=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", nargs="?", choices=["serve", "doctor"], default="serve")
-    parser.add_argument("--providers", action="store_true", help="Doctor only: call Gemini and authenticate with PayPal sandbox; never creates payments")
+    probes = parser.add_mutually_exclusive_group()
+    probes.add_argument("--providers", action="store_true", help="Doctor only: call Gemini and authenticate with PayPal sandbox; never creates payments")
+    probes.add_argument("--ai", action="store_true", help="Doctor only: send two synthetic briefs to Gemini, with payments kept in simulation; never contacts PayPal")
     args = parser.parse_args()
-    if args.providers and args.command != "doctor":
-        parser.error("--providers is available only with doctor")
+    if (args.providers or args.ai) and args.command != "doctor":
+        parser.error("--providers and --ai are available only with doctor")
     env = ROOT / ".env"
     if env.exists():
         for line in env.read_text().splitlines():
@@ -508,13 +538,13 @@ def main():
     ai_mode, payment_mode = os.getenv("AI_MODE", "sample"), os.getenv("PAYMENT_MODE", "simulation")
     if ai_mode not in {"sample", "gemini"} or payment_mode not in {"simulation", "sandbox"}:
         raise SystemExit("Use AI_MODE=sample|gemini and PAYMENT_MODE=simulation|sandbox.")
-    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    model = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
     if not re.fullmatch(r"[a-z0-9.-]+", model):
         raise SystemExit("Invalid Gemini model name.")
     if args.command == "doctor":
-        report = doctor(ai_mode, payment_mode, model, args.providers)
+        report = doctor(ai_mode, payment_mode, model, args.providers, ai_only=args.ai)
         print(json.dumps(report, indent=2))
-        passed = report["provider_checks_passed"] if args.providers else report["configured_for_real_services"]
+        passed = report["provider_checks_passed"] if args.providers or args.ai else report["configured_for_real_services"]
         return 0 if passed else 1
     if ai_mode == "gemini" and not os.getenv("GEMINI_API_KEY"):
         raise SystemExit("GEMINI_API_KEY is required for real AI mode.")

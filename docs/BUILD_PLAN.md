@@ -1,6 +1,6 @@
 # Prooflane: phased build plan
 
-Updated 17 October 2026. Work through one phase at a time. A phase advances only when its completion gate has evidence; a fixture or test double does not complete a real-service gate.
+Updated 18 October 2026. Work through one phase at a time. A phase advances only when its completion gate has evidence; a fixture or test double does not complete a real-service gate.
 
 **Product:** a client agrees to measurable CSV work and a USD price. AI proposes reviewable acceptance checks; code tests the delivery; a human approves the exact checked file; PayPal sandbox checkout connects that snapshot to a reconciled capture receipt.
 
@@ -13,7 +13,7 @@ Dates are working targets in IST, not automatic phase transitions. Keep 12 Novem
 | Phase | Target | Build | Completion gate | Current state |
 | --- | --- | --- | --- | --- |
 | 1. Local MVP | 17–18 October | Sample brief, review, CSV checks, approval, simulated receipt, saved-project resume, evidence export | Reproducible local flow; faulty file blocked; corrected file paid in simulation; restart/resume preserves evidence | Complete 17 October; headed Edge and desktop/390px visual gates passed |
-| 2. Real AI | 19–21 October | Gemini configuration and custom measurable briefs with human review | Actual provider responses for measurable and ambiguous briefs; errors never silently use the sample fixture | Active after Phase 1 gate; offline checks pass, local Gemini key missing |
+| 2. Real AI | 19–21 October | Gemini configuration and custom measurable briefs with human review | Actual provider responses for measurable and ambiguous briefs; errors never silently use the sample fixture | Active; key configured, genuine responses failed coverage; latest diagnostic returned HTTP 503 |
 | 3. PayPal sandbox | 22–25 October | Actual create, buyer approval, capture/readback, cancellation and retry | One real sandbox capture linked to the approved hash; cancellation unpaid; retry and amount mismatch handled | Adapter implemented; credentials and real checkout pending |
 | 4. Usability and reliability | 26 October–4 November | Desktop/mobile QA, a second use case, fresh setup, user feedback, final recovery checks | Another person completes the judge path; evidence agrees with the provider; issues fixed | Planned |
 | 5. Submission | 5–11 November | Feature freeze, demonstration, project description, judge instructions and submission | Public links work; video under 3 minutes; Devpost submission confirmed | Planned |
@@ -56,13 +56,23 @@ Start with the existing adapter and validation. Recheck model availability and s
 4. Check provider errors, malformed JSON, invented source text, unsupported checks and empty output. No silent sample fallback.
 5. Record the model, synthetic brief, reviewed output, correction needed and final outcome. Keep credentials out of evidence and videos.
 
-Gate: credential-backed results for a measurable and an ambiguous brief; reviewed checks and honest limitations. The existing `doctor --providers` checks both Gemini and PayPal, so reserve that combined check for Phase 3 when both are configured. CSV contents stay local.
+Gate: credential-backed results for a measurable and an ambiguous brief; reviewed checks and honest limitations. Use `doctor --ai` with simulated payments for this phase. Reserve the combined `doctor --providers` check for Phase 3. CSV contents stay local.
 
 17 October progress, started only after Phase 1's gate passed:
 
 - Offline `python app.py doctor` reports `AI_MODE=sample`, `PAYMENT_MODE=simulation`, model `gemini-2.5-flash`, and `GEMINI_API_KEY` absent (values never printed). Its exit status 1 is expected until both real-service modes are configured, not a failure of sample mode. No local `.env` exists and no provider call was attempted.
 - Added offline Gemini contract coverage for this synthetic measurable brief: “Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.” Test-double checks cover all four requirements with exact quotations, accept quantity bounds 0 and 100, and block 101. Appending “Make the data insightful.” produces a test-double clarification that blocks agreement. Invented quotes create no project; empty/malformed responses and provider errors have no sample fallback. These results verify adapter/state handling, not Gemini's ability to interpret briefs; actual coverage must still be reviewed by a human.
 - **Blocked input:** a local free-tier Gemini API key. Follow the README's Phase 2 setup: create `.env` from `.env.example` only if absent, set `AI_MODE=gemini`, `GEMINI_API_KEY` locally and keep `PAYMENT_MODE=simulation`; restart with `python app.py`. Try the two briefs above and record model, actual checks/quotes, missing obligations, clarifications, provider errors and outcome here. No genuine provider results or current model/quota availability are claimed. Phase 2 remains incomplete; PayPal sandbox testing has not begun.
+
+18 October progress — the missing key above is now configured locally:
+
+- Added `python app.py doctor --ai`. It sends only the two synthetic briefs to Gemini, reports full plans and checks required columns, unique sku, quantity min=0/max=100 and row-count min=max=2. It fails on missing coverage, wrong clarification state, provider errors or wrong modes. Human review remains required. PayPal authentication/order/capture are never called, and no projects or database are created.
+- Genuine provider responses and reviews are saved in [PHASE2_AI_RESULTS.json](PHASE2_AI_RESULTS.json). `gemini-2.5-flash` returned HTTP 404 for both briefs. Google's model documentation limits 2.5 access for new users; model listing succeeded, so the key could authenticate. Tested documented free-tier replacements `gemini-3.5-flash-lite` and `gemini-3.8-flash`.
+- Flash-Lite's ambiguous response quoted sources exactly and requested clarification, but omitted the quantity maximum and the exact row-count maximum. A measurable request timed out after 60 seconds. Captured numeric text showed thousands of trailing zeros. Flash 3.8's measurable response omitted the maximum and row count and invented a small positive lower bound instead of zero; its ambiguous response was rejected as unusable. Schema validity did not establish correct coverage. A decimal-text experiment also failed validation and was discarded; the public numeric plan contract is retained.
+- Tightened prompt guidance for bounds and supported row counts, removed the low-temperature override per Google's Gemini 3 guidance, capped output at 8,192 tokens and extended only the AI response timeout to 60 seconds. Configuration/template defaults now select `gemini-3.8-flash`; no silent model or sample fallback was added. Final focused diagnostic and one retry both returned HTTP 503. No accepted real-AI browser walkthrough was possible, and no completion claim is made for these adapter changes.
+- Verification: 16 Python tests, Node controller check, compilation and the headed Edge sample workflow pass. The browser runner still ignores the real key and uses sample AI/simulation; desktop/390px evidence, persistence, hash guards and return recovery remain passing. Local `.env` is ignored and keeps `PAYMENT_MODE=simulation`. No PayPal provider request was made.
+
+**Phase 2 gate remains open.** Next: after provider availability recovers, run `python app.py doctor --ai`; require all four coverage flags, review exact quotes/extra restrictions and clarify the ambiguous obligation, then exercise the real browser/API/SQLite flow. Do not start Phase 3 before this review passes. The existing offline clarification/state tests are not a substitute for that real-AI walkthrough.
 
 ## Phase 3 — PayPal sandbox
 
@@ -103,14 +113,22 @@ Gate: submitted project with functioning access, working links and evidence supp
 
 ## Scope rules and blockers
 
-Phase 1 is complete. The next active work is Phase 2's actual Gemini interpretation and clarification review, waiting for a local key. Keep payments simulated; sandbox credentials and transaction testing belong to Phase 3. Configure credentials locally; do not paste them into chat or commit `.env`.
+Phase 1 is complete. Phase 2's local key is configured; actual Gemini outputs still fail the interpretation gate, and the last diagnostic/retry returned HTTP 503. Resume with the AI-only diagnostic when availability recovers. Keep payments simulated; sandbox credentials and transaction testing belong to Phase 3. Configure credentials locally; do not paste them into chat or commit `.env`.
 
 Keep one delivery, one agreed amount and one capture. Defer escrow, automatic payouts, refunds, multi-milestone work, arbitrary generated code, additional file formats, marketplace features and sponsor integrations. Add an item only if observed user feedback or a broken completion gate requires it.
 
-## Sources checked 17 October
+## Sources
+
+Checked 17 October:
 
 - [Official rules: required AI + PayPal sandbox, judge access, public open-source repo, video and dates](https://paypalaihackathon.devpost.com/rules).
 - [PayPal Orders v2](https://developer.paypal.com/api/orders/v2/).
 - [PayPal request idempotency](https://developer.paypal.com/api/rest/reference/idempotency/): endpoint support and retention vary; the local retry window is an application guard.
 - [Gemini structured output](https://ai.google.dev/gemini-api/docs/structured-output): use supported schema constraints and validate the returned data on the server.
 - [Gemini pricing and free-tier conditions](https://ai.google.dev/gemini-api/docs/pricing): recheck availability before enabling a provider.
+
+Checked 18 October:
+
+- [Gemini 2.5 Flash access restrictions for new users](https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash).
+- [Gemini 3.8 Flash structured-output support](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash) and [current free-tier listing](https://ai.google.dev/gemini-api/docs/pricing).
+- [Gemini 3 temperature guidance](https://ai.google.dev/gemini-api/docs/gemini-3): keep the default temperature.
