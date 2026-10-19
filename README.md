@@ -6,7 +6,7 @@ Prooflane is an outcome checkout for independent data freelancers and small anal
 
 New project started on 11 October 2026 for the [PayPal AI Hackathon](https://paypalaihackathon.devpost.com/). Built with the Ponytail approach: Python's standard library, SQLite, and a buildless HTML client.
 
-Follow the [five-phase build plan](docs/BUILD_PLAN.md): local MVP → real AI → PayPal sandbox → usability/reliability → submission. **Phase 1 is complete. Phase 2 is active:** actual Gemini requests have been made, but returned plans failed requirement coverage and the latest diagnostic requests returned HTTP 503. The real-AI gate remains open. PayPal sandbox validation remains Phase 3.
+Follow the [five-phase build plan](docs/BUILD_PLAN.md): local MVP → real AI → PayPal sandbox → usability/reliability → submission. **Phase 1 is complete. Phase 2 is active:** actual Gemini requests on 18 October failed requirement coverage and the final diagnostic requests returned HTTP 503. The 19 October adapter hardening rejects the recorded bad plans in offline replay; fresh provider and browser validation remain outstanding. PayPal sandbox validation remains Phase 3.
 
 ## Run
 
@@ -91,6 +91,18 @@ Run `python app.py doctor --ai` when provider availability recovers. Then restar
 
 The default model is now `gemini-3.8-flash`. The previous `gemini-2.5-flash` returned HTTP 404 for this key; [Google documents restricted 2.5 access for new users](https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash). The [current model supports structured output](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash), with a [listed free tier](https://ai.google.dev/gemini-api/docs/pricing). Actual plan quality remains unverified. The adapter uses the model's default temperature, an 8,192-token output limit and a 60-second AI timeout. Keep billing disabled and payments simulated.
 
+### Phase 2 hardening — 19 October
+
+Gemini now receives a schema requiring explicit `column`, `columns`, `min` and `max` fields. Inapplicable values use `null`; the adapter removes those placeholders before storing the existing public plan format. Descriptions ask for full requirement quotations and both stated endpoints. Responses must finish with `STOP`; truncated, blocked or malformed responses create no project. Decimal parsing rejects precision loss such as a tiny positive bound silently rounding to zero.
+
+The server independently checks a small set of explicit inclusive English forms: `between X and Y`, `greater than or equal to X`, `less than or equal to X`, `at least`, `at most`, and `exactly N [data] rows`. A missing, altered or additional bound for a recognized form rejects the plan. If a brief sentence has no quoted check and the model supplied no clarifications, the server adds a clearly labeled `Server review` clarification, which blocks agreement.
+
+These are conservative guards, not a general language parser or proof of semantic completeness. Context sentences can need review; multiple obligations within one sentence and unrecognized wording still need human inspection. The guards never fill missing limits, create replacement checks or substitute a sample plan.
+
+Gemini HTTP 500/502/503/504 responses get at most one retry after one second, using the same model, brief and schema. Authentication/not-found/quota errors, timeouts and invalid plans are not automatically retried. The two-brief diagnostic can therefore make up to four Gemini requests; each attempt retains the 60-second timeout. PayPal retry behavior is unchanged. This follows the [official transient-error guidance](https://ai.google.dev/gemini-api/docs/troubleshooting) with a deliberately small request budget.
+
+Validation here: 21 offline Python tests, the Node controller check and compilation pass, including replay of both captured incomplete plans, omitted-sentence blocking, finished-response checks, bounded retry exhaustion and no PayPal calls. **No new credential-backed Gemini request or real-AI browser run was made:** this workspace has no Gemini key, although the prior local-machine setup records one. Historical provider evidence stays in `docs/PHASE2_AI_RESULTS.json`. Keep Phase 2 open, pull the changes on that configured machine, run `python app.py doctor --ai`, and review the actual plans and browser workflow.
+
 If order creation times out, the delivery freezes immediately in `CHECKOUT_PENDING`. Retry the same checkout within 15 minutes; its request ID and approved hash remain unchanged. After that window, inspect orders in the sandbox dashboard before starting another project. Editing or replacing a CSV preview requires fresh checks before the UI permits approval or checkout.
 
 ## Verify
@@ -99,7 +111,7 @@ If order creation times out, the delivery freezes immediately in `CHECKOUT_PENDI
 python3 -m unittest -v test_app.py
 ```
 
-Sixteen tests cover malformed plans and CSVs, exact money values, failed deliveries, stale approvals, frozen checkout evidence after a provider timeout, the retry window, pending and mismatched captures, repeated requests, persistence, offline/provider setup diagnostics, and a localhost HTTP flow with concurrent capture replays and an evidence download. Gemini test doubles cover a custom inventory plan, exact source quotations, bounds, clarification-blocked agreement, empty/malformed output and no silent fallback. The AI-only diagnostic tests cover missing keys, wrong modes, provider errors, incomplete coverage and no PayPal calls. These are offline contract checks, not actual provider results. Tests do not require network access or credentials.
+Twenty-one tests cover malformed plans and CSVs, exact money values, failed deliveries, stale approvals, frozen checkout evidence after a provider timeout, the retry window, pending and mismatched captures, repeated requests, persistence, offline/provider setup diagnostics, and a localhost HTTP flow with concurrent capture replays and an evidence download. Gemini checks include replay of the captured bad plans, exact quoted bounds, missing-sentence review, nullable wire fields, unfinished responses, decimal underflow, bounded HTTP retries and clarification-blocked agreement. The AI-only diagnostic tests cover missing keys, wrong modes, provider errors, incomplete coverage and no PayPal calls. These are offline contract checks, not new provider results. Tests do not require network access or credentials.
 
 Optional client controller check with Node 20 or newer (no npm packages):
 

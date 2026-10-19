@@ -1,6 +1,6 @@
 # Prooflane: phased build plan
 
-Updated 18 October 2026. Work through one phase at a time. A phase advances only when its completion gate has evidence; a fixture or test double does not complete a real-service gate.
+Updated 19 October 2026. Work through one phase at a time. A phase advances only when its completion gate has evidence; a fixture or test double does not complete a real-service gate.
 
 **Product:** a client agrees to measurable CSV work and a USD price. AI proposes reviewable acceptance checks; code tests the delivery; a human approves the exact checked file; PayPal sandbox checkout connects that snapshot to a reconciled capture receipt.
 
@@ -13,7 +13,7 @@ Dates are working targets in IST, not automatic phase transitions. Keep 12 Novem
 | Phase | Target | Build | Completion gate | Current state |
 | --- | --- | --- | --- | --- |
 | 1. Local MVP | 17–18 October | Sample brief, review, CSV checks, approval, simulated receipt, saved-project resume, evidence export | Reproducible local flow; faulty file blocked; corrected file paid in simulation; restart/resume preserves evidence | Complete 17 October; headed Edge and desktop/390px visual gates passed |
-| 2. Real AI | 19–21 October | Gemini configuration and custom measurable briefs with human review | Actual provider responses for measurable and ambiguous briefs; errors never silently use the sample fixture | Active; key configured, genuine responses failed coverage; latest diagnostic returned HTTP 503 |
+| 2. Real AI | 19–21 October | Gemini configuration and custom measurable briefs with human review | Actual provider responses for measurable and ambiguous briefs; errors never silently use the sample fixture | Active; 19 October hardening passes offline replay, fresh provider/browser validation pending; last real diagnostics returned HTTP 503 |
 | 3. PayPal sandbox | 22–25 October | Actual create, buyer approval, capture/readback, cancellation and retry | One real sandbox capture linked to the approved hash; cancellation unpaid; retry and amount mismatch handled | Adapter implemented; credentials and real checkout pending |
 | 4. Usability and reliability | 26 October–4 November | Desktop/mobile QA, a second use case, fresh setup, user feedback, final recovery checks | Another person completes the judge path; evidence agrees with the provider; issues fixed | Planned |
 | 5. Submission | 5–11 November | Feature freeze, demonstration, project description, judge instructions and submission | Public links work; video under 3 minutes; Devpost submission confirmed | Planned |
@@ -72,7 +72,17 @@ Gate: credential-backed results for a measurable and an ambiguous brief; reviewe
 - Tightened prompt guidance for bounds and supported row counts, removed the low-temperature override per Google's Gemini 3 guidance, capped output at 8,192 tokens and extended only the AI response timeout to 60 seconds. Configuration/template defaults now select `gemini-3.8-flash`; no silent model or sample fallback was added. Final focused diagnostic and one retry both returned HTTP 503. No accepted real-AI browser walkthrough was possible, and no completion claim is made for these adapter changes.
 - Verification: 16 Python tests, Node controller check, compilation and the headed Edge sample workflow pass. The browser runner still ignores the real key and uses sample AI/simulation; desktop/390px evidence, persistence, hash guards and return recovery remain passing. Local `.env` is ignored and keeps `PAYMENT_MODE=simulation`. No PayPal provider request was made.
 
-**Phase 2 gate remains open.** Next: after provider availability recovers, run `python app.py doctor --ai`; require all four coverage flags, review exact quotes/extra restrictions and clarify the ambiguous obligation, then exercise the real browser/API/SQLite flow. Do not start Phase 3 before this review passes. The existing offline clarification/state tests are not a substitute for that real-AI walkthrough.
+19 October progress — adapter hardening, not a new provider result:
+
+- Identified two acceptance gaps: optional wire bounds let a model omit endpoints; schema/source validation did not check explicit quoted limits or flag a wholly unrepresented sentence.
+- The Gemini schema now requires explicit nullable fields. The public stored plan format is preserved after normalization. The adapter rejects unfinished responses, malformed output and decimal precision loss.
+- Server validation rejects mismatched/missing limits for recognized inclusive English range and row-count forms. Both captured incomplete plans now fail before project persistence in offline replay. A sentence with no quoted check adds a server review clarification when the model supplied none; agreement stays blocked.
+- These guards do not reconstruct missing checks or bounds and do not prove semantics inside compound sentences or unrecognized wording. Human review remains required.
+- Added one Gemini-only retry, after one second, for HTTP 500/502/503/504. No retry for authentication, missing models, quota errors, timeout or invalid plans; no alternate model, sample fallback or PayPal request. At most two attempts per brief.
+- Verification: 21 Python tests, Node controller check and compilation pass. New regressions replay the genuine captured plans in test envelopes and cover exact bounds, omitted sentences, null normalization, truncation, decimal underflow and exhausted retries. The historical headed Edge browser result is not claimed as rerun here.
+- This workspace has neither a configured Gemini environment key nor local `.env`; the key recorded on the VS Code machine is not available here. The AI-only doctor correctly reports a configuration block without making a provider request. No secrets were requested or moved, and `PHASE2_AI_RESULTS.json` remains the unchanged historical record.
+
+**Phase 2 gate remains open.** Next: pull the hardening on the configured VS Code machine and run `python app.py doctor --ai`; require all four coverage flags, review exact quotes/extra restrictions and clarify the ambiguous obligation, then exercise the real browser/API/SQLite flow. Do not start Phase 3 before this review passes. Offline regressions are not a substitute for that real-AI walkthrough.
 
 ## Phase 3 — PayPal sandbox
 
@@ -113,7 +123,7 @@ Gate: submitted project with functioning access, working links and evidence supp
 
 ## Scope rules and blockers
 
-Phase 1 is complete. Phase 2's local key is configured; actual Gemini outputs still fail the interpretation gate, and the last diagnostic/retry returned HTTP 503. Resume with the AI-only diagnostic when availability recovers. Keep payments simulated; sandbox credentials and transaction testing belong to Phase 3. Configure credentials locally; do not paste them into chat or commit `.env`.
+Phase 1 is complete. Phase 2's key is recorded as configured on the VS Code machine; it is unavailable in this workspace. The 19 October safety hardening passes offline replay, but actual Gemini interpretation and a fresh real-AI browser workflow are still unverified. The last credential-backed diagnostic/retry on 18 October returned HTTP 503. Resume with the AI-only diagnostic on the configured machine. Keep payments simulated; sandbox credentials and transaction testing belong to Phase 3. Configure credentials locally; do not paste them into chat or commit `.env`.
 
 Keep one delivery, one agreed amount and one capture. Defer escrow, automatic payouts, refunds, multi-milestone work, arbitrary generated code, additional file formats, marketplace features and sponsor integrations. Add an item only if observed user feedback or a broken completion gate requires it.
 
@@ -132,3 +142,8 @@ Checked 18 October:
 - [Gemini 2.5 Flash access restrictions for new users](https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash).
 - [Gemini 3.8 Flash structured-output support](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash) and [current free-tier listing](https://ai.google.dev/gemini-api/docs/pricing).
 - [Gemini 3 temperature guidance](https://ai.google.dev/gemini-api/docs/gemini-3): keep the default temperature.
+
+Checked 19 October:
+
+- [GenerateContent schema reference](https://ai.google.dev/api/generate-content): required/nullable fields and candidate finish reasons. The existing GenerateContent integration is retained; the wire format still needs a fresh credential-backed check.
+- [Gemini troubleshooting and transient retry guidance](https://ai.google.dev/gemini-api/docs/troubleshooting).

@@ -1,5 +1,6 @@
 """Money/state/CSV checks plus a real localhost HTTP flow; no external credentials."""
 import copy
+import io
 import json
 import tempfile
 import threading
@@ -15,6 +16,14 @@ from app import Handler, PayPal, Problem, ROOT, SAMPLE_BRIEF, Store, doctor, dra
 
 FAILED = (ROOT / "examples/failed.csv").read_text()
 PASSED = (ROOT / "examples/passed.csv").read_text()
+
+
+def gemini_response(plan, finish_reason="STOP"):
+    wire = copy.deepcopy(plan)
+    for check in wire["checks"]:
+        for field in ("column", "columns", "min", "max"):
+            check.setdefault(field, None)
+    return {"candidates": [{"finishReason": finish_reason, "content": {"parts": [{"text": json.dumps(wire)}]}}]}
 
 
 def new(store):
@@ -73,12 +82,15 @@ class Checks(unittest.TestCase):
             validate_plan(plan, SAMPLE_BRIEF)
 
     def test_gemini_adapter_and_no_silent_fallback(self):
-        result = {"candidates": [{"content": {"parts": [{"text": json.dumps(sample_plan())}]}}]}
+        result = gemini_response(sample_plan())
         with patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", return_value=result) as call:
             self.assertEqual(draft_plan(SAMPLE_BRIEF, "gemini", "gemini-2.5-flash"), sample_plan())
             self.assertEqual(call.call_args.args[1]["generationConfig"]["responseMimeType"], "application/json")
             self.assertNotIn("key=", call.call_args.args[0])
             self.assertEqual(call.call_args.kwargs["timeout"], 60)
+            required = call.call_args.args[1]["generationConfig"]["responseSchema"]["properties"]["checks"]["items"]["required"]
+            self.assertIn("min", required)
+            self.assertIn("max", required)
         with patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", side_effect=Problem("Provider unavailable", 502)), self.assertRaises(Problem):
             draft_plan(SAMPLE_BRIEF, "gemini", "gemini-2.5-flash")
         with self.assertRaises(Problem):
@@ -101,7 +113,7 @@ class Checks(unittest.TestCase):
         for ambiguous in (False, True):
             current_brief = brief + (" Make the data insightful." if ambiguous else "")
             plan["clarifications"] = ["What measurable CSV checks define insightful?"] if ambiguous else []
-            response = {"candidates": [{"content": {"parts": [{"text": json.dumps(plan)}]}}]}
+            response = gemini_response(plan)
             with patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", return_value=response):
                 project = self.store.create({"brief": current_brief, "price": "42.50"})
             self.assertEqual(project["plan"], plan)
@@ -118,10 +130,88 @@ class Checks(unittest.TestCase):
                 failed = self.store.act(project["id"], "verify", {"csv": "sku,quantity\nA,101\nB,100\n"}, "")
                 self.assertEqual(failed["status"], "BLOCKED")
         plan["checks"][0]["source"] = "Invented requirement."
-        response = {"candidates": [{"content": {"parts": [{"text": json.dumps(plan)}]}}]}
+        response = gemini_response(plan)
         with patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", return_value=response), self.assertRaises(Problem):
             self.store.create({"brief": brief, "price": "42.50"})
         self.assertEqual(self.store.db.execute("SELECT COUNT(*) FROM projects").fetchone()[0], 2)
+
+    def test_recorded_incomplete_bounds_cannot_create_projects(self):
+        # Captured plans are replayed in a test envelope, without contacting Gemini.
+        review = json.loads((ROOT / "docs/PHASE2_AI_RESULTS.json").read_text())
+        self.store.ai_mode = "gemini"
+        count = 0
+        for attempt in review["attempts"]:
+            for result in attempt["results"].values():
+                if "plan" not in result:
+                    continue
+                count += 1
+                with self.subTest(model=attempt["model"]), patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", return_value=gemini_response(result["plan"])):
+                    with self.assertRaises(Problem) as error:
+                        self.store.create({"brief": result["brief"], "price": "42.50"})
+                    self.assertEqual(error.exception.status, 502)
+                    self.assertIn("bounds", str(error.exception))
+        self.assertGreaterEqual(count, 2)
+        self.assertEqual(self.store.db.execute("SELECT COUNT(*) FROM projects").fetchone()[0], 0)
+
+    def test_quoted_bounds_keep_both_endpoints_and_exact_row_count(self):
+        for kind, source, correct, wrong in [
+            ("number_range", "Score must be between -5 and 12.5.", {"min": -5, "max": 12.5}, [{"min": -5}, {"min": -5, "max": 12}, {"min": 1e-62, "max": 12.5}]),
+            ("number_range", "Score must be greater than or equal to 0.", {"min": 0}, [{"min": 1e-62}, {"min": 0, "max": 100}]),
+            ("row_count", "Include exactly 4 data rows.", {"min": 4, "max": 4}, [{"min": 4}, {"min": 3, "max": 4}]),
+            ("row_count", "Include at most 4 rows.", {"max": 4}, [{"min": 4}, {"min": 0, "max": 4}]),
+        ]:
+            check = {"kind": kind, "source": source, **({"column": "score"} if kind == "number_range" else {})}
+            plan = {"title": "Scope", "clarifications": [], "checks": [{**check, **correct}]}
+            with self.subTest(source=source):
+                validate_plan(plan, source)
+            for limits in wrong:
+                with self.subTest(source=source, limits=limits), self.assertRaises(Problem):
+                    validate_plan({**plan, "checks": [{**check, **limits}]}, source)
+
+    def test_missing_sentence_gets_server_review_and_blocks_agreement(self):
+        plan = sample_plan()
+        plan["checks"].pop()
+        self.store.ai_mode = "gemini"
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", return_value=gemini_response(plan)):
+            project = new(self.store)
+        self.assertEqual(len(project["plan"]["clarifications"]), 1)
+        self.assertIn("Server review:", project["plan"]["clarifications"][0])
+        self.assertIn("Include at least 3 rows.", project["plan"]["clarifications"][0])
+        with self.assertRaises(Problem):
+            self.store.act(project["id"], "agree", {}, "")
+        self.assertIsNone(self.store.get(project["id"])["order"])
+
+    def test_gemini_rejects_unfinished_and_malformed_responses(self):
+        responses = [gemini_response(sample_plan(), reason) for reason in ("MAX_TOKENS", "SAFETY", None)]
+        responses += [{"candidates": [{"finishReason": "STOP", "content": {"parts": [123]}}]}]
+        underflow = gemini_response(sample_plan())
+        part = underflow["candidates"][0]["content"]["parts"][0]
+        part["text"] = part["text"].replace('"min": 0', '"min": 1e-400')
+        responses.append(underflow)
+        self.store.ai_mode = "gemini"
+        for response in responses:
+            with self.subTest(response=response), patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", return_value=response):
+                with self.assertRaises(Problem) as error:
+                    new(self.store)
+                self.assertEqual(error.exception.status, 502)
+        self.assertEqual(self.store.db.execute("SELECT COUNT(*) FROM projects").fetchone()[0], 0)
+
+    def test_gemini_transient_http_retry_is_bounded_without_fallback(self):
+        def error(code):
+            return HTTPError("https://generativelanguage.googleapis.com/", code, "Provider error", None, io.BytesIO(b""))
+        good = json.dumps(gemini_response(sample_plan())).encode()
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.time.sleep") as pause, patch("app.urlopen", side_effect=[error(503), io.BytesIO(good)]) as request, patch.object(PayPal, "authenticate") as paypal:
+            self.assertEqual(draft_plan(SAMPLE_BRIEF, "gemini", "gemini-3.8-flash"), sample_plan())
+            self.assertEqual(request.call_count, 2)
+            pause.assert_called_once_with(1)
+            paypal.assert_not_called()
+        for code, attempts in [(503, 2), (401, 1), (404, 1), (429, 1)]:
+            with self.subTest(code=code), patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.time.sleep") as pause, patch("app.urlopen", side_effect=[error(code) for _ in range(attempts)]) as request:
+                with self.assertRaises(Problem) as failure:
+                    draft_plan(SAMPLE_BRIEF, "gemini", "gemini-3.8-flash")
+                self.assertEqual(failure.exception.provider_status, code)
+                self.assertEqual(request.call_count, attempts)
+                self.assertEqual(pause.call_count, attempts - 1)
 
     def test_real_csv_checks_and_parser_limits(self):
         failed = verify_csv(FAILED, sample_plan()["checks"])

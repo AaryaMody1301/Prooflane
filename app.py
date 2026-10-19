@@ -31,13 +31,15 @@ PLAN_SCHEMA = {
     "properties": {
         "title": {"type": "string"},
         "clarifications": {"type": "array", "items": {"type": "string"}},
-        "checks": {"type": "array", "items": {
-            "type": "object", "required": ["kind", "source"],
+        "checks": {"type": "array", "minItems": 1, "maxItems": 20, "items": {
+            "type": "object", "required": ["kind", "source", "column", "columns", "min", "max"],
             "properties": {
                 "kind": {"type": "string", "enum": KINDS},
-                "source": {"type": "string"}, "column": {"type": "string"},
-                "columns": {"type": "array", "items": {"type": "string"}},
-                "min": {"type": "number"}, "max": {"type": "number"},
+                "source": {"type": "string", "description": "Quote the full requirement sentence exactly, including every bound."},
+                "column": {"type": "string", "nullable": True, "description": "The named CSV column, or null for required_columns and row_count."},
+                "columns": {"type": "array", "nullable": True, "items": {"type": "string"}, "description": "All required CSV column names, or null for other kinds."},
+                "min": {"type": "number", "nullable": True, "description": "Exact inclusive lower bound, or null only when none is stated. For exactly N rows, use N."},
+                "max": {"type": "number", "nullable": True, "description": "Exact inclusive upper bound, or null only when none is stated. For exactly N rows, use N."},
             },
         }},
     },
@@ -45,9 +47,10 @@ PLAN_SCHEMA = {
 
 
 class Problem(Exception):
-    def __init__(self, message, status=400):
+    def __init__(self, message, status=400, provider_status=None):
         super().__init__(message)
         self.status = status
+        self.provider_status = provider_status
 
 
 def now():
@@ -80,6 +83,29 @@ def finite(value):
     if not d.is_finite() or abs(d) > Decimal("1e12"):
         raise Problem("Check limit is outside the supported range.")
     return d
+
+
+def validate_quoted_bounds(check):
+    """Recognize a few explicit inclusive forms; this is not a general language parser."""
+    source, kind = check["source"], check["kind"]
+    number = r"[+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?"
+    expected = {}
+    if kind == "number_range":
+        interval = re.search(rf"\bbetween\s+({number})\s+and\s+({number})(?!\w|\.\d)", source, re.I)
+        if interval:
+            expected = dict(zip(("min", "max"), map(Decimal, interval.groups())))
+        else:
+            for key, phrase in (("min", "greater than or equal to|at least"), ("max", "less than or equal to|at most")):
+                bound = re.search(rf"\b(?:{phrase})\s+({number})(?!\w|\.\d)", source, re.I)
+                if bound:
+                    expected[key] = Decimal(bound[1])
+    elif kind == "row_count":
+        bound = re.search(rf"\b(exactly|at least|at most)\s+({number})\s+(?:data\s+)?rows?\b", source, re.I)
+        if bound:
+            keys = {"exactly": ("min", "max"), "at least": ("min",), "at most": ("max",)}[bound[1].lower()]
+            expected = {key: Decimal(bound[2]) for key in keys}
+    if expected and ({key: finite(check[key]) for key in ("min", "max") if key in check} != expected):
+        raise Problem("Check bounds do not match the quoted requirement. Review the brief and draft again.")
 
 
 def validate_plan(plan, brief):
@@ -121,6 +147,7 @@ def validate_plan(plan, brief):
                 raise Problem("Invalid check bounds.")
             if kind == "row_count" and any(v < 0 or v > 5000 or v != v.to_integral_value() for v in limits.values()):
                 raise Problem("Row-count limits must be whole numbers from 0 to 5,000.")
+            validate_quoted_bounds(check)
     return plan
 
 
@@ -144,7 +171,9 @@ def json_request(url, body=None, headers=None, method=None, timeout=25):
         with urlopen(request, timeout=timeout) as response:
             return json.loads(response.read(4_000_000))
     except HTTPError as exc:
-        raise Problem(f"Provider returned HTTP {exc.code}. Check credentials, quota, or sandbox approval; no simulated fallback was used.", 502) from None
+        code = exc.code
+        exc.close()
+        raise Problem(f"Provider returned HTTP {code}. Check credentials, quota, or sandbox approval; no simulated fallback was used.", 502, provider_status=code) from None
     except (URLError, TimeoutError, ValueError) as exc:
         raise Problem("Provider response unavailable. Retry the same action; payment status has not been assumed.", 502) from None
 
@@ -162,19 +191,56 @@ def draft_plan(brief, ai_mode, model):
         "Keep every supported measurable check even when another obligation needs clarification. "
         "number_range uses inclusive limits: a stated interval needs BOTH min and max. "
         "row_count IS supported: exactly N data rows means min=N and max=N; at least N means min=N. "
+        "Return all six check fields. Use null for inapplicable column/columns/min/max fields; never use null for a stated bound. "
+        "Quote each full requirement sentence. Account for every sentence with checks or a clarification. "
         "Write concise numeric literals, without unnecessary trailing decimal zeros. "
         "Do not infer an upper bound or row count absent from the brief. Return only the supplied JSON schema.\n"
         + json.dumps({"client_brief": brief})
     )
-    result = json_request(
-        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-        {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"maxOutputTokens": 8192, "responseMimeType": "application/json", "responseSchema": PLAN_SCHEMA}},
-        {"x-goog-api-key": os.environ["GEMINI_API_KEY"]}, timeout=60,
-    )
+    for attempt in range(2):
+        try:
+            result = json_request(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"maxOutputTokens": 8192, "responseMimeType": "application/json", "responseSchema": PLAN_SCHEMA}},
+                {"x-goog-api-key": os.environ["GEMINI_API_KEY"]}, timeout=60,
+            )
+            break
+        except Problem as exc:
+            if attempt or exc.provider_status not in {500, 502, 503, 504}:
+                raise
+            time.sleep(1)  # One bounded retry for transient Gemini HTTP failures only.
     try:
-        output = "".join(part.get("text", "") for part in result["candidates"][0]["content"]["parts"] if not part.get("thought"))
-        return validate_plan(json.loads(output), brief)
-    except (KeyError, IndexError, TypeError, json.JSONDecodeError):
+        candidate = result["candidates"][0]
+        if candidate.get("finishReason") != "STOP":
+            raise Problem("AI response did not finish normally. No project or payment was created.", 502)
+        output = "".join(part.get("text", "") for part in candidate["content"]["parts"] if not part.get("thought"))
+        plan = json.loads(output, parse_float=Decimal)
+        if isinstance(plan, dict) and isinstance(plan.get("checks"), list):
+            for check in plan["checks"]:
+                if isinstance(check, dict):
+                    for field in ("column", "columns", "min", "max"):
+                        if field in check and check[field] is None:
+                            del check[field]
+                        elif field in {"min", "max"} and isinstance(check.get(field), Decimal):
+                            value = check[field]
+                            if not value.is_finite() or Decimal(str(float(value))) != value:
+                                raise Problem("AI bound cannot be represented without losing precision.")
+                            check[field] = float(value)
+        validate_plan(plan, brief)
+        # ponytail: sentence-level omission guard, not semantic proof; compound requirements still need human review.
+        if not plan["clarifications"]:
+            for sentence in re.split(r"(?<=[.!?])\s+|\n+", brief):
+                sentence = sentence.strip()
+                if sentence and not any(c["source"] in sentence or sentence in c["source"] for c in plan["checks"]):
+                    review = "Server review: no check covers this brief text: " + sentence[:330]
+                    if review not in plan["clarifications"]:
+                        plan["clarifications"].append(review)
+        return validate_plan(plan, brief)
+    except Problem as exc:
+        if exc.status == 502:
+            raise
+        raise Problem("AI plan rejected: " + str(exc), 502) from None
+    except (KeyError, IndexError, TypeError, AttributeError, ValueError, InvalidOperation, OverflowError):
         raise Problem("AI did not return a usable plan. No project or payment was created.", 502) from None
 
 
