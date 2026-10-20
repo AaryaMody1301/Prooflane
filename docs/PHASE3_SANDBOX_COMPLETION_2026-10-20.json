@@ -1,0 +1,330 @@
+{
+  "format": "prooflane-phase3-sandbox-completion-v1",
+  "checked_date_ist": "2026-10-20",
+  "recorded_at_utc": "2026-10-20T11:48:15+00:00",
+  "phase2_gate_passed": true,
+  "phase3_gate_passed": true,
+  "ai_mode": "gemini",
+  "model": "gemini-3.6-flash",
+  "payment_mode": "sandbox",
+  "primary_project": {
+    "id": "9b330edb5d5a43fb93290c32fec7ef98",
+    "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+    "cents": 100,
+    "currency": "USD",
+    "plan": {
+      "title": "Inventory CSV Acceptance Plan",
+      "checks": [
+        {
+          "kind": "required_columns",
+          "source": "Deliver an inventory CSV with sku and quantity columns.",
+          "columns": [
+            "sku",
+            "quantity"
+          ]
+        },
+        {
+          "kind": "unique",
+          "source": "Every sku must be unique.",
+          "column": "sku"
+        },
+        {
+          "kind": "number_range",
+          "source": "Quantity must be a number between 0 and 100.",
+          "column": "quantity",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "kind": "row_count",
+          "source": "Include exactly 2 rows.",
+          "min": 2,
+          "max": 2
+        }
+      ],
+      "clarifications": []
+    },
+    "status": "PAID",
+    "ai_mode": "gemini",
+    "payment_mode": "sandbox",
+    "events": [
+      {
+        "at": "2026-10-20T10:46:35+00:00",
+        "action": "PLAN_DRAFTED",
+        "detail": "Gemini structured plan"
+      },
+      {
+        "at": "2026-10-20T10:48:04+00:00",
+        "action": "SCOPE_AGREED",
+        "detail": "Operator confirmed the displayed checks and USD price."
+      },
+      {
+        "at": "2026-10-20T10:48:10+00:00",
+        "action": "DELIVERY_CHECKED",
+        "detail": "BLOCKED: b59150ca0a99a1926956304dd0393deae362f4a9f39dcffe3ba7f98f8db5c3dc"
+      },
+      {
+        "at": "2026-10-20T10:48:30+00:00",
+        "action": "DELIVERY_CHECKED",
+        "detail": "VERIFIED: 9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555"
+      },
+      {
+        "at": "2026-10-20T10:48:43+00:00",
+        "action": "DELIVERY_APPROVED",
+        "detail": "Human approved this exact delivery snapshot."
+      },
+      {
+        "at": "2026-10-20T10:48:54+00:00",
+        "action": "CHECKOUT_STARTED",
+        "detail": "Delivery frozen before requesting the PayPal sandbox order."
+      },
+      {
+        "at": "2026-10-20T10:48:56+00:00",
+        "action": "CHECKOUT_CREATED",
+        "detail": "62Y81094JH0739710"
+      },
+      {
+        "at": "2026-10-20T11:42:43+00:00",
+        "action": "PAYMENT_RECONCILED",
+        "detail": "6C523873TS2828007"
+      }
+    ],
+    "verification": {
+      "sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+      "rows": 2,
+      "checks": [
+        {
+          "kind": "required_columns",
+          "source": "Deliver an inventory CSV with sku and quantity columns.",
+          "columns": [
+            "sku",
+            "quantity"
+          ],
+          "passed": true,
+          "detail": "All required columns present.",
+          "failed_rows": []
+        },
+        {
+          "kind": "unique",
+          "source": "Every sku must be unique.",
+          "column": "sku",
+          "passed": true,
+          "detail": "Every row satisfies this check.",
+          "failed_rows": []
+        },
+        {
+          "kind": "number_range",
+          "source": "Quantity must be a number between 0 and 100.",
+          "column": "quantity",
+          "min": 0,
+          "max": 100,
+          "passed": true,
+          "detail": "Every row satisfies this check.",
+          "failed_rows": []
+        },
+        {
+          "kind": "row_count",
+          "source": "Include exactly 2 rows.",
+          "min": 2,
+          "max": 2,
+          "passed": true,
+          "detail": "2 rows; agreed range 2–2.",
+          "failed_rows": []
+        }
+      ],
+      "passed": true,
+      "verified_at": "2026-10-20T10:48:30+00:00"
+    },
+    "approval": {
+      "sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+      "at": "2026-10-20T10:48:43+00:00"
+    },
+    "order": {
+      "id": "62Y81094JH0739710",
+      "approve_url": "https://www.sandbox.paypal.com/checkoutnow?token=62Y81094JH0739710"
+    },
+    "receipt": {
+      "capture_id": "6C523873TS2828007",
+      "order_id": "62Y81094JH0739710",
+      "amount": "1.00",
+      "currency": "USD",
+      "delivery_sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+      "mode": "sandbox",
+      "ai_mode": "gemini",
+      "at": "2026-10-20T11:42:43+00:00"
+    },
+    "checkout_attempted_at": 1792493334.724287
+  },
+  "payment_verification": {
+    "checked_at": "2026-10-20T11:43:43+00:00",
+    "project_id": "9b330edb5d5a43fb93290c32fec7ef98",
+    "local_status": "PAID",
+    "receipt": {
+      "capture_id": "6C523873TS2828007",
+      "order_id": "62Y81094JH0739710",
+      "amount": "1.00",
+      "currency": "USD",
+      "delivery_sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+      "mode": "sandbox",
+      "ai_mode": "gemini",
+      "at": "2026-10-20T11:42:43+00:00"
+    },
+    "approved_sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+    "provider_before_reconciliation": {
+      "order_id": "62Y81094JH0739710",
+      "status": "COMPLETED",
+      "custom_id": "9b330edb5d5a43fb93290c32fec7ef98",
+      "invoice_id": "9b330edb5d5a43fb93290c32fec7ef98",
+      "amount": {
+        "currency_code": "USD",
+        "value": "1.00",
+        "breakdown": {}
+      },
+      "captures": [
+        {
+          "id": "6C523873TS2828007",
+          "status": "COMPLETED",
+          "amount": {
+            "currency_code": "USD",
+            "value": "1.00"
+          }
+        }
+      ]
+    },
+    "reconciliation_replays": [
+      {
+        "attempt": 1,
+        "status": "PAID",
+        "capture_id": "6C523873TS2828007",
+        "receipt_unchanged": true
+      },
+      {
+        "attempt": 2,
+        "status": "PAID",
+        "capture_id": "6C523873TS2828007",
+        "receipt_unchanged": true
+      },
+      {
+        "attempt": 3,
+        "status": "PAID",
+        "capture_id": "6C523873TS2828007",
+        "receipt_unchanged": true
+      }
+    ],
+    "provider_after_reconciliation": {
+      "order_id": "62Y81094JH0739710",
+      "status": "COMPLETED",
+      "custom_id": "9b330edb5d5a43fb93290c32fec7ef98",
+      "invoice_id": "9b330edb5d5a43fb93290c32fec7ef98",
+      "amount": {
+        "currency_code": "USD",
+        "value": "1.00",
+        "breakdown": {}
+      },
+      "captures": [
+        {
+          "id": "6C523873TS2828007",
+          "status": "COMPLETED",
+          "amount": {
+            "currency_code": "USD",
+            "value": "1.00"
+          }
+        }
+      ]
+    },
+    "single_completed_capture_verified": true,
+    "evidence_matches": true,
+    "capture_requested_by_this_verification_script": false
+  },
+  "browser_callback_replay": {
+    "completed": true,
+    "stored_order_token_used": true,
+    "status": "PAID",
+    "capture_id": "6C523873TS2828007",
+    "receipt_unchanged": true
+  },
+  "cancellation_verification": {
+    "checked_at": "2026-10-20T11:45:08+00:00",
+    "project_id": "53c1a89709ad472aa0389c56a9965485",
+    "order_id": "4RK78281FR317544T",
+    "scenario": "Cancel and return to Prooflane from the normal USD 1.00 sandbox approval review with the US test buyer. Complete Purchase was not used on this order.",
+    "normal_review_cancellation_verified": true,
+    "local_status": "ORDER_CREATED",
+    "receipt": null,
+    "provider_status": "PAYER_ACTION_REQUIRED",
+    "provider_amount": {
+      "currency_code": "USD",
+      "value": "1.00",
+      "breakdown": {}
+    },
+    "provider_custom_id": "53c1a89709ad472aa0389c56a9965485",
+    "captures": [],
+    "local_reconciliation_attempted": true,
+    "local_reconciliation_refused": true,
+    "provider_capture_requested": false,
+    "reconciliation_error": "Approve this order in PayPal's sandbox before capture.",
+    "approved_sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+    "snapshot": ".venv/phase3-normal-cancelled-return.jpg"
+  },
+  "sandbox_account_resolution": {
+    "original_buyer_country": "IN",
+    "merchant_country": "IN",
+    "original_error": "UNSUPPORTED_PAYEE_CURRENCY",
+    "successful_buyer_country": "US",
+    "successful_buyer_type": "Personal",
+    "user_authorized_use_of_existing_us_sandbox_buyer": true,
+    "same_primary_order_reused": true,
+    "application_currency_validation_changed": false,
+    "live_account_settings_changed": false,
+    "finding": "The same USD 1.00 order failed with the India buyer and completed with the US sandbox buyer. Both original test accounts were India-registered. This is consistent with PayPal India supporting international payments only.",
+    "official_references": [
+      "https://www.paypal.com/in/cshelp/article/can-i-use-paypal-to-receive-payments-from-indian-customers-help1049",
+      "https://developer.paypal.com/sandbox-testing/accounts"
+    ]
+  },
+  "screenshots": [
+    ".venv/phase3-sandbox-paid.jpg",
+    ".venv/phase3-normal-cancelled-return.jpg"
+  ],
+  "phase4_start": {
+    "started": true,
+    "first_check": "Post-capture backend restart and browser reload",
+    "recovery_verification": {
+      "checked_at": "2026-10-20T11:46:47+00:00",
+      "server_restarted": true,
+      "paid_project_id": "9b330edb5d5a43fb93290c32fec7ef98",
+      "paid_status": "PAID",
+      "receipt": {
+        "capture_id": "6C523873TS2828007",
+        "order_id": "62Y81094JH0739710",
+        "amount": "1.00",
+        "currency": "USD",
+        "delivery_sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+        "mode": "sandbox",
+        "ai_mode": "gemini",
+        "at": "2026-10-20T11:42:43+00:00"
+      },
+      "receipt_and_frozen_evidence_unchanged": true,
+      "event_history_unchanged": true,
+      "cancelled_project_id": "53c1a89709ad472aa0389c56a9965485",
+      "cancelled_status": "ORDER_CREATED",
+      "cancelled_receipt": null,
+      "credentials_changed": false,
+      "new_order_created": false,
+      "new_capture_requested": false
+    },
+    "browser_reloaded_paid_project": true,
+    "remaining": [
+      "desktop/mobile and keyboard review",
+      "second real-AI delivery example through sandbox checkout",
+      "independent fresh setup and judge walkthrough",
+      "target-user scope-review feedback"
+    ]
+  },
+  "limits": [
+    "One completed USD 1.00 sandbox capture is verified; no live payment is supported or claimed.",
+    "Provider pending, timeout and wrong-amount scenarios remain offline contract tests.",
+    "Phase 4 and submission gates are incomplete; this remains a localhost single-operator starter."
+  ],
+  "note": "Reports omit account login identities, passwords, API secrets, OAuth tokens, raw provider bodies and raw CSV contents. Payment/order IDs and the approved hash are retained for reconciliation."
+}

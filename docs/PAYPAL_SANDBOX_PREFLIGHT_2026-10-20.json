@@ -1,0 +1,18 @@
+{
+  "format": "prooflane-paypal-sandbox-preflight-v1",
+  "checked_date_ist": "2026-10-20",
+  "payment_mode": "simulation",
+  "credentials_present": {
+    "PAYPAL_CLIENT_ID": true,
+    "PAYPAL_CLIENT_SECRET": true
+  },
+  "endpoint": "https://api-m.sandbox.paypal.com/v1/oauth2/token",
+  "action": "Sandbox OAuth authentication only",
+  "authentication_passed": true,
+  "orders_created": 0,
+  "payments_captured": 0,
+  "phase3_gate_passed": false,
+  "http_status": 200,
+  "elapsed_seconds": 1.12,
+  "request_count": 1
+}

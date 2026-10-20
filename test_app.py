@@ -39,7 +39,7 @@ def ready(store):
 
 def order_result(p, state="COMPLETED", currency="USD", value="120.00"):
     capture = {"id": "SANDBOX-CAPTURE", "status": state, "amount": {"currency_code": currency, "value": value}}
-    return {"id": p["order"]["id"], "status": "COMPLETED", "purchase_units": [{"custom_id": p["id"], "amount": {"currency_code": "USD", "value": "120.00"}, "payments": {"captures": [capture]}}]}
+    return {"id": p["order"]["id"], "status": "COMPLETED", "purchase_units": [{"custom_id": p["id"], "amount": {"currency_code": "USD", "value": "120.00", "breakdown": {}}, "payments": {"captures": [capture]}}]}
 
 
 class FakePayPal:
@@ -49,7 +49,7 @@ class FakePayPal:
 
     def create(self, p, origin):
         self.creates += 1
-        return {"id": "SANDBOX-ORDER", "status": "CREATED", "purchase_units": [{"custom_id": p["id"], "amount": {"currency_code": "USD", "value": "120.00"}}], "links": [{"rel": "payer-action", "href": "https://www.sandbox.paypal.com/checkoutnow?token=SANDBOX-ORDER"}]}
+        return {"id": "SANDBOX-ORDER", "status": "CREATED", "purchase_units": [{"custom_id": p["id"], "amount": {"currency_code": "USD", "value": "120.00", "breakdown": {}}}], "links": [{"rel": "payer-action", "href": "https://www.sandbox.paypal.com/checkoutnow?token=SANDBOX-ORDER"}]}
 
     def capture(self, p):
         self.captures += 1
@@ -297,6 +297,23 @@ class Checks(unittest.TestCase):
         with patch.object(adapter, "call", return_value=mismatch) as call, self.assertRaises(Problem):
             adapter.capture(p)
         self.assertEqual(call.call_count, 1)
+
+    def test_order_readback_accepts_breakdown_but_blocks_money_mismatch(self):
+        p = ready(self.store)
+        p = self.store.act(p["id"], "order", {}, "")
+        adapter = PayPal("test", "test")
+        completed = order_result(p)
+        # Actual sandbox readback includes an empty amount breakdown.
+        with patch.object(adapter, "call", return_value=completed) as call:
+            self.assertEqual(adapter.capture(p), completed)
+            self.assertEqual(call.call_count, 1)
+        for value in [None, "120.00", {}, {"currency_code": "EUR", "value": "120.00", "breakdown": {}}, {"currency_code": "USD", "value": "1.00", "breakdown": {}}]:
+            wrong = copy.deepcopy(completed)
+            wrong["status"] = "APPROVED"
+            wrong["purchase_units"][0]["amount"] = value
+            with self.subTest(value=value), patch.object(adapter, "call", return_value=wrong) as call, self.assertRaises(Problem):
+                adapter.capture(p)
+            self.assertEqual(call.call_count, 1)
 
     def test_uncertain_checkout_freezes_delivery_before_retry(self):
         fake = FakePayPal()

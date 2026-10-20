@@ -1,0 +1,564 @@
+{
+  "record_status": "Historical progress before the successful US sandbox buyer checkout. Statuses and incomplete gates below describe that earlier checkpoint.",
+  "superseded_by": "PHASE3_SANDBOX_COMPLETION_2026-10-20.json",
+  "format": "prooflane-phase3-sandbox-progress-v1",
+  "checked_date_ist": "2026-10-20",
+  "phase2_gate_passed": true,
+  "phase3_gate_passed": false,
+  "ai_mode": "gemini",
+  "model": "gemini-3.6-flash",
+  "payment_mode": "sandbox",
+  "provider_preflight": {
+    "ai_mode": "gemini",
+    "payment_mode": "sandbox",
+    "model": "gemini-3.6-flash",
+    "credentials_present": {
+      "GEMINI_API_KEY": true,
+      "PAYPAL_CLIENT_ID": true,
+      "PAYPAL_CLIENT_SECRET": true
+    },
+    "configured_for_real_services": true,
+    "provider_checks": {
+      "gemini": {
+        "ok": true,
+        "checks": 5,
+        "clarifications": 0
+      },
+      "paypal_sandbox": {
+        "ok": true,
+        "action": "OAuth authentication only; no order or payment created"
+      }
+    },
+    "provider_checks_passed": true
+  },
+  "primary_project": {
+    "id": "9b330edb5d5a43fb93290c32fec7ef98",
+    "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+    "cents": 100,
+    "currency": "USD",
+    "plan": {
+      "title": "Inventory CSV Acceptance Plan",
+      "checks": [
+        {
+          "kind": "required_columns",
+          "source": "Deliver an inventory CSV with sku and quantity columns.",
+          "columns": [
+            "sku",
+            "quantity"
+          ]
+        },
+        {
+          "kind": "unique",
+          "source": "Every sku must be unique.",
+          "column": "sku"
+        },
+        {
+          "kind": "number_range",
+          "source": "Quantity must be a number between 0 and 100.",
+          "column": "quantity",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "kind": "row_count",
+          "source": "Include exactly 2 rows.",
+          "min": 2,
+          "max": 2
+        }
+      ],
+      "clarifications": []
+    },
+    "status": "ORDER_CREATED",
+    "ai_mode": "gemini",
+    "payment_mode": "sandbox",
+    "events": [
+      {
+        "at": "2026-10-20T10:46:35+00:00",
+        "action": "PLAN_DRAFTED",
+        "detail": "Gemini structured plan"
+      },
+      {
+        "at": "2026-10-20T10:48:04+00:00",
+        "action": "SCOPE_AGREED",
+        "detail": "Operator confirmed the displayed checks and USD price."
+      },
+      {
+        "at": "2026-10-20T10:48:10+00:00",
+        "action": "DELIVERY_CHECKED",
+        "detail": "BLOCKED: b59150ca0a99a1926956304dd0393deae362f4a9f39dcffe3ba7f98f8db5c3dc"
+      },
+      {
+        "at": "2026-10-20T10:48:30+00:00",
+        "action": "DELIVERY_CHECKED",
+        "detail": "VERIFIED: 9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555"
+      },
+      {
+        "at": "2026-10-20T10:48:43+00:00",
+        "action": "DELIVERY_APPROVED",
+        "detail": "Human approved this exact delivery snapshot."
+      },
+      {
+        "at": "2026-10-20T10:48:54+00:00",
+        "action": "CHECKOUT_STARTED",
+        "detail": "Delivery frozen before requesting the PayPal sandbox order."
+      },
+      {
+        "at": "2026-10-20T10:48:56+00:00",
+        "action": "CHECKOUT_CREATED",
+        "detail": "62Y81094JH0739710"
+      }
+    ],
+    "verification": {
+      "sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+      "rows": 2,
+      "checks": [
+        {
+          "kind": "required_columns",
+          "source": "Deliver an inventory CSV with sku and quantity columns.",
+          "columns": [
+            "sku",
+            "quantity"
+          ],
+          "passed": true,
+          "detail": "All required columns present.",
+          "failed_rows": []
+        },
+        {
+          "kind": "unique",
+          "source": "Every sku must be unique.",
+          "column": "sku",
+          "passed": true,
+          "detail": "Every row satisfies this check.",
+          "failed_rows": []
+        },
+        {
+          "kind": "number_range",
+          "source": "Quantity must be a number between 0 and 100.",
+          "column": "quantity",
+          "min": 0,
+          "max": 100,
+          "passed": true,
+          "detail": "Every row satisfies this check.",
+          "failed_rows": []
+        },
+        {
+          "kind": "row_count",
+          "source": "Include exactly 2 rows.",
+          "min": 2,
+          "max": 2,
+          "passed": true,
+          "detail": "2 rows; agreed range 2–2.",
+          "failed_rows": []
+        }
+      ],
+      "passed": true,
+      "verified_at": "2026-10-20T10:48:30+00:00"
+    },
+    "approval": {
+      "sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+      "at": "2026-10-20T10:48:43+00:00"
+    },
+    "order": {
+      "id": "62Y81094JH0739710",
+      "approve_url": "https://www.sandbox.paypal.com/checkoutnow?token=62Y81094JH0739710"
+    },
+    "receipt": null,
+    "checkout_attempted_at": 1792493334.724287
+  },
+  "primary_order_readback": {
+    "order_id": "62Y81094JH0739710",
+    "status": "PAYER_ACTION_REQUIRED",
+    "project_id": "9b330edb5d5a43fb93290c32fec7ef98",
+    "amount": {
+      "currency_code": "USD",
+      "value": "1.00",
+      "breakdown": {}
+    },
+    "captures": [],
+    "delivery_sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+    "validation_passed": true,
+    "capture_requested": false,
+    "note": "Allowlisted sandbox readback after the metadata fix; no payer identity, credential, token or raw provider body."
+  },
+  "faulty_delivery": {
+    "id": "9b330edb5d5a43fb93290c32fec7ef98",
+    "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+    "cents": 100,
+    "currency": "USD",
+    "plan": {
+      "title": "Inventory CSV Acceptance Plan",
+      "checks": [
+        {
+          "kind": "required_columns",
+          "source": "Deliver an inventory CSV with sku and quantity columns.",
+          "columns": [
+            "sku",
+            "quantity"
+          ]
+        },
+        {
+          "kind": "unique",
+          "source": "Every sku must be unique.",
+          "column": "sku"
+        },
+        {
+          "kind": "number_range",
+          "source": "Quantity must be a number between 0 and 100.",
+          "column": "quantity",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "kind": "row_count",
+          "source": "Include exactly 2 rows.",
+          "min": 2,
+          "max": 2
+        }
+      ],
+      "clarifications": []
+    },
+    "status": "BLOCKED",
+    "ai_mode": "gemini",
+    "payment_mode": "sandbox",
+    "events": [
+      {
+        "at": "2026-10-20T10:46:35+00:00",
+        "action": "PLAN_DRAFTED",
+        "detail": "Gemini structured plan"
+      },
+      {
+        "at": "2026-10-20T10:48:04+00:00",
+        "action": "SCOPE_AGREED",
+        "detail": "Operator confirmed the displayed checks and USD price."
+      },
+      {
+        "at": "2026-10-20T10:48:10+00:00",
+        "action": "DELIVERY_CHECKED",
+        "detail": "BLOCKED: b59150ca0a99a1926956304dd0393deae362f4a9f39dcffe3ba7f98f8db5c3dc"
+      }
+    ],
+    "verification": {
+      "sha256": "b59150ca0a99a1926956304dd0393deae362f4a9f39dcffe3ba7f98f8db5c3dc",
+      "rows": 2,
+      "checks": [
+        {
+          "kind": "required_columns",
+          "source": "Deliver an inventory CSV with sku and quantity columns.",
+          "columns": [
+            "sku",
+            "quantity"
+          ],
+          "passed": true,
+          "detail": "All required columns present.",
+          "failed_rows": []
+        },
+        {
+          "kind": "unique",
+          "source": "Every sku must be unique.",
+          "column": "sku",
+          "passed": false,
+          "detail": "1 failing rows",
+          "failed_rows": [
+            3
+          ]
+        },
+        {
+          "kind": "number_range",
+          "source": "Quantity must be a number between 0 and 100.",
+          "column": "quantity",
+          "min": 0,
+          "max": 100,
+          "passed": false,
+          "detail": "1 failing rows",
+          "failed_rows": [
+            2
+          ]
+        },
+        {
+          "kind": "row_count",
+          "source": "Include exactly 2 rows.",
+          "min": 2,
+          "max": 2,
+          "passed": true,
+          "detail": "2 rows; agreed range 2–2.",
+          "failed_rows": []
+        }
+      ],
+      "passed": false,
+      "verified_at": "2026-10-20T10:48:10+00:00"
+    },
+    "approval": null,
+    "order": null,
+    "receipt": null
+  },
+  "readback_bug": {
+    "actual_diagnosis": {
+      "expected": {
+        "order_id": "62Y81094JH0739710",
+        "project_id": "9b330edb5d5a43fb93290c32fec7ef98",
+        "amount": {
+          "currency_code": "USD",
+          "value": "1.00"
+        }
+      },
+      "actual": {
+        "order_id": "62Y81094JH0739710",
+        "status": "PAYER_ACTION_REQUIRED",
+        "purchase_units": [
+          {
+            "custom_id": "9b330edb5d5a43fb93290c32fec7ef98",
+            "invoice_id": "9b330edb5d5a43fb93290c32fec7ef98",
+            "amount": {
+              "currency_code": "USD",
+              "value": "1.00",
+              "breakdown": {}
+            },
+            "capture_count": 0
+          }
+        ]
+      },
+      "top_level_fields": [
+        "create_time",
+        "id",
+        "intent",
+        "links",
+        "payment_source",
+        "purchase_units",
+        "status"
+      ],
+      "note": "Allowlisted diagnosis only. No payer identity, token, credential, raw error body or capture request."
+    },
+    "root_cause": "PayPal adds amount.breakdown={} on order readback. Comparing the entire amount object rejected an otherwise matching USD total and project.",
+    "fix": "Compare amount currency_code/value, retaining strict order ID, single purchase unit and custom_id checks. Reject missing/malformed amounts and real value/currency mismatches.",
+    "regression": "New adapter regression failed before the fix. Create/readback/capture fixtures now include breakdown. All 22 Python tests, Node controller and compilation pass. Fresh credential-backed readback of the original order now validates.",
+    "original_order_preserved": true
+  },
+  "cancellation_scenario": {
+    "purpose": "Separate sandbox cancellation scenario",
+    "completed": false,
+    "capture_requested": false,
+    "project_id": "53c1a89709ad472aa0389c56a9965485",
+    "order_prepared": true,
+    "project": {
+      "id": "53c1a89709ad472aa0389c56a9965485",
+      "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+      "cents": 100,
+      "currency": "USD",
+      "plan": {
+        "title": "Inventory CSV Acceptance Plan",
+        "checks": [
+          {
+            "kind": "required_columns",
+            "source": "Deliver an inventory CSV with sku and quantity columns.",
+            "columns": [
+              "sku",
+              "quantity"
+            ]
+          },
+          {
+            "kind": "unique",
+            "source": "Every sku must be unique.",
+            "column": "sku"
+          },
+          {
+            "kind": "number_range",
+            "source": "Quantity must be a number between 0 and 100.",
+            "column": "quantity",
+            "min": 0,
+            "max": 100
+          },
+          {
+            "kind": "row_count",
+            "source": "Include exactly 2 rows.",
+            "min": 2,
+            "max": 2
+          }
+        ],
+        "clarifications": []
+      },
+      "status": "ORDER_CREATED",
+      "ai_mode": "gemini",
+      "payment_mode": "sandbox",
+      "events": [
+        {
+          "at": "2026-10-20T10:55:58+00:00",
+          "action": "PLAN_DRAFTED",
+          "detail": "Gemini structured plan"
+        },
+        {
+          "at": "2026-10-20T10:55:58+00:00",
+          "action": "SCOPE_AGREED",
+          "detail": "Operator confirmed the displayed checks and USD price."
+        },
+        {
+          "at": "2026-10-20T10:55:58+00:00",
+          "action": "DELIVERY_CHECKED",
+          "detail": "VERIFIED: 9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555"
+        },
+        {
+          "at": "2026-10-20T10:55:58+00:00",
+          "action": "DELIVERY_APPROVED",
+          "detail": "Human approved this exact delivery snapshot."
+        },
+        {
+          "at": "2026-10-20T10:55:58+00:00",
+          "action": "CHECKOUT_STARTED",
+          "detail": "Delivery frozen before requesting the PayPal sandbox order."
+        },
+        {
+          "at": "2026-10-20T10:56:00+00:00",
+          "action": "CHECKOUT_CREATED",
+          "detail": "4RK78281FR317544T"
+        }
+      ],
+      "verification": {
+        "sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+        "rows": 2,
+        "checks": [
+          {
+            "kind": "required_columns",
+            "source": "Deliver an inventory CSV with sku and quantity columns.",
+            "columns": [
+              "sku",
+              "quantity"
+            ],
+            "passed": true,
+            "detail": "All required columns present.",
+            "failed_rows": []
+          },
+          {
+            "kind": "unique",
+            "source": "Every sku must be unique.",
+            "column": "sku",
+            "passed": true,
+            "detail": "Every row satisfies this check.",
+            "failed_rows": []
+          },
+          {
+            "kind": "number_range",
+            "source": "Quantity must be a number between 0 and 100.",
+            "column": "quantity",
+            "min": 0,
+            "max": 100,
+            "passed": true,
+            "detail": "Every row satisfies this check.",
+            "failed_rows": []
+          },
+          {
+            "kind": "row_count",
+            "source": "Include exactly 2 rows.",
+            "min": 2,
+            "max": 2,
+            "passed": true,
+            "detail": "2 rows; agreed range 2–2.",
+            "failed_rows": []
+          }
+        ],
+        "passed": true,
+        "verified_at": "2026-10-20T10:55:58+00:00"
+      },
+      "approval": {
+        "sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+        "at": "2026-10-20T10:55:58+00:00"
+      },
+      "order": {
+        "id": "4RK78281FR317544T",
+        "approve_url": "https://www.sandbox.paypal.com/checkoutnow?token=4RK78281FR317544T"
+      },
+      "receipt": null,
+      "checkout_attempted_at": 1792493758.2261336
+    },
+    "next_action": "After resolving account setup, verify cancellation from the normal approval review without approving this separate order.",
+    "cancelled_return_verified": true,
+    "path": "PayPal currency-error page Return to merchant link uses the configured cancelled=1 URL; normal review-page cancellation is still untested.",
+    "local_status_after_return": "ORDER_CREATED",
+    "receipt_after_return": null,
+    "provider_readback": {
+      "project_id": "53c1a89709ad472aa0389c56a9965485",
+      "order_id": "4RK78281FR317544T",
+      "provider_status": "PAYER_ACTION_REQUIRED",
+      "custom_id": "53c1a89709ad472aa0389c56a9965485",
+      "invoice_id": "53c1a89709ad472aa0389c56a9965485",
+      "amount": {
+        "currency_code": "USD",
+        "value": "1.00",
+        "breakdown": {}
+      },
+      "captures": [],
+      "local_status": "ORDER_CREATED",
+      "receipt": null,
+      "approved_sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555"
+    },
+    "reconciliation_attempted": true,
+    "reconciliation_error": "Approve this order in PayPal's sandbox before capture.",
+    "reconciliation_marked_paid": false,
+    "screenshots": [
+      ".venv/phase3-cancelled-return.jpg"
+    ]
+  },
+  "buyer_handoff": {
+    "required": "Sign in to the open PayPal Developer Dashboard with the regular developer account, then inspect sandbox account country and USD settings.",
+    "browser": "Chrome",
+    "snapshot": ".venv/phase3-currency-blocked.jpg",
+    "reason": "Sandbox buyer login succeeded. Checkout now fails on provider currency setup, and the Developer Dashboard is signed out. Existing orders stay unpaid with zero captures."
+  },
+  "remaining_gate": [
+    "resolve sandbox buyer/seller country and USD receiving configuration",
+    "buyer approval and actual completed sandbox capture on the existing primary order",
+    "receipt/provider readback amount, currency, project and approved-hash comparison",
+    "repeat completed-payment reconciliation without duplicate capture",
+    "cancellation from the normal approval review; currency-error/cancel return is already verified unpaid"
+  ],
+  "note": "These are actual sandbox orders. Buyer login succeeds, but PayPal currency setup blocks approval. Both remain PAYER_ACTION_REQUIRED with zero captures and no local receipt. The currency-error cancel return and refusal to reconcile an unapproved order are verified. Reports omit account identities, passwords, API credentials, access tokens and raw provider bodies.",
+  "currency_blocker": {
+    "observed_at": "2026-10-20T11:19:50+00:00",
+    "buyer_login_succeeded": true,
+    "provider_code": "UNSUPPORTED_PAYEE_CURRENCY",
+    "visible_message": "This seller does not accept payments in your currency. Please return to the seller and choose another way to pay.",
+    "approval_completed": false,
+    "capture_completed": false,
+    "account_configuration_cause_confirmed": false,
+    "next_step": "Inspect sandbox buyer/seller country and USD receiving settings after Developer Dashboard login; do not change live-account settings or weaken USD validation.",
+    "screenshot": ".venv/phase3-currency-blocked.jpg",
+    "official_reference": "https://developer.paypal.com/api/errors/unsupported-payee-currency/",
+    "provider_readback": {
+      "checked_at": "2026-10-20T11:19:50+00:00",
+      "provider_environment": "sandbox",
+      "orders": [
+        {
+          "project_id": "9b330edb5d5a43fb93290c32fec7ef98",
+          "order_id": "62Y81094JH0739710",
+          "provider_status": "PAYER_ACTION_REQUIRED",
+          "custom_id": "9b330edb5d5a43fb93290c32fec7ef98",
+          "invoice_id": "9b330edb5d5a43fb93290c32fec7ef98",
+          "amount": {
+            "currency_code": "USD",
+            "value": "1.00",
+            "breakdown": {}
+          },
+          "captures": [],
+          "local_status": "ORDER_CREATED",
+          "receipt": null,
+          "approved_sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555"
+        },
+        {
+          "project_id": "53c1a89709ad472aa0389c56a9965485",
+          "order_id": "4RK78281FR317544T",
+          "provider_status": "PAYER_ACTION_REQUIRED",
+          "custom_id": "53c1a89709ad472aa0389c56a9965485",
+          "invoice_id": "53c1a89709ad472aa0389c56a9965485",
+          "amount": {
+            "currency_code": "USD",
+            "value": "1.00",
+            "breakdown": {}
+          },
+          "captures": [],
+          "local_status": "ORDER_CREATED",
+          "receipt": null,
+          "approved_sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555"
+        }
+      ],
+      "no_completed_payment": true
+    }
+  }
+}

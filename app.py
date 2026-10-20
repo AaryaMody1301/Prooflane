@@ -347,12 +347,13 @@ def validate_order(order, project):
     if order.get("id") != project["order"]["id"] or len(units) != 1:
         raise Problem("PayPal order identity mismatch; payment blocked.", 502)
     unit = units[0]
-    if unit.get("custom_id") != project["id"] or unit.get("amount") != {"currency_code": "USD", "value": amount(project["cents"])}:
+    total = unit.get("amount")
+    if unit.get("custom_id") != project["id"] or not isinstance(total, dict) or total.get("currency_code") != "USD" or total.get("value") != amount(project["cents"]):
         raise Problem("PayPal order amount or project mismatch; payment blocked.", 502)
 
 
 class Store:
-    def __init__(self, db_path, ai_mode="sample", payment_mode="simulation", model="gemini-3.8-flash", paypal=None):
+    def __init__(self, db_path, ai_mode="sample", payment_mode="simulation", model="gemini-3.6-flash", paypal=None):
         self.db = sqlite3.connect(db_path, check_same_thread=False)
         self.db.execute("CREATE TABLE IF NOT EXISTS projects (id TEXT PRIMARY KEY, data TEXT NOT NULL)")
         # ponytail: one process, one operator, <=5k rows; use transactional row locks and authentication for public multi-user hosting.
@@ -604,7 +605,7 @@ def main():
     ai_mode, payment_mode = os.getenv("AI_MODE", "sample"), os.getenv("PAYMENT_MODE", "simulation")
     if ai_mode not in {"sample", "gemini"} or payment_mode not in {"simulation", "sandbox"}:
         raise SystemExit("Use AI_MODE=sample|gemini and PAYMENT_MODE=simulation|sandbox.")
-    model = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+    model = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
     if not re.fullmatch(r"[a-z0-9.-]+", model):
         raise SystemExit("Invalid Gemini model name.")
     if args.command == "doctor":
