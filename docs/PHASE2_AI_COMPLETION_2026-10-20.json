@@ -1,0 +1,592 @@
+{
+  "format": "prooflane-phase2-completion-v1",
+  "completed_date_ist": "2026-10-20",
+  "phase2_gate_passed": true,
+  "model": "gemini-3.6-flash",
+  "ai_mode": "gemini",
+  "payment_mode_during_phase2": "simulation",
+  "note": "Actual credential-backed Gemini requests and an automated Chrome UI walkthrough with synthetic data. Approval and simulated capture were invoked by the test operator. This is not evidence of a real PayPal payment or independent buyer/seller accounts.",
+  "model_selection": "The configured Gemini 3.8 Flash again returned HTTP 500/unavailable. A controlled LOW-thinking experiment also failed after about 60 seconds per brief. Gemini 3.6 Flash was explicitly tested, reviewed and selected; it is now the local and application/template default. No automatic model or sample fallback was added.",
+  "failed_default_retry": {
+    "ai_mode": "gemini",
+    "payment_mode": "simulation",
+    "model": "gemini-3.8-flash",
+    "credentials_present": {
+      "GEMINI_API_KEY": true,
+      "PAYPAL_CLIENT_ID": true,
+      "PAYPAL_CLIENT_SECRET": true
+    },
+    "configured_for_real_services": false,
+    "provider_checks": {
+      "gemini": {
+        "measurable": {
+          "ok": false,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+          "error": "Provider returned HTTP 500. Check credentials, quota, or sandbox approval; no simulated fallback was used."
+        },
+        "ambiguous": {
+          "ok": false,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows. Make the data insightful.",
+          "error": "Provider response unavailable. Retry the same action; payment status has not been assumed."
+        }
+      }
+    },
+    "provider_checks_passed": false,
+    "review_required": "Review requirement coverage, bounds and exact quotations in both returned plans. Passing probes alone do not complete Phase 2."
+  },
+  "failed_low_thinking_experiment": {
+    "ai_mode": "gemini",
+    "payment_mode": "simulation",
+    "model": "gemini-3.8-flash",
+    "credentials_present": {
+      "GEMINI_API_KEY": true,
+      "PAYPAL_CLIENT_ID": true,
+      "PAYPAL_CLIENT_SECRET": true
+    },
+    "configured_for_real_services": false,
+    "provider_checks": {
+      "gemini": {
+        "measurable": {
+          "ok": false,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+          "error": "Provider response unavailable. Retry the same action; payment status has not been assumed."
+        },
+        "ambiguous": {
+          "ok": false,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows. Make the data insightful.",
+          "error": "Provider response unavailable. Retry the same action; payment status has not been assumed."
+        }
+      }
+    },
+    "provider_checks_passed": false,
+    "review_required": "Review requirement coverage, bounds and exact quotations in both returned plans. Passing probes alone do not complete Phase 2.",
+    "request_variant": {
+      "thinkingConfig": {
+        "thinkingLevel": "LOW"
+      }
+    },
+    "actual_network_requests": [
+      {
+        "thinking_level": "LOW",
+        "response_received": false,
+        "provider_http_status": null,
+        "error": "Provider response unavailable. Retry the same action; payment status has not been assumed.",
+        "elapsed_seconds": 60.23
+      },
+      {
+        "thinking_level": "LOW",
+        "response_received": false,
+        "provider_http_status": null,
+        "error": "Provider response unavailable. Retry the same action; payment status has not been assumed.",
+        "elapsed_seconds": 60.18
+      }
+    ],
+    "note": "Controlled requests to the same configured model, using the actual adapter, prompt, schema and validators. Only the thinking setting differs. No application source change or PayPal request."
+  },
+  "passed_two_brief_provider_probe": {
+    "ai_mode": "gemini",
+    "payment_mode": "simulation",
+    "model": "gemini-3.6-flash",
+    "credentials_present": {
+      "GEMINI_API_KEY": true,
+      "PAYPAL_CLIENT_ID": true,
+      "PAYPAL_CLIENT_SECRET": true
+    },
+    "configured_for_real_services": false,
+    "provider_checks": {
+      "gemini": {
+        "measurable": {
+          "ok": true,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+          "coverage": {
+            "required_columns": true,
+            "unique_sku": true,
+            "quantity_0_100": true,
+            "exactly_2_rows": true
+          },
+          "plan": {
+            "title": "Inventory CSV Acceptance Plan",
+            "checks": [
+              {
+                "kind": "required_columns",
+                "source": "Deliver an inventory CSV with sku and quantity columns.",
+                "columns": [
+                  "sku",
+                  "quantity"
+                ]
+              },
+              {
+                "kind": "unique",
+                "source": "Every sku must be unique.",
+                "column": "sku"
+              },
+              {
+                "kind": "number_range",
+                "source": "Quantity must be a number between 0 and 100.",
+                "column": "quantity",
+                "min": 0,
+                "max": 100
+              },
+              {
+                "kind": "row_count",
+                "source": "Include exactly 2 rows.",
+                "min": 2,
+                "max": 2
+              }
+            ],
+            "clarifications": []
+          }
+        },
+        "ambiguous": {
+          "ok": true,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows. Make the data insightful.",
+          "coverage": {
+            "required_columns": true,
+            "unique_sku": true,
+            "quantity_0_100": true,
+            "exactly_2_rows": true
+          },
+          "plan": {
+            "title": "Inventory CSV Acceptance Plan",
+            "checks": [
+              {
+                "kind": "required_columns",
+                "source": "Deliver an inventory CSV with sku and quantity columns.",
+                "columns": [
+                  "sku",
+                  "quantity"
+                ]
+              },
+              {
+                "kind": "unique",
+                "source": "Every sku must be unique.",
+                "column": "sku"
+              },
+              {
+                "kind": "number_range",
+                "source": "Quantity must be a number between 0 and 100.",
+                "column": "quantity",
+                "min": 0,
+                "max": 100
+              },
+              {
+                "kind": "row_count",
+                "source": "Include exactly 2 rows.",
+                "min": 2,
+                "max": 2
+              }
+            ],
+            "clarifications": [
+              "The requirement 'Make the data insightful.' is subjective and cannot be objectively measured without explicit criteria."
+            ]
+          }
+        }
+      }
+    },
+    "provider_checks_passed": true,
+    "review_required": "Review requirement coverage, bounds and exact quotations in both returned plans. Passing probes alone do not complete Phase 2.",
+    "actual_network_requests": [
+      {
+        "model": "gemini-3.6-flash",
+        "response_received": true,
+        "elapsed_seconds": 8.53
+      },
+      {
+        "model": "gemini-3.6-flash",
+        "response_received": true,
+        "elapsed_seconds": 6.8
+      }
+    ],
+    "note": "Explicit comparison probe to Gemini 3.6 Flash with the existing prompt, schema, default temperature and validators. The configured model has not been changed. No PayPal calls."
+  },
+  "plan_review": "Both four-obligation provider probes quote complete exact sentences and contain only the requested sku/quantity columns, unique sku, quantity min=0/max=100 and row-count min=max=2. The measurable plan has no clarifications; the ambiguous plan explicitly flags insightful as subjective.",
+  "browser_measurable": {
+    "browser": "Chrome",
+    "initial_project": {
+      "id": "6164a69c44294320904144465a7d44ee",
+      "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+      "cents": 4250,
+      "currency": "USD",
+      "plan": {
+        "title": "Inventory CSV Acceptance Plan",
+        "checks": [
+          {
+            "kind": "required_columns",
+            "source": "Deliver an inventory CSV with sku and quantity columns.",
+            "columns": [
+              "sku",
+              "quantity"
+            ]
+          },
+          {
+            "kind": "unique",
+            "source": "Every sku must be unique.",
+            "column": "sku"
+          },
+          {
+            "kind": "number_range",
+            "source": "Quantity must be a number between 0 and 100.",
+            "column": "quantity",
+            "min": 0,
+            "max": 100
+          },
+          {
+            "kind": "row_count",
+            "source": "Include exactly 2 rows.",
+            "min": 2,
+            "max": 2
+          }
+        ],
+        "clarifications": []
+      },
+      "status": "DRAFT",
+      "ai_mode": "gemini",
+      "payment_mode": "simulation",
+      "events": [
+        {
+          "at": "2026-10-20T10:33:20+00:00",
+          "action": "PLAN_DRAFTED",
+          "detail": "Gemini structured plan"
+        }
+      ],
+      "verification": null,
+      "approval": null,
+      "order": null,
+      "receipt": null
+    },
+    "faulty_delivery": {
+      "id": "6164a69c44294320904144465a7d44ee",
+      "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+      "cents": 4250,
+      "currency": "USD",
+      "plan": {
+        "title": "Inventory CSV Acceptance Plan",
+        "checks": [
+          {
+            "kind": "required_columns",
+            "source": "Deliver an inventory CSV with sku and quantity columns.",
+            "columns": [
+              "sku",
+              "quantity"
+            ]
+          },
+          {
+            "kind": "unique",
+            "source": "Every sku must be unique.",
+            "column": "sku"
+          },
+          {
+            "kind": "number_range",
+            "source": "Quantity must be a number between 0 and 100.",
+            "column": "quantity",
+            "min": 0,
+            "max": 100
+          },
+          {
+            "kind": "row_count",
+            "source": "Include exactly 2 rows.",
+            "min": 2,
+            "max": 2
+          }
+        ],
+        "clarifications": []
+      },
+      "status": "BLOCKED",
+      "ai_mode": "gemini",
+      "payment_mode": "simulation",
+      "events": [
+        {
+          "at": "2026-10-20T10:33:20+00:00",
+          "action": "PLAN_DRAFTED",
+          "detail": "Gemini structured plan"
+        },
+        {
+          "at": "2026-10-20T10:33:43+00:00",
+          "action": "SCOPE_AGREED",
+          "detail": "Operator confirmed the displayed checks and USD price."
+        },
+        {
+          "at": "2026-10-20T10:33:47+00:00",
+          "action": "DELIVERY_CHECKED",
+          "detail": "BLOCKED: b59150ca0a99a1926956304dd0393deae362f4a9f39dcffe3ba7f98f8db5c3dc"
+        }
+      ],
+      "verification": {
+        "sha256": "b59150ca0a99a1926956304dd0393deae362f4a9f39dcffe3ba7f98f8db5c3dc",
+        "rows": 2,
+        "checks": [
+          {
+            "kind": "required_columns",
+            "source": "Deliver an inventory CSV with sku and quantity columns.",
+            "columns": [
+              "sku",
+              "quantity"
+            ],
+            "passed": true,
+            "detail": "All required columns present.",
+            "failed_rows": []
+          },
+          {
+            "kind": "unique",
+            "source": "Every sku must be unique.",
+            "column": "sku",
+            "passed": false,
+            "detail": "1 failing rows",
+            "failed_rows": [
+              3
+            ]
+          },
+          {
+            "kind": "number_range",
+            "source": "Quantity must be a number between 0 and 100.",
+            "column": "quantity",
+            "min": 0,
+            "max": 100,
+            "passed": false,
+            "detail": "1 failing rows",
+            "failed_rows": [
+              2
+            ]
+          },
+          {
+            "kind": "row_count",
+            "source": "Include exactly 2 rows.",
+            "min": 2,
+            "max": 2,
+            "passed": true,
+            "detail": "2 rows; agreed range 2–2.",
+            "failed_rows": []
+          }
+        ],
+        "passed": false,
+        "verified_at": "2026-10-20T10:33:47+00:00"
+      },
+      "approval": null,
+      "order": null,
+      "receipt": null
+    },
+    "final_evidence": {
+      "format": "prooflane-evidence-v1",
+      "exported_at": "2026-10-20T10:39:34+00:00",
+      "note": "Local evidence record. SHA-256 identifies the checked CSV; this export is not digitally signed. Sample AI and simulated payments are not provider transactions.",
+      "project": {
+        "id": "6164a69c44294320904144465a7d44ee",
+        "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+        "cents": 4250,
+        "currency": "USD",
+        "plan": {
+          "title": "Inventory CSV Acceptance Plan",
+          "checks": [
+            {
+              "kind": "required_columns",
+              "source": "Deliver an inventory CSV with sku and quantity columns.",
+              "columns": [
+                "sku",
+                "quantity"
+              ]
+            },
+            {
+              "kind": "unique",
+              "source": "Every sku must be unique.",
+              "column": "sku"
+            },
+            {
+              "kind": "number_range",
+              "source": "Quantity must be a number between 0 and 100.",
+              "column": "quantity",
+              "min": 0,
+              "max": 100
+            },
+            {
+              "kind": "row_count",
+              "source": "Include exactly 2 rows.",
+              "min": 2,
+              "max": 2
+            }
+          ],
+          "clarifications": []
+        },
+        "status": "PAID",
+        "ai_mode": "gemini",
+        "payment_mode": "simulation",
+        "events": [
+          {
+            "at": "2026-10-20T10:33:20+00:00",
+            "action": "PLAN_DRAFTED",
+            "detail": "Gemini structured plan"
+          },
+          {
+            "at": "2026-10-20T10:33:43+00:00",
+            "action": "SCOPE_AGREED",
+            "detail": "Operator confirmed the displayed checks and USD price."
+          },
+          {
+            "at": "2026-10-20T10:33:47+00:00",
+            "action": "DELIVERY_CHECKED",
+            "detail": "BLOCKED: b59150ca0a99a1926956304dd0393deae362f4a9f39dcffe3ba7f98f8db5c3dc"
+          },
+          {
+            "at": "2026-10-20T10:35:14+00:00",
+            "action": "DELIVERY_CHECKED",
+            "detail": "VERIFIED: 9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555"
+          },
+          {
+            "at": "2026-10-20T10:35:18+00:00",
+            "action": "DELIVERY_APPROVED",
+            "detail": "Human approved this exact delivery snapshot."
+          },
+          {
+            "at": "2026-10-20T10:35:23+00:00",
+            "action": "CHECKOUT_CREATED",
+            "detail": "SIM-ORDER-6164a69c44294320904144465a7d44ee"
+          },
+          {
+            "at": "2026-10-20T10:35:29+00:00",
+            "action": "PAYMENT_RECONCILED",
+            "detail": "SIM-CAPTURE-6164a69c44294320904144465a7d44ee"
+          }
+        ],
+        "verification": {
+          "sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+          "rows": 2,
+          "checks": [
+            {
+              "kind": "required_columns",
+              "source": "Deliver an inventory CSV with sku and quantity columns.",
+              "columns": [
+                "sku",
+                "quantity"
+              ],
+              "passed": true,
+              "detail": "All required columns present.",
+              "failed_rows": []
+            },
+            {
+              "kind": "unique",
+              "source": "Every sku must be unique.",
+              "column": "sku",
+              "passed": true,
+              "detail": "Every row satisfies this check.",
+              "failed_rows": []
+            },
+            {
+              "kind": "number_range",
+              "source": "Quantity must be a number between 0 and 100.",
+              "column": "quantity",
+              "min": 0,
+              "max": 100,
+              "passed": true,
+              "detail": "Every row satisfies this check.",
+              "failed_rows": []
+            },
+            {
+              "kind": "row_count",
+              "source": "Include exactly 2 rows.",
+              "min": 2,
+              "max": 2,
+              "passed": true,
+              "detail": "2 rows; agreed range 2–2.",
+              "failed_rows": []
+            }
+          ],
+          "passed": true,
+          "verified_at": "2026-10-20T10:35:14+00:00"
+        },
+        "approval": {
+          "sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+          "at": "2026-10-20T10:35:18+00:00"
+        },
+        "order": {
+          "id": "SIM-ORDER-6164a69c44294320904144465a7d44ee",
+          "approve_url": null
+        },
+        "receipt": {
+          "capture_id": "SIM-CAPTURE-6164a69c44294320904144465a7d44ee",
+          "order_id": "SIM-ORDER-6164a69c44294320904144465a7d44ee",
+          "amount": "42.50",
+          "currency": "USD",
+          "delivery_sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+          "mode": "simulation",
+          "ai_mode": "gemini",
+          "at": "2026-10-20T10:35:29+00:00"
+        }
+      }
+    },
+    "corrected_csv_sha256": "9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555",
+    "assertions": [
+      "two faulty checks block checkout",
+      "quantities 0 and 100 pass",
+      "scope agreement and delivery approval through UI",
+      "simulated USD 42.50 receipt has exact verification/approval/receipt hash and stable IDs",
+      "evidence attachment API returns no raw CSV contents",
+      "page reload resumes the saved receipt",
+      "backend restart preserves the saved real-AI projects"
+    ]
+  },
+  "browser_ambiguous": {
+    "project": {
+      "id": "7cb96255443f4b8c8b6d0f200bd6cdbc",
+      "brief": "Deliver an inventory CSV with sku and quantity columns. Make the data insightful.",
+      "cents": 4250,
+      "currency": "USD",
+      "plan": {
+        "title": "Inventory CSV Acceptance Plan",
+        "checks": [
+          {
+            "kind": "required_columns",
+            "source": "Deliver an inventory CSV with sku and quantity columns.",
+            "columns": [
+              "sku",
+              "quantity"
+            ]
+          }
+        ],
+        "clarifications": [
+          "The requirement 'Make the data insightful.' is subjective and lacks measurable criteria for automated validation."
+        ]
+      },
+      "status": "DRAFT",
+      "ai_mode": "gemini",
+      "payment_mode": "simulation",
+      "events": [
+        {
+          "at": "2026-10-20T10:42:45+00:00",
+          "action": "PLAN_DRAFTED",
+          "detail": "Gemini structured plan"
+        }
+      ],
+      "verification": null,
+      "approval": null,
+      "order": null,
+      "receipt": null
+    },
+    "agreement_http_status": 409,
+    "ui_agreement_enabled": false,
+    "ui_checkout_enabled": false
+  },
+  "browser_ambiguity_note": "Two UI attempts with the full four-obligation ambiguous brief ended in transient HTTP 503 and created no project. A fresh minimal ambiguous brief, Deliver an inventory CSV with sku and quantity columns. Make the data insightful., returned the correct column check and a clarification. Agreement and checkout were disabled; a direct agree request returned HTTP 409 with the draft unchanged and no order.",
+  "browser_tool_limits": [
+    "Chrome extension file upload requires Allow access to file URLs; no extension permission was changed. Corrected CSV was entered in the delivery preview. Earlier Edge sample upload regression passed.",
+    "Chrome download event automation timed out. The same evidence attachment endpoint was fetched directly and its hash, receipt and data exclusion were checked.",
+    "Viewport ambiguity screenshot saved under ignored .venv/phase2-ambiguous.jpg; full-page capture timed out."
+  ],
+  "verification_after_model_default_update": {
+    "python_tests_passed": 21,
+    "node_controller_passed": true,
+    "compilation_passed": true
+  },
+  "limitations": "A reviewed inventory flow is complete, not a proof of general semantic completeness. Gemini 3.6 can still return transient 503s. Human review remains required for new briefs.",
+  "next_phase": "Phase 3 PayPal sandbox started after this gate passed; its create/approval/capture/cancellation/retry acceptance is separate.",
+  "sources": [
+    "https://ai.google.dev/gemini-api/docs/models/gemini-3.6-flash",
+    "https://ai.google.dev/gemini-api/docs/pricing",
+    "https://ai.google.dev/gemini-api/docs/generate-content/structured-output",
+    "https://ai.google.dev/api/generate-content#ThinkingConfig"
+  ],
+  "verification_after_sandbox_readback_fix": {
+    "python_tests_passed": 22,
+    "node_controller_passed": true,
+    "compilation_passed": true,
+    "note": "Additional order-amount regression; no acceptance-plan or client behavior changed."
+  }
+}

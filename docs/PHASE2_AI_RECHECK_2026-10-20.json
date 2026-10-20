@@ -1,0 +1,182 @@
+{
+  "format": "prooflane-phase2-recheck-v1",
+  "review_date_ist": "2026-10-20",
+  "source_commit": "c3fd7b3",
+  "model": "gemini-3.8-flash",
+  "ai_mode": "gemini",
+  "payment_mode": "simulation",
+  "phase2_gate_passed": false,
+  "note": "Fresh credential-backed requests with synthetic briefs. No sample fallback, alternate model, PayPal authentication, order or capture. Historical 18 October evidence is preserved separately.",
+  "local_setup": {
+    "python": "3.14.8",
+    "python_location": ".venv/Scripts/python.exe",
+    "setup": "Official Python NuGet runtime under ignored .venv/runtime; project virtual environment and optional Playwright 1.64.0. Windows aliases did not run. No system installation or PATH change.",
+    "gemini_key_configured_locally": true,
+    "paypal_credentials_present": false
+  },
+  "offline_and_sample_validation": {
+    "python_unittests": {
+      "passed": 21,
+      "command": ".venv/Scripts/python.exe -m unittest -v test_app.py"
+    },
+    "node_controller": {
+      "passed": true,
+      "node_version": "24.18.0",
+      "command": "Set PYTHON to .venv/Scripts/python.exe, then node test_client.cjs"
+    },
+    "compilation": {
+      "passed": true,
+      "files": [
+        "app.py",
+        "test_app.py",
+        "browser_check.py"
+      ]
+    },
+    "edge_sample_workflow": {
+      "passed": true,
+      "browser_version": "155.0.4283.62",
+      "headed": false,
+      "widths_px": [
+        1280,
+        390
+      ],
+      "command": ".venv/Scripts/python.exe browser_check.py --channel msedge --screenshots .venv/visual-qa-2026-10-20",
+      "reviewed_screenshots": [
+        "scope-1280.png",
+        "paid-390.png"
+      ],
+      "coverage": [
+        "CSV upload and faulty/corrected delivery",
+        "stale preview and approval guards",
+        "simulated capture and evidence hashes",
+        "saved-project resume and server restart",
+        "valid and foreign return tokens",
+        "keyboard focus and horizontal overflow"
+      ],
+      "note": "Uses sample AI and simulated payments. This pass is not a real-AI or PayPal acceptance result."
+    }
+  },
+  "doctor_report": {
+    "ai_mode": "gemini",
+    "payment_mode": "simulation",
+    "model": "gemini-3.8-flash",
+    "credentials_present": {
+      "GEMINI_API_KEY": true,
+      "PAYPAL_CLIENT_ID": false,
+      "PAYPAL_CLIENT_SECRET": false
+    },
+    "configured_for_real_services": false,
+    "provider_checks": {
+      "gemini": {
+        "measurable": {
+          "ok": false,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+          "error": "Provider returned HTTP 503. Check credentials, quota, or sandbox approval; no simulated fallback was used."
+        },
+        "ambiguous": {
+          "ok": true,
+          "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows. Make the data insightful.",
+          "coverage": {
+            "required_columns": true,
+            "unique_sku": true,
+            "quantity_0_100": true,
+            "exactly_2_rows": true
+          },
+          "plan": {
+            "title": "Inventory CSV Acceptance Plan",
+            "checks": [
+              {
+                "kind": "required_columns",
+                "source": "Deliver an inventory CSV with sku and quantity columns.",
+                "columns": [
+                  "sku",
+                  "quantity"
+                ]
+              },
+              {
+                "kind": "unique",
+                "source": "Every sku must be unique.",
+                "column": "sku"
+              },
+              {
+                "kind": "number_range",
+                "source": "Quantity must be a number between 0 and 100.",
+                "column": "quantity",
+                "min": 0,
+                "max": 100
+              },
+              {
+                "kind": "row_count",
+                "source": "Include exactly 2 rows.",
+                "min": 2,
+                "max": 2
+              }
+            ],
+            "clarifications": [
+              "The requirement 'Make the data insightful.' is subjective and cannot be verified by an automated validation check."
+            ]
+          }
+        }
+      }
+    },
+    "provider_checks_passed": false,
+    "review_required": "Review requirement coverage, bounds and exact quotations in both returned plans. Passing probes alone do not complete Phase 2."
+  },
+  "plan_review": {
+    "measurable": "HTTP 503 after the adapter request/retry budget. No plan was returned and the probe failed.",
+    "ambiguous": "All four expected checks are present, with the full exact source sentences. Quantity min=0/max=100; row-count min=max=2; sku uniqueness; required sku/quantity columns. No extra check or restriction was returned. A clarification explicitly identifies insightful as subjective. The diagnostic passes this brief; browser agreement blocking for this fresh response has not been completed.",
+    "scope_limit": "Only these synthetic requirements were reviewed. This is not proof that other briefs will be interpreted correctly."
+  },
+  "browser_attempt": {
+    "review_date_ist": "2026-10-20",
+    "ai_mode": "gemini",
+    "payment_mode": "simulation",
+    "browser": "Edge",
+    "provider_responses": [
+      {
+        "name": "measurable",
+        "brief": "Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.",
+        "http_status": 502,
+        "response": {
+          "error": "Provider response unavailable. Retry the same action; payment status has not been assumed."
+        }
+      }
+    ],
+    "browser_gate_passed": false,
+    "model": "gemini-3.8-flash",
+    "browser_version": "155.0.4283.62",
+    "failure": "measurable: Provider response unavailable. Retry the same action; payment status has not been assumed.",
+    "page_errors": [],
+    "external_browser_requests": []
+  },
+  "browser_failure_review": {
+    "saved_project_count_after_attempt": 0,
+    "orders_after_attempt": 0,
+    "visible_error": "Provider response unavailable. Retry the same action; payment status has not been assumed.",
+    "checkout_disabled": true,
+    "mode_label": "Gemini AI ? Simulated payments",
+    "screenshot": ".venv/phase2-browser-2026-10-20/failure.png",
+    "note": "Actual UI draft request returned local HTTP 502 and persisted no project. Error screenshot inspected. The sanitized adapter message does not distinguish a timeout from other unavailable/invalid provider responses. No successful measurable browser flow, CSV approval, or receipt was reached."
+  },
+  "minimal_control": {
+    "model": "gemini-3.8-flash",
+    "probe": "Return the word OK.",
+    "max_output_tokens": 256,
+    "timeout_seconds": 60,
+    "attempts": 1,
+    "paypal_called": false,
+    "response_received": false,
+    "provider_http_status": null,
+    "error": "Provider response unavailable. Retry the same action; payment status has not been assumed.",
+    "elapsed_seconds": 60.26
+  },
+  "assessment": "Intermittent provider availability/latency remains a blocker: the same model/schema produced one correct ambiguous plan, but the measurable request and a separate small control failed. No application-source change is justified by these failures alone.",
+  "next_action": "Keep PAYMENT_MODE=simulation. When the configured provider is responsive, run .venv/Scripts/python.exe app.py doctor --ai. Require both briefs to pass, review exact quotations and extra restrictions, then complete the real-AI browser/API/SQLite flow before Phase 3.",
+  "sources_checked_2026_10_20": [
+    "https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash",
+    "https://ai.google.dev/gemini-api/docs/pricing",
+    "https://ai.google.dev/gemini-api/docs/structured-output",
+    "https://docs.python.org/3/using/windows.html#the-nuget-org-packages",
+    "https://www.nuget.org/packages/python/3.14.8"
+  ]
+}

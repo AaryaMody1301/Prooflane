@@ -1,6 +1,6 @@
 # Prooflane: phased build plan
 
-Updated 19 October 2026. Work through one phase at a time. A phase advances only when its completion gate has evidence; a fixture or test double does not complete a real-service gate.
+Updated 20 October 2026. Work through one phase at a time. A phase advances only when its completion gate has evidence; a fixture or test double does not complete a real-service gate.
 
 **Product:** a client agrees to measurable CSV work and a USD price. AI proposes reviewable acceptance checks; code tests the delivery; a human approves the exact checked file; PayPal sandbox checkout connects that snapshot to a reconciled capture receipt.
 
@@ -13,9 +13,9 @@ Dates are working targets in IST, not automatic phase transitions. Keep 12 Novem
 | Phase | Target | Build | Completion gate | Current state |
 | --- | --- | --- | --- | --- |
 | 1. Local MVP | 17–18 October | Sample brief, review, CSV checks, approval, simulated receipt, saved-project resume, evidence export | Reproducible local flow; faulty file blocked; corrected file paid in simulation; restart/resume preserves evidence | Complete 17 October; headed Edge and desktop/390px visual gates passed |
-| 2. Real AI | 19–21 October | Gemini configuration and custom measurable briefs with human review | Actual provider responses for measurable and ambiguous briefs; errors never silently use the sample fixture | Active; 19 October hardening passes offline replay, fresh provider/browser validation pending; last real diagnostics returned HTTP 503 |
-| 3. PayPal sandbox | 22–25 October | Actual create, buyer approval, capture/readback, cancellation and retry | One real sandbox capture linked to the approved hash; cancellation unpaid; retry and amount mismatch handled | Adapter implemented; credentials and real checkout pending |
-| 4. Usability and reliability | 26 October–4 November | Desktop/mobile QA, a second use case, fresh setup, user feedback, final recovery checks | Another person completes the judge path; evidence agrees with the provider; issues fixed | Planned |
+| 2. Real AI | 19–21 October | Gemini configuration and custom measurable briefs with human review | Actual provider responses for measurable and ambiguous briefs; errors never silently use the sample fixture | Complete 20 October for the reviewed Gemini 3.6 inventory flow; source/coverage review, real browser and ambiguity blocking verified |
+| 3. PayPal sandbox | 22–25 October | Actual create, buyer approval, capture/readback, cancellation and retry | One real sandbox capture linked to the approved hash; cancellation unpaid; retry and amount mismatch handled | Complete 20 October for the reviewed inventory flow; actual USD 1.00 capture/readback, repeated reconciliation and separate normal cancellation pass; wrong-amount/pending/timeout cases remain offline contracts |
+| 4. Usability and reliability | 26 October–4 November | Desktop/mobile QA, a second use case, fresh setup, user feedback, final recovery checks | Another person completes the judge path; evidence agrees with the provider; issues fixed | Started 20 October; post-capture restart/resume passes; remaining usability, second-case, fresh-setup and feedback gates open |
 | 5. Submission | 5–11 November | Feature freeze, demonstration, project description, judge instructions and submission | Public links work; video under 3 minutes; Devpost submission confirmed | Planned |
 
 ## Phase 1 — local MVP
@@ -82,7 +82,26 @@ Gate: credential-backed results for a measurable and an ambiguous brief; reviewe
 - Verification: 21 Python tests, Node controller check and compilation pass. New regressions replay the genuine captured plans in test envelopes and cover exact bounds, omitted sentences, null normalization, truncation, decimal underflow and exhausted retries. The historical headed Edge browser result is not claimed as rerun here.
 - This workspace has neither a configured Gemini environment key nor local `.env`; the key recorded on the VS Code machine is not available here. The AI-only doctor correctly reports a configuration block without making a provider request. No secrets were requested or moved, and `PHASE2_AI_RESULTS.json` remains the unchanged historical record.
 
-**Phase 2 gate remains open.** Next: pull the hardening on the configured VS Code machine and run `python app.py doctor --ai`; require all four coverage flags, review exact quotes/extra restrictions and clarify the ambiguous obligation, then exercise the real browser/API/SQLite flow. Do not start Phase 3 before this review passes. Offline regressions are not a substitute for that real-AI walkthrough.
+20 October progress — fresh credential-backed recheck:
+
+- Checked clean `main` at `c3fd7b3`; no applicable AGENTS.md was found. The Windows aliases did not launch Python. Installed the [official Python NuGet runtime](https://docs.python.org/3/using/windows.html#the-nuget-org-packages) under ignored `.venv/runtime`, then created `.venv` with Python 3.14.8 and optional Playwright 1.64.0. No system installation or PATH change was made.
+- Prepared ignored `.env` for Gemini and simulated payments; the key was configured locally without appearing in chat or evidence. PayPal credentials remain absent. Rechecked the selected model's official structured-output support and listed free tier; kept the same model and request settings.
+- All 21 Python tests, the Node controller check (Node 24.18.0), compilation and the headless Edge 155.0.4283.62 **sample** browser runner pass. The runner covers upload, faulty/corrected CSVs, approval guards, simulated receipt/hash evidence, resume, restart, return tokens, keyboard focus and desktop/390px overflow. Inspected desktop scope and narrow paid screenshots. This is a new sample-mode pass, not a real-service completion claim.
+- Ran the actual two-brief `doctor --ai`. The ambiguous response passes all four coverage flags. Reviewed its complete source sentences, quantity min=0/max=100, exactly-two-row min=max=2 and clarification for “insightful”; no extra check or restriction was returned. The measurable response failed with HTTP 503 after the adapter's single retry. The combined diagnostic exits 1.
+- Tried the measurable brief through the actual Edge UI and localhost API with Gemini enabled. The provider-unavailable error was displayed, checkout stayed disabled and no project or order was saved. The browser returned local HTTP 502; the sanitized message does not distinguish timeout from other unavailable/invalid provider responses. No successful measurable CSV/approval/receipt flow was reached.
+- A separate small control, “Return the word OK.”, made one request to the same model with a 256-token output cap and the existing 60-second timeout. It returned provider-unavailable after 60.26 seconds. There was no further retry, alternate model, sample fallback or PayPal request. Intermittent provider availability/latency remains a blocker; these failures alone do not justify an application-source change.
+- Fresh sanitized reports and the reviewed ambiguous plan are in [PHASE2_AI_RECHECK_2026-10-20.json](PHASE2_AI_RECHECK_2026-10-20.json). The 18 October evidence remains unchanged. Screenshots and one-off browser/control tooling stay under ignored `.venv`.
+
+Later 20 October — Phase 2 completion:
+
+- A fresh Gemini 3.8 diagnostic still failed (HTTP 500/unavailable). A same-model `LOW` thinking comparison also failed after roughly 60 seconds per brief; that setting was not deployed.
+- Explicitly tested documented free-tier `gemini-3.6-flash` with the existing prompt/schema/validators. Both four-obligation probes pass in 8.53 and 6.80 seconds. Reviewed complete exact quotations, columns, uniqueness, quantity min=0/max=100, row-count min=max=2 and the subjective-obligation clarification. No extra check or restriction appeared. Selected 3.6 in local configuration and the application/template defaults; no automatic fallback was added.
+- Actual Chrome UI: created a real-AI inventory project, agreed its reviewed scope, blocked two faulty checks, corrected quantities to 0 and 100, approved the hash and completed a USD 42.50 simulated receipt. Evidence attachment API and verification/approval/receipt hashes match; reload and backend restart preserve the saved real-AI projects. This was an automated synthetic walkthrough, not an independent human trial or PayPal transaction.
+- The full ambiguous UI request and one manual retry returned HTTP 503 without creating projects. A fresh minimal ambiguous brief returned the required-column check and an explicit “insightful” clarification. Agreement and checkout were disabled; a direct agreement request returned HTTP 409 and left the draft unchanged with no order.
+- Chrome extension file access blocked the file chooser; corrected CSV was entered in the preview. Download-event automation timed out, so the actual evidence attachment endpoint was fetched and verified directly. No extension permission was changed. Earlier Edge sample upload/download QA remains separate passing evidence.
+- [PHASE2_AI_COMPLETION_2026-10-20.json](PHASE2_AI_COMPLETION_2026-10-20.json) records the actual provider plans, failed comparisons, browser states and limitations. The model can still return transient 503s, and these cases do not establish general semantic completeness.
+
+**Phase 2 gate passed for the reviewed inventory flow.** Phase 3 started afterward. Keep `doctor --ai` restricted to simulated payments for any repeat AI-only probe; current sandbox setup uses `doctor --providers`.
 
 ## Phase 3 — PayPal sandbox
 
@@ -97,7 +116,23 @@ Prerequisite: reviewed real-AI plan. Use a sandbox business merchant and a separ
 
 Gate: actual completed sandbox capture, separate cancellation, matching evidence and retry results. OAuth authentication alone does not complete this phase.
 
+20 October credential preflight: both sandbox app credentials are configured locally. One call through the existing `PayPal.authenticate()` adapter to `https://api-m.sandbox.paypal.com/v1/oauth2/token` returned HTTP 200 in 1.12 seconds. Credentials and the access token were not printed or saved in evidence. The [sanitized preflight record](PAYPAL_SANDBOX_PREFLIGHT_2026-10-20.json) records one OAuth request and zero orders/captures at that point. Payments stayed simulated until Phase 2 passed.
+
+20 October sandbox execution — after Phase 2's gate:
+
+- Selected `PAYMENT_MODE=sandbox` with `gemini-3.6-flash`; offline configuration and combined `doctor --providers` pass. The combined probe returned five Gemini checks with no clarification and successful PayPal OAuth; it created no payments.
+- Created a new USD 1.00 real-AI inventory project, reviewed all four checks, blocked the duplicate/out-of-range CSV, corrected both boundary values and approved SHA-256 `9392061e121e8e6a8b40b552f3c2390c010de46236406d6db1580d757cf2b555`.
+- The original sandbox buyer and merchant were both India-registered. Buyer login succeeded, but PayPal blocked approval with `UNSUPPORTED_PAYEE_CURRENCY`. An approved US Personal sandbox buyer then completed the same order. Order `62Y81094JH0739710` has one `COMPLETED` USD 1.00 capture, `6C523873TS2828007`; its custom/invoice IDs match the project. No application currency validation or live-account settings changed.
+- Actual readback includes `amount.breakdown={}`. The old whole-dictionary comparison wrongly rejected it. Fixed the shared order validator to compare currency/value and retain exact order/project identity. Updated create/capture fixtures to include the observed metadata; a new regression reproduces the failure before the fix and rejects missing/malformed amounts and actual currency/value mismatches. All 22 Python tests, Node controller and compilation pass; a fresh actual readback now validates.
+- The provider amount, completed capture, local receipt and evidence export match USD 1.00 and the approved hash. Three local reconciliation replays and another browser return preserve the same receipt. Provider readbacks before and after those replays contain the same single completed capture.
+- The separate real-AI USD 1.00 order was cancelled from PayPal's normal approval review with the US buyer. Prooflane shows cancellation and remains `ORDER_CREATED` with no receipt; reconciliation refuses it because approval is missing. Provider readback remains `PAYER_ACTION_REQUIRED` with zero captures. Cancellation leaves an unapproved order available; it does not mark it paid.
+- The [completion record](PHASE3_SANDBOX_COMPLETION_2026-10-20.json) contains matching payment evidence, cancellation and restart results. The [earlier progress record](PHASE3_SANDBOX_PROGRESS_2026-10-20.json) is historical and preserves the currency blocker and readback bug. Credentials, access tokens and account logins are excluded.
+
+**Phase 3 gate passed for the reviewed inventory flow.** Actual capture, matching evidence, repeated reconciliation and normal cancellation are verified. Exceptional pending/timeout/wrong-amount cases remain labeled offline contract tests; they were not induced against the provider.
+
 ## Phase 4 — usability, reliability and judge access
+
+Started 20 October after Phase 3 passed. The first recovery check passes: restarting the backend and reloading the paid project preserves the receipt, order, approval, verification and event history; the separately cancelled project remains unpaid. No new order or capture was requested by that recovery check. See the `phase4_start` fields in the [completion evidence](PHASE3_SANDBOX_COMPLETION_2026-10-20.json). The following gates remain open:
 
 - Test desktop and narrow mobile layouts, keyboard navigation, readable failure details, loading/error states and the PayPal return path.
 - Test a second synthetic data-delivery example through real AI and sandbox checkout.
@@ -123,7 +158,7 @@ Gate: submitted project with functioning access, working links and evidence supp
 
 ## Scope rules and blockers
 
-Phase 1 is complete. Phase 2's key is recorded as configured on the VS Code machine; it is unavailable in this workspace. The 19 October safety hardening passes offline replay, but actual Gemini interpretation and a fresh real-AI browser workflow are still unverified. The last credential-backed diagnostic/retry on 18 October returned HTTP 503. Resume with the AI-only diagnostic on the configured machine. Keep payments simulated; sandbox credentials and transaction testing belong to Phase 3. Configure credentials locally; do not paste them into chat or commit `.env`.
+Phases 1–3 are complete for the reviewed inventory case. This checkout runs Gemini 3.6 Flash with sandbox payments; Gemini 3.8 failures and the explicit model comparison remain in the evidence. The India buyer/merchant currency blocker was resolved for testing by using the approved US sandbox buyer on the original order. One completed USD 1.00 capture matches the evidence; repeated reconciliation, normal cancellation and restart recovery pass. Phase 4 has started, with remaining usability, second-case, independent setup and user-feedback gates open. Configure credentials locally; do not paste them into chat or commit `.env`.
 
 Keep one delivery, one agreed amount and one capture. Defer escrow, automatic payouts, refunds, multi-milestone work, arbitrary generated code, additional file formats, marketplace features and sponsor integrations. Add an item only if observed user feedback or a broken completion gate requires it.
 
@@ -147,3 +182,10 @@ Checked 19 October:
 
 - [GenerateContent schema reference](https://ai.google.dev/api/generate-content): required/nullable fields and candidate finish reasons. The existing GenerateContent integration is retained; the wire format still needs a fresh credential-backed check.
 - [Gemini troubleshooting and transient retry guidance](https://ai.google.dev/gemini-api/docs/troubleshooting).
+
+Checked 20 October:
+
+- [Gemini 3.8 Flash model capabilities](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash), [listed free tier](https://ai.google.dev/gemini-api/docs/pricing) and [structured-output contract](https://ai.google.dev/gemini-api/docs/structured-output). These document support; they do not prove this account's quota or availability.
+- [Python's project-local NuGet runtime guidance](https://docs.python.org/3/using/windows.html#the-nuget-org-packages) and [Python 3.14.8 package](https://www.nuget.org/packages/python/3.14.8).
+- [Gemini 3.6 Flash capabilities](https://ai.google.dev/gemini-api/docs/models/gemini-3.6-flash), [GenerateContent structured output support](https://ai.google.dev/gemini-api/docs/generate-content/structured-output) and [thinking configuration contract](https://ai.google.dev/api/generate-content#ThinkingConfig).
+- [PayPal Orders v2](https://developer.paypal.com/api/orders/v2/): actual create/readback exercised; optional order amount breakdown is metadata alongside the currency/value total.

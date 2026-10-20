@@ -6,7 +6,7 @@ Prooflane is an outcome checkout for independent data freelancers and small anal
 
 New project started on 11 October 2026 for the [PayPal AI Hackathon](https://paypalaihackathon.devpost.com/). Built with the Ponytail approach: Python's standard library, SQLite, and a buildless HTML client.
 
-Follow the [five-phase build plan](docs/BUILD_PLAN.md): local MVP → real AI → PayPal sandbox → usability/reliability → submission. **Phase 1 is complete. Phase 2 is active:** actual Gemini requests on 18 October failed requirement coverage and the final diagnostic requests returned HTTP 503. The 19 October adapter hardening rejects the recorded bad plans in offline replay; fresh provider and browser validation remain outstanding. PayPal sandbox validation remains Phase 3.
+Follow the [five-phase build plan](docs/BUILD_PLAN.md): local MVP → real AI → PayPal sandbox → usability/reliability → submission. **Phases 1–3 are complete for the reviewed inventory flow. Phase 4 has started:** Gemini 3.6 Flash drafts the reviewed checks, an actual USD 1.00 sandbox capture matches the approved delivery, repeated reconciliation keeps one capture, and a separate cancelled checkout stays unpaid. The paid receipt and frozen evidence survive restart. See the [AI completion evidence](docs/PHASE2_AI_COMPLETION_2026-10-20.json) and [sandbox completion evidence](docs/PHASE3_SANDBOX_COMPLETION_2026-10-20.json). Independent setup, user feedback and the remaining usability checks are still open.
 
 ## Run
 
@@ -37,7 +37,7 @@ For real AI, set:
 ```dotenv
 AI_MODE=gemini
 GEMINI_API_KEY=your_local_key
-GEMINI_MODEL=gemini-3.8-flash
+GEMINI_MODEL=gemini-3.6-flash
 ```
 
 Use [Google AI Studio](https://aistudio.google.com/apikey) and confirm your project's current [free-tier availability](https://ai.google.dev/gemini-api/docs/pricing) without enabling billing. The model name is configurable. Only the brief goes to Gemini; CSV contents are evaluated locally. Use synthetic briefs because free-tier inputs may be used for product improvement. Unsupported or ambiguous obligations produce clarifications or a rejected plan; revise the brief and draft a new project. Review every proposed check for missing or misunderstood requirements.
@@ -50,7 +50,7 @@ PAYPAL_CLIENT_ID=your_sandbox_app_client_id
 PAYPAL_CLIENT_SECRET=your_sandbox_app_secret
 ```
 
-Use the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/). Create a sandbox REST app tied to a business test account, and use a different personal test account to approve checkout. Keep your real account details accurate. Test accounts and balances are fictitious. Set the sandbox merchant to receive USD. No live-payment base URL exists in this code.
+Use the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/). Create a sandbox REST app tied to a business test account, and use a different personal test account to approve checkout. Keep your real account details accurate. Test accounts and balances are fictitious. Set the sandbox merchant to receive USD. For an India-registered sandbox merchant, use an international sandbox buyer, such as a US Personal test account: [PayPal India supports international payments only](https://www.paypal.com/in/cshelp/article/can-i-use-paypal-to-receive-payments-from-indian-customers-help1049). The original India buyer/India merchant pair failed; the same order completed with the US sandbox buyer. No live-payment base URL exists in this code.
 
 Check configuration before starting a new project:
 
@@ -68,11 +68,11 @@ Reserve `doctor --providers` for Phase 3. It sends a synthetic brief to Gemini a
 
 Restart after configuration changes and create a **new project**. During checkout, the browser opens PayPal's sandbox approval page and returns to this localhost app. The callback's token must match the stored order. The backend checks the order's project ID and USD amount before capture, then checks the capture amount and completion status before recording payment. A cancelled or pending transaction is not marked paid. Reconcile again to inspect a pending capture.
 
-Both adapters have local contract tests. Actual Gemini results from 18 October are recorded in [the provider review](docs/PHASE2_AI_RESULTS.json): incomplete bounds/row-count coverage, rejected output, timeouts and provider errors. No real-AI plan has passed the completion gate, and no credential-backed PayPal request has been made. This is a working starter, not a hackathon-ready submission.
+Both adapters have local contract tests. The [18 October provider review](docs/PHASE2_AI_RESULTS.json) and [early 20 October recheck](docs/PHASE2_AI_RECHECK_2026-10-20.json) retain the original failures. The [later Gemini 3.6 completion](docs/PHASE2_AI_COMPLETION_2026-10-20.json) records reviewed real plans and browser evidence. The [sandbox completion record](docs/PHASE3_SANDBOX_COMPLETION_2026-10-20.json) verifies actual buyer approval/capture, matching evidence, repeated reconciliation, cancellation and restart recovery. The [earlier progress record](docs/PHASE3_SANDBOX_PROGRESS_2026-10-20.json) preserves the original currency blocker. This is a working starter, not a hackathon-ready submission.
 
-### Next local step: Phase 2 only
+### Real AI setup and repeat checks
 
-On 18 October a local Gemini key was configured, with payments kept simulated. The current blocker is provider availability and plan quality, not a missing key. For a fresh setup, create the ignored configuration only if it does not already exist:
+This checkout uses the verified Gemini 3.6 Flash and sandbox payment configuration. For a fresh setup or a repeat of Phase 2, keep payments simulated during AI interpretation checks. Create the ignored configuration only if it does not already exist:
 
 ```powershell
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
@@ -84,12 +84,12 @@ Edit `.env` locally to set these values, replacing the key placeholder with your
 AI_MODE=gemini
 PAYMENT_MODE=simulation
 GEMINI_API_KEY=your_local_key
-GEMINI_MODEL=gemini-3.8-flash
+GEMINI_MODEL=gemini-3.6-flash
 ```
 
 Run `python app.py doctor --ai` when provider availability recovers. Then restart with `python app.py` and draft a new project. The probe uses: “Deliver an inventory CSV with sku and quantity columns. Every sku must be unique. Quantity must be a number between 0 and 100. Include exactly 2 rows.” Expect all four obligations with exact source quotations. Appending “Make the data insightful.” must ask for clarification or reject the plan, with agreement blocked. Inspect actual returned checks, missing obligations, extra restrictions and provider errors; schema validation alone does not prove correct interpretation. Complete the real browser/API walkthrough before closing Phase 2.
 
-The default model is now `gemini-3.8-flash`. The previous `gemini-2.5-flash` returned HTTP 404 for this key; [Google documents restricted 2.5 access for new users](https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash). The [current model supports structured output](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash), with a [listed free tier](https://ai.google.dev/gemini-api/docs/pricing). Actual plan quality remains unverified. The adapter uses the model's default temperature, an 8,192-token output limit and a 60-second AI timeout. Keep billing disabled and payments simulated.
+The default model is now `gemini-3.6-flash`, explicitly selected after both synthetic probes passed review. Gemini 3.8 Flash repeatedly returned HTTP 500/503 or unavailable; a low-thinking experiment did not resolve that. The [selected model supports structured output](https://ai.google.dev/gemini-api/docs/models/gemini-3.6-flash), with a [listed free tier](https://ai.google.dev/gemini-api/docs/pricing), checked 20 October. It can still return transient 503s. No automatic model or sample fallback exists. The adapter retains default temperature, an 8,192-token output limit and a 60-second AI timeout; the low-thinking experiment was not deployed. Keep billing disabled.
 
 ### Phase 2 hardening — 19 October
 
@@ -101,7 +101,34 @@ These are conservative guards, not a general language parser or proof of semanti
 
 Gemini HTTP 500/502/503/504 responses get at most one retry after one second, using the same model, brief and schema. Authentication/not-found/quota errors, timeouts and invalid plans are not automatically retried. The two-brief diagnostic can therefore make up to four Gemini requests; each attempt retains the 60-second timeout. PayPal retry behavior is unchanged. This follows the [official transient-error guidance](https://ai.google.dev/gemini-api/docs/troubleshooting) with a deliberately small request budget.
 
-Validation here: 21 offline Python tests, the Node controller check and compilation pass, including replay of both captured incomplete plans, omitted-sentence blocking, finished-response checks, bounded retry exhaustion and no PayPal calls. **No new credential-backed Gemini request or real-AI browser run was made:** this workspace has no Gemini key, although the prior local-machine setup records one. Historical provider evidence stays in `docs/PHASE2_AI_RESULTS.json`. Keep Phase 2 open, pull the changes on that configured machine, run `python app.py doctor --ai`, and review the actual plans and browser workflow.
+Validation on 19 October: 21 offline Python tests, the Node controller check and compilation passed, including replay of both captured incomplete plans, omitted-sentence blocking, finished-response checks, bounded retry exhaustion and no PayPal calls. That workspace had no Gemini key, so no new provider or real-AI browser request was made that day. Historical provider evidence stays in `docs/PHASE2_AI_RESULTS.json`.
+
+### Phase 2 recheck — 20 October
+
+Earlier on 20 October, the configured `gemini-3.8-flash` returned a correct ambiguous plan: all four expected checks, exact full quotations, quantity bounds 0–100, exactly two rows and a clarification for “Make the data insightful.” No extra check or restriction appeared. The measurable diagnostic exhausted its bounded retry with HTTP 503. A real Edge browser draft then returned a provider-unavailable error; the UI displayed the error, kept checkout disabled and saved no project. A separate one-attempt “Return the word OK.” control also failed after 60.26 seconds. That recheck did not pass Phase 2; the later completion below uses an explicitly reviewed different model.
+
+All 21 Python tests, the Node controller check, compilation and the Edge **sample** browser runner pass again. Desktop scope, narrow paid-state and real-AI error screenshots were inspected. The sample runner still uses fixtures and simulated payments. The [dated evidence](docs/PHASE2_AI_RECHECK_2026-10-20.json) contains the returned plan, diagnostic failure, browser result and small control; it contains no credentials. No application-source or model-setting change was made.
+
+This checkout now has Python 3.14.8 and optional Playwright inside ignored `.venv`; its Windows `python`/`py` aliases did not run. Use the project interpreter here:
+
+```powershell
+.\.venv\Scripts\python.exe app.py doctor --ai
+.\.venv\Scripts\python.exe app.py
+```
+
+Use `PAYMENT_MODE=simulation` for a repeat `doctor --ai`. This checkout has since advanced to `PAYMENT_MODE=sandbox`; its current preflight command is `.\.venv\Scripts\python.exe app.py doctor --providers`.
+
+### Phase 2 and Phase 3 completion — 20 October
+
+Gemini 3.6 Flash passed the full measurable and ambiguous diagnostic in 8.53 and 6.80 seconds respectively. Reviewed plans include the four exact source sentences, both quantity bounds and both exact-row limits, with no extra restrictions. A Chrome walkthrough blocked the duplicate/out-of-range CSV, accepted quantities 0 and 100, approved the exact hash and produced a clearly labeled USD 42.50 **simulated** receipt. The evidence attachment API, receipt hashes, reload and backend restart preserve that state.
+
+Two full ambiguous browser requests returned 503 without creating projects. A fresh minimal ambiguous brief returned the required columns plus a clarification for “insightful”; agreement and checkout were disabled, and a direct agreement request returned HTTP 409 without changing the draft. This completes the reviewed Phase 2 case; other briefs still require review. Chrome extension upload permission and download-event automation blocked those two browser-tool checks. The corrected CSV was entered in the preview and its evidence attachment verified through the API; the earlier Edge sample upload/download regression passed.
+
+Both providers pass `doctor --providers` in sandbox mode. A new USD 1.00 project passed failure/correction and approval before creating an actual PayPal sandbox order. Its readback has the matching project ID, currency, amount and delivery hash. An empty PayPal `amount.breakdown` field exposed an overly strict dictionary comparison; the validator now checks currency/value while retaining order/project identity. The regression fails before the fix and passes afterward, alongside all 22 tests and the client controller check.
+
+The initial buyer and merchant were both India-registered; checkout failed with `UNSUPPORTED_PAYEE_CURRENCY`. With the approved US Personal sandbox buyer, the same order `62Y81094JH0739710` completed as capture `6C523873TS2828007` for USD 1.00. Provider readback, the local receipt and the evidence export agree on order, amount, project and approved SHA-256. Three reconciliation replays and another browser return preserve that receipt and one completed capture. The separate order was cancelled from PayPal's normal review page; it remains unpaid with zero captures, and reconciliation refuses it. [Phase 3 completion evidence](docs/PHASE3_SANDBOX_COMPLETION_2026-10-20.json) records these results without account logins or secrets.
+
+**Current step: Phase 4.** The first recovery check passes: after a backend restart and browser reload, the paid receipt, approval, verification and event history are unchanged; the cancelled project remains unpaid. Desktop/mobile and keyboard review, a second delivery example, independent fresh setup and target-user feedback remain open.
 
 If order creation times out, the delivery freezes immediately in `CHECKOUT_PENDING`. Retry the same checkout within 15 minutes; its request ID and approved hash remain unchanged. After that window, inspect orders in the sandbox dashboard before starting another project. Editing or replacing a CSV preview requires fresh checks before the UI permits approval or checkout.
 
@@ -111,7 +138,7 @@ If order creation times out, the delivery freezes immediately in `CHECKOUT_PENDI
 python3 -m unittest -v test_app.py
 ```
 
-Twenty-one tests cover malformed plans and CSVs, exact money values, failed deliveries, stale approvals, frozen checkout evidence after a provider timeout, the retry window, pending and mismatched captures, repeated requests, persistence, offline/provider setup diagnostics, and a localhost HTTP flow with concurrent capture replays and an evidence download. Gemini checks include replay of the captured bad plans, exact quoted bounds, missing-sentence review, nullable wire fields, unfinished responses, decimal underflow, bounded HTTP retries and clarification-blocked agreement. The AI-only diagnostic tests cover missing keys, wrong modes, provider errors, incomplete coverage and no PayPal calls. These are offline contract checks, not new provider results. Tests do not require network access or credentials.
+Twenty-two tests cover malformed plans and CSVs, exact money values, failed deliveries, stale approvals, frozen checkout evidence after a provider timeout, the retry window, pending and mismatched captures, repeated requests, persistence, offline/provider setup diagnostics, and a localhost HTTP flow with concurrent capture replays and an evidence download. Order readback accepts PayPal's optional amount breakdown while rejecting missing/malformed totals and actual currency/value mismatches. Gemini checks include replay of the captured bad plans, exact quoted bounds, missing-sentence review, nullable wire fields, unfinished responses, decimal underflow, bounded HTTP retries and clarification-blocked agreement. The AI-only diagnostic tests cover missing keys, wrong modes, provider errors, incomplete coverage and no PayPal calls. These are offline contract checks, separate from the linked provider results. Tests do not require network access or credentials.
 
 Optional client controller check with Node 20 or newer (no npm packages):
 
@@ -150,7 +177,10 @@ The runner prints `PASS` only after its assertions finish; failures exit with an
 - `test_client.cjs`: optional controller regression check against the real localhost API.
 - `browser_check.py`: optional real-browser Phase 1 workflow, layout and restart check.
 - `docs/BUILD_PLAN.md`: immediate integration gates, project scope and submission checklist.
-- `docs/PHASE2_AI_RESULTS.json`: actual synthetic Gemini responses, reviewed gaps and provider errors; Phase 2 is incomplete.
+- `docs/PHASE2_AI_RESULTS.json`: historical 18 October Gemini responses, reviewed gaps and provider errors before Phase 2 passed.
+- `docs/PHASE2_AI_COMPLETION_2026-10-20.json`: later reviewed Gemini 3.6 probes and real-AI browser completion evidence.
+- `docs/PHASE3_SANDBOX_PROGRESS_2026-10-20.json`: historical checkpoint before capture, preserving the initial orders/readback, metadata fix, currency blocker and unpaid error/cancel return.
+- `docs/PHASE3_SANDBOX_COMPLETION_2026-10-20.json`: completed USD 1.00 sandbox capture, matching evidence, repeated reconciliation, normal cancellation and post-capture restart recovery. The progress record above is historical.
 
 Supported checks: required columns, unique nonempty values, nonempty values, numeric ranges and row counts. Up to 300 KB, 5,000 data rows, 30 columns and 20 checks. AI output is data only; no generated code is executed. Prices use integer cents, never floats. Deliveries cannot change after an order starts. A stable `PayPal-Request-Id` is reused for each create and capture action. Capture retries first retrieve the existing order. An uncertain create result older than 15 minutes requires manual inspection rather than blindly creating another order.
 
@@ -160,7 +190,7 @@ The server intentionally binds to localhost and uses one operator to demonstrate
 
 Before public hosting, add authenticated buyer/seller roles, authorization on every project route, HTTPS, CSRF/session controls, durable storage and verified webhook reconciliation. Do not expose this starter through a tunnel or change its host guards. The hosted implementation and integration checks are mapped in the accompanying research report.
 
-The local browser/visual gate is verified above. Real Gemini responses and PayPal sandbox transactions are still pending their separate phase gates.
+The local sample browser/visual, reviewed real-AI inventory and actual PayPal sandbox gates are verified above. Phase 4 is underway; independent setup, user feedback, a second delivery example and remaining usability checks are incomplete. No public deployment or submission is claimed.
 
 ## License
 
