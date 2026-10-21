@@ -128,7 +128,7 @@ Both providers pass `doctor --providers` in sandbox mode. A new USD 1.00 project
 
 The initial buyer and merchant were both India-registered; checkout failed with `UNSUPPORTED_PAYEE_CURRENCY`. With the approved US Personal sandbox buyer, the same order `62Y81094JH0739710` completed as capture `6C523873TS2828007` for USD 1.00. Provider readback, the local receipt and the evidence export agree on order, amount, project and approved SHA-256. Three reconciliation replays and another browser return preserve that receipt and one completed capture. The separate order was cancelled from PayPal's normal review page; it remains unpaid with zero captures, and reconciliation refuses it. [Phase 3 completion evidence](docs/PHASE3_SANDBOX_COMPLETION_2026-10-20.json) records these results without account logins or secrets.
 
-**Current step: Phase 4.** The first recovery check passes: after a backend restart and browser reload, the paid receipt, approval, verification and event history are unchanged; the cancelled project remains unpaid. Desktop/mobile and keyboard review, a second delivery example, independent fresh setup and target-user feedback remain open.
+**Current step: Phase 4.** Post-capture restart/resume passes. The [21 October CI and UI checkpoint](docs/PHASE4_PROGRESS_2026-10-21.json) adds passing Linux/Windows checks and Chrome sample-mode review at 320, 390, 768 and 1280px. Pending requests now lock editable inputs, and errors receive focus so they are visible on mobile. Keyboard focus, failure details, simulated receipts, project switching and return-token recovery pass. Chrome file-chooser upload remains unverified because the extension lacks local-file permission. A second real-AI/sandbox delivery example, independent fresh setup and target-user feedback remain open; Phase 4 is not complete.
 
 If order creation times out, the delivery freezes immediately in `CHECKOUT_PENDING`. Retry the same checkout within 15 minutes; its request ID and approved hash remain unchanged. After that window, inspect orders in the sandbox dashboard before starting another project. Editing or replacing a CSV preview requires fresh checks before the UI permits approval or checkout.
 
@@ -148,7 +148,9 @@ node test_client.cjs
 
 On Windows, select the interpreter explicitly if `python3` is unavailable: `$env:PYTHON = (Get-Command python).Source; node test_client.cjs`.
 
-This starts a temporary Python HTTP server and runs the actual client handlers against it using DOM stubs. It checks simulated checkout, saved-project selection, restored brief/price/receipt, cleared previews, fresh-page resume, return reconciliation and invalid-return recovery. It does not validate browser layout, native controls or accessibility. The Python app and core test suite do not require Node.
+This starts a temporary Python HTTP server and runs the actual client handlers against it using DOM stubs. It checks simulated checkout, saved-project selection, restored brief/price/receipt, cleared previews, fresh-page resume, return reconciliation, invalid-return recovery, input locks during verification, changed-preview approval guards and error focus. It does not validate browser layout, native controls or accessibility. The Python app and core test suite do not require Node.
+
+[GitHub Actions checks](.github/workflows/checks.yml) run the 22 Python tests, Node controller check and Python compilation on Ubuntu with Python 3.11 and Windows with Python 3.14, using Node 24. They run for pull requests and pushes to `main`, without provider credentials, npm packages or external-service calls. Both jobs [passed for the Phase 4 code changes](https://github.com/AaryaMody1301/Prooflane/actions/runs/39547552760). Browser review and real-service acceptance remain separate checks.
 
 ### Real-browser Phase 1 check
 

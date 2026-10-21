@@ -1,0 +1,326 @@
+{
+  "format": "prooflane-phase4-progress-v1",
+  "checked_date_ist": "2026-10-21",
+  "recorded_at_utc": "2026-10-21T05:15:20+00:00",
+  "phase4_gate_passed": false,
+  "ci_and_reviewed_ui_checks_passed": true,
+  "tested_code_commit": "ca67f6e434034eab7dbffd364e2256b24f2b290e",
+  "pull_request": "https://github.com/AaryaMody1301/Prooflane/pull/2",
+  "scope": {
+    "ai_mode": "sample",
+    "payment_mode": "simulation",
+    "isolated_ignored_databases": true,
+    "gemini_requests": 0,
+    "paypal_requests": 0,
+    "normal_app_database_modified": false
+  },
+  "ci": {
+    "workflow": ".github/workflows/checks.yml",
+    "run_url": "https://github.com/AaryaMody1301/Prooflane/actions/runs/39547552760",
+    "run_id": 39547552760,
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 119049058599,
+        "os": "ubuntu-latest",
+        "python": "3.11",
+        "node": "24",
+        "conclusion": "success"
+      },
+      {
+        "id": 119049058723,
+        "os": "windows-latest",
+        "python": "3.14",
+        "node": "24",
+        "conclusion": "success"
+      }
+    ],
+    "checks": [
+      "22 Python unittest tests",
+      "Node client controller check",
+      "Python entry-point compilation"
+    ],
+    "triggers": [
+      "pull_request",
+      "push to main"
+    ],
+    "credentials_required": false,
+    "dependencies_installed": false,
+    "action_versions": "checkout/setup-python/setup-node v7, pinned to verified full commit SHAs",
+    "action_sources": [
+      "https://github.com/actions/checkout",
+      "https://github.com/actions/setup-python",
+      "https://github.com/actions/setup-node"
+    ]
+  },
+  "local_regression": {
+    "python_tests_passed": 22,
+    "client_controller_passed": true,
+    "python_compilation_passed": true,
+    "in_flight_lock_test_failed_before_fix": true,
+    "failure_before_fix": "pending.csv.readOnly was false; expected true",
+    "test_passed_after_fix": true
+  },
+  "browser": {
+    "browser": "Connected Chrome on Windows",
+    "method": "Actual DOM interactions and screenshots; viewport overrides for responsive review",
+    "delay_reproduction": {
+      "draft_seconds": 3,
+      "verify_seconds": 8
+    },
+    "findings_fixed": [
+      {
+        "id": "mobile-error-focus",
+        "before": {
+          "errorShown": true,
+          "errorTop": -296.5,
+          "errorWithinViewport": false,
+          "focusedElement": ""
+        },
+        "after": {
+          "busyNoticeHidden": true,
+          "errorShown": true,
+          "errorTop": 384.5,
+          "errorWithinViewport": true,
+          "focusedElement": "error",
+          "inputsRestored": true
+        }
+      },
+      {
+        "id": "in-flight-preview-edit",
+        "before": {
+          "approveEnabled": true,
+          "approveShown": true,
+          "dirtyWarningShown": false,
+          "previewWasEdited": true,
+          "status": "VERIFIED"
+        },
+        "duringFixedRequest": {
+          "briefReadOnly": true,
+          "busyNoticeShown": true,
+          "keyboardEditRejected": true,
+          "previewReadOnly": true,
+          "priceReadOnly": true,
+          "projectPickerDisabled": true,
+          "uploadDisabled": true,
+          "verificationPending": true
+        },
+        "after": {
+          "briefReadOnly": false,
+          "busyNoticeHidden": true,
+          "previewReadOnly": false,
+          "priceReadOnly": false,
+          "projectPickerDisabled": false,
+          "status": "VERIFIED",
+          "uploadDisabled": false
+        }
+      }
+    ],
+    "layout": {
+      "horizontal_overflow": false,
+      "measurements": [
+        {
+          "stage": "scope",
+          "cardsWithinWidth": true,
+          "clientWidth": 1265,
+          "pageWidth": 1265,
+          "status": "DRAFT",
+          "width": 1280
+        },
+        {
+          "stage": "scope",
+          "cardsWithinWidth": true,
+          "clientWidth": 753,
+          "pageWidth": 753,
+          "status": "DRAFT",
+          "width": 768
+        },
+        {
+          "stage": "scope",
+          "cardsWithinWidth": true,
+          "clientWidth": 375,
+          "pageWidth": 375,
+          "status": "DRAFT",
+          "width": 390
+        },
+        {
+          "stage": "scope",
+          "cardsWithinWidth": true,
+          "clientWidth": 305,
+          "pageWidth": 305,
+          "status": "DRAFT",
+          "width": 320
+        },
+        {
+          "stage": "blocked",
+          "cardsWithinWidth": true,
+          "clientWidth": 1265,
+          "pageWidth": 1265,
+          "status": "BLOCKED",
+          "width": 1280
+        },
+        {
+          "stage": "blocked",
+          "cardsWithinWidth": true,
+          "clientWidth": 753,
+          "pageWidth": 753,
+          "status": "BLOCKED",
+          "width": 768
+        },
+        {
+          "stage": "blocked",
+          "cardsWithinWidth": true,
+          "clientWidth": 375,
+          "pageWidth": 375,
+          "status": "BLOCKED",
+          "width": 390
+        },
+        {
+          "stage": "blocked",
+          "cardsWithinWidth": true,
+          "clientWidth": 305,
+          "pageWidth": 305,
+          "status": "BLOCKED",
+          "width": 320
+        },
+        {
+          "stage": "paid",
+          "cardsWithinWidth": true,
+          "clientWidth": 1265,
+          "pageWidth": 1265,
+          "status": "PAID",
+          "width": 1280
+        },
+        {
+          "stage": "paid",
+          "cardsWithinWidth": true,
+          "clientWidth": 753,
+          "pageWidth": 753,
+          "status": "PAID",
+          "width": 768
+        },
+        {
+          "stage": "paid",
+          "cardsWithinWidth": true,
+          "clientWidth": 375,
+          "pageWidth": 375,
+          "status": "PAID",
+          "width": 390
+        },
+        {
+          "stage": "paid",
+          "cardsWithinWidth": true,
+          "clientWidth": 305,
+          "pageWidth": 305,
+          "status": "PAID",
+          "width": 320
+        }
+      ],
+      "visual_inspection": "Desktop overview, mobile scope, focused error, completed failure details and simulated receipt inspected. Width measurements are DOM-based; screenshots are viewport captures."
+    },
+    "keyboard": {
+      "desktop": {
+        "focusVisible": true,
+        "focusedElement": "draft",
+        "outlineStyle": "auto"
+      },
+      "mobile": {
+        "focusVisible": true,
+        "focusedElement": "draft",
+        "outlineStyle": "auto",
+        "width": 390
+      }
+    },
+    "blocked_delivery": {
+      "approvalHidden": true,
+      "checkoutDisabled": true,
+      "failedChecks": 3,
+      "readableLineNumbers": true,
+      "status": "BLOCKED"
+    },
+    "simulated_checkout": "Faulty CSV blocked; corrected CSV passed all five checks; human approval, checkout and simulated capture completed.",
+    "saved_project_switch": {
+      "paid": {
+        "previewEmpty": true,
+        "price": "120.00",
+        "receiptMode": true,
+        "status": "PAID"
+      },
+      "unpaid": {
+        "previewEmpty": true,
+        "price": "75.50",
+        "receiptEmpty": true,
+        "status": "AGREED"
+      }
+    },
+    "saved_project_switch_note": "USD 120.00 paid and USD 75.50 agreed projects restored their own price/state and cleared unsaved previews. The second project was subsequently checked with the faulty example and remains BLOCKED and unpaid; this is not the second real-AI use-case gate.",
+    "return_path": {
+      "valid": {
+        "errorHidden": true,
+        "receiptMatches": true,
+        "reconciledEvents": 1,
+        "status": "PAID"
+      },
+      "foreign": {
+        "error": "Return token does not match this stored order. Payment was not captured.",
+        "errorTop": 455.5,
+        "focusedElement": "error",
+        "reconciledEvents": 1,
+        "status": "PAID"
+      }
+    },
+    "return_path_note": "Valid completed return preserved one receipt/event; foreign token displayed a focused error without capture. These are simulated callbacks, separate from the previous real sandbox evidence.",
+    "console_errors_observed": 0,
+    "upload": {
+      "attempted": true,
+      "completed": false,
+      "reason": "Chrome extension Allow access to file URLs is disabled; no permission was changed."
+    },
+    "viewport_override_reset": true
+  },
+  "evidence_attachment_api": {
+    "attachment": true,
+    "content_type": "application/json; charset=utf-8",
+    "project_id": "412e6e9f035249088654bc15baf6d406",
+    "status": "PAID",
+    "amount": "120.00",
+    "currency": "USD",
+    "ai_mode": "sample",
+    "payment_mode": "simulation",
+    "order_id": "SIM-ORDER-412e6e9f035249088654bc15baf6d406",
+    "capture_id": "SIM-CAPTURE-412e6e9f035249088654bc15baf6d406",
+    "delivery_sha256": "63b500480384b3cc711da1596f901eda79ffa3599ceefa5c9d01f706f2e6cd0c",
+    "receipt_approval_verification_hash_match": true,
+    "reconciled_event_count": 1,
+    "raw_csv_absent": true,
+    "sample_customer_emails_absent": true
+  },
+  "local_artifacts": {
+    "ignored_directory": ".venv/phase4-ui-2026-10-21/",
+    "screenshots": [
+      "paid-desktop.jpg",
+      "paid-mobile.jpg",
+      "mobile-error-before.jpg",
+      "mobile-error-after.jpg",
+      "scope-390.jpg",
+      "blocked-mobile.jpg"
+    ],
+    "measurements": "qa-results.json",
+    "receipt_assertions": "receipt-check.json",
+    "published_screenshots": false
+  },
+  "remaining_gates": [
+    "Chrome native CSV upload: extension local-file permission is disabled.",
+    "Browser download-event check was not repeated; the HTTP attachment and contents were verified.",
+    "A second synthetic delivery example through real Gemini and PayPal sandbox checkout.",
+    "Independent fresh setup and judge-path walkthrough from the public repository.",
+    "Target-user feedback from real data freelancers or clients.",
+    "Final recovery review before feature freeze; prior real sandbox restart evidence remains in the Phase 3 completion record."
+  ],
+  "limits": [
+    "No new real-AI or PayPal acceptance occurred in this checkpoint.",
+    "No physical mobile device, screen reader or independent-user test occurred.",
+    "Wrong-amount, pending-capture and provider-timeout cases remain offline contracts.",
+    "No raw CSV rows, customer emails, credentials, account logins or provider response bodies are included."
+  ]
+}

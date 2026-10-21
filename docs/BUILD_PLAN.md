@@ -1,6 +1,6 @@
 # Prooflane: phased build plan
 
-Updated 20 October 2026. Work through one phase at a time. A phase advances only when its completion gate has evidence; a fixture or test double does not complete a real-service gate.
+Updated 21 October 2026. Work through one phase at a time. A phase advances only when its completion gate has evidence; a fixture or test double does not complete a real-service gate.
 
 **Product:** a client agrees to measurable CSV work and a USD price. AI proposes reviewable acceptance checks; code tests the delivery; a human approves the exact checked file; PayPal sandbox checkout connects that snapshot to a reconciled capture receipt.
 
@@ -15,7 +15,7 @@ Dates are working targets in IST, not automatic phase transitions. Keep 12 Novem
 | 1. Local MVP | 17–18 October | Sample brief, review, CSV checks, approval, simulated receipt, saved-project resume, evidence export | Reproducible local flow; faulty file blocked; corrected file paid in simulation; restart/resume preserves evidence | Complete 17 October; headed Edge and desktop/390px visual gates passed |
 | 2. Real AI | 19–21 October | Gemini configuration and custom measurable briefs with human review | Actual provider responses for measurable and ambiguous briefs; errors never silently use the sample fixture | Complete 20 October for the reviewed Gemini 3.6 inventory flow; source/coverage review, real browser and ambiguity blocking verified |
 | 3. PayPal sandbox | 22–25 October | Actual create, buyer approval, capture/readback, cancellation and retry | One real sandbox capture linked to the approved hash; cancellation unpaid; retry and amount mismatch handled | Complete 20 October for the reviewed inventory flow; actual USD 1.00 capture/readback, repeated reconciliation and separate normal cancellation pass; wrong-amount/pending/timeout cases remain offline contracts |
-| 4. Usability and reliability | 26 October–4 November | Desktop/mobile QA, a second use case, fresh setup, user feedback, final recovery checks | Another person completes the judge path; evidence agrees with the provider; issues fixed | Started 20 October; post-capture restart/resume passes; remaining usability, second-case, fresh-setup and feedback gates open |
+| 4. Usability and reliability | 26 October–4 November | Desktop/mobile QA, a second use case, fresh setup, user feedback, final recovery checks | Another person completes the judge path; evidence agrees with the provider; issues fixed | In progress; restart/resume, Linux/Windows CI and reviewed Chrome sample UI checks pass; upload, second real-service case, independent setup and feedback remain open |
 | 5. Submission | 5–11 November | Feature freeze, demonstration, project description, judge instructions and submission | Public links work; video under 3 minutes; Devpost submission confirmed | Planned |
 
 ## Phase 1 — local MVP
@@ -132,9 +132,18 @@ Gate: actual completed sandbox capture, separate cancellation, matching evidence
 
 ## Phase 4 — usability, reliability and judge access
 
-Started 20 October after Phase 3 passed. The first recovery check passes: restarting the backend and reloading the paid project preserves the receipt, order, approval, verification and event history; the separately cancelled project remains unpaid. No new order or capture was requested by that recovery check. See the `phase4_start` fields in the [completion evidence](PHASE3_SANDBOX_COMPLETION_2026-10-20.json). The following gates remain open:
+Started 20 October after Phase 3 passed. The first recovery check passes: restarting the backend and reloading the paid project preserves the receipt, order, approval, verification and event history; the separately cancelled project remains unpaid. No new order or capture was requested by that recovery check. See the `phase4_start` fields in the [completion evidence](PHASE3_SANDBOX_COMPLETION_2026-10-20.json).
 
-- Test desktop and narrow mobile layouts, keyboard navigation, readable failure details, loading/error states and the PayPal return path.
+21 October [CI and UI checkpoint](PHASE4_PROGRESS_2026-10-21.json):
+
+- Added credential-free CI for Ubuntu/Python 3.11 and Windows/Python 3.14 with Node 24. Both jobs pass the 22 Python tests, controller regression and compilation.
+- Chrome sample/simulation review passes scope, blocked and paid layouts at 320/390/768/1280px, desktop/mobile keyboard focus, readable CSV-line failures, project switching, receipt/hash agreement, reload and valid/foreign return-token recovery. These checks use separate ignored test databases; they make no Gemini or PayPal requests.
+- Fixed two observed issues: verification no longer permits preview edits while a response is pending, and mobile errors receive focus instead of appearing above the viewport. The controller regression failed before the shared UI fix and passes afterward; the delayed browser retest rejects edits and restores controls after completion.
+- Native file-chooser upload remains unverified in this Chrome session because local-file access is disabled for the extension. Evidence attachment headers and contents pass through the API; browser download-event automation was not repeated. Physical mobile devices and screen readers were not tested.
+
+The following gates remain open:
+
+- Finish the Chrome native-upload check when local-file permission is available; retain the separate browser download limitation in the evidence.
 - Test a second synthetic data-delivery example through real AI and sandbox checkout.
 - Ask target data freelancers/clients to try scope review. Aim for three conversations; document real observations, without inventing interview results or savings metrics.
 - Have someone run a fresh checkout from the public repo, add their local credentials and follow the README without coaching.
@@ -158,7 +167,7 @@ Gate: submitted project with functioning access, working links and evidence supp
 
 ## Scope rules and blockers
 
-Phases 1–3 are complete for the reviewed inventory case. This checkout runs Gemini 3.6 Flash with sandbox payments; Gemini 3.8 failures and the explicit model comparison remain in the evidence. The India buyer/merchant currency blocker was resolved for testing by using the approved US sandbox buyer on the original order. One completed USD 1.00 capture matches the evidence; repeated reconciliation, normal cancellation and restart recovery pass. Phase 4 has started, with remaining usability, second-case, independent setup and user-feedback gates open. Configure credentials locally; do not paste them into chat or commit `.env`.
+Phases 1–3 are complete for the reviewed inventory case. This checkout runs Gemini 3.6 Flash with sandbox payments; Gemini 3.8 failures and the explicit model comparison remain in the evidence. The India buyer/merchant currency blocker was resolved for testing by using the approved US sandbox buyer on the original order. One completed USD 1.00 capture matches the evidence; repeated reconciliation, normal cancellation and restart recovery pass. Phase 4 now has passing CI and reviewed sample UI checks; native upload, a second real-service case, independent setup and user-feedback gates remain open. Configure credentials locally; do not paste them into chat or commit `.env`.
 
 Keep one delivery, one agreed amount and one capture. Defer escrow, automatic payouts, refunds, multi-milestone work, arbitrary generated code, additional file formats, marketplace features and sponsor integrations. Add an item only if observed user feedback or a broken completion gate requires it.
 
