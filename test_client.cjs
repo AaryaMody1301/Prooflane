@@ -11,8 +11,8 @@ const {createInterface} = require('node:readline');
 const html = fs.readFileSync(path.join(__dirname, 'static/index.html'), 'utf8');
 const script = html.split('<script>')[1].split('</script>')[0];
 
-async function client(base, route='/') {
-  const elements = Object.fromEntries([...html.matchAll(/\bid="([^"]+)"/g)].map(([,id]) => [id, {value:'', innerHTML:'', textContent:'', files:[]} ]));
+async function client(base, route='/', request=fetch) {
+  const elements = Object.fromEntries([...html.matchAll(/\bid="([^"]+)"/g)].map(([,id]) => [id, {value:'', innerHTML:'', textContent:'', files:[], focused:false, focus(){this.focused=true;}} ]));
   elements.price.value = '120.00';
   const buttons = [...html.matchAll(/<button\b[^>]*\bid="([^"]+)"/g)].map(([,id]) => elements[id]);
   let url = new URL(route, base);
@@ -22,7 +22,7 @@ async function client(base, route='/') {
     URLSearchParams,
     history: {replaceState: (_state,_title,target)=>{url=new URL(target,base);}},
     location: {get pathname(){return url.pathname;}, get search(){return url.search;}, assign: target=>{throw Error('Unexpected external navigation: '+target);}},
-    fetch: (target,options)=>{requests.push({path:target,method:options?.method||'GET'});return fetch(new URL(target,base),options);},
+    fetch: (target,options)=>{requests.push({path:target,method:options?.method||'GET'});return request(new URL(target,base),options);},
   });
   await vm.runInContext(script, context);
   return {elements,requests,get id(){return url.searchParams.get('project');}};
@@ -90,7 +90,56 @@ async function main() {
     assert.match(foreignReturn.elements.error.textContent,/does not match/);
     assert.doesNotMatch(foreignReturn.elements.error.textContent,/Start the local app/);
     assert.equal(foreignReturn.requests.filter(r=>r.method==='POST').length,0);
-    console.log('PASS: sample checkout, two-project resume, restored price/brief/receipt, cleared preview, fresh-page resume, return reconciliation, unknown-project recovery and foreign-token rejection. DOM stubs; use browser_check.py for browser/layout checks.');
+
+    let releaseVerification, verificationStarted;
+    const verificationGate=new Promise(resolve=>{releaseVerification=resolve;});
+    const receivedVerification=new Promise(resolve=>{verificationStarted=resolve;});
+    const delayed=await client(base,'/',async(url,options)=>{
+      const response=await fetch(url,options);
+      if(options?.method==='POST'&&url.pathname.endsWith('/verify')){
+        verificationStarted();
+        await verificationGate;
+      }
+      return response;
+    });
+    const pending=delayed.elements;
+    await pending.draft.onclick();
+    await pending.agree.onclick();
+    await pending.passed.onclick();
+    const checkedPreview=pending.csv.value;
+    const checking=pending.verify.onclick();
+    try {
+      await receivedVerification;
+      assert.equal(pending.csv.readOnly,true);
+      assert.equal(pending.upload.disabled,true);
+      assert.equal(pending.projects.disabled,true);
+      assert.equal(pending.brief.readOnly,true);
+      assert.equal(pending.price.readOnly,true);
+      assert.equal(pending['busy-note'].hidden,false);
+    } finally {
+      releaseVerification();
+      await checking;
+    }
+    assert.equal(pending.csv.value,checkedPreview);
+    assert.equal(pending.csv.readOnly,false);
+    assert.equal(pending.upload.disabled,false);
+    assert.equal(pending.projects.disabled,false);
+    assert.equal(pending.brief.readOnly,false);
+    assert.equal(pending.price.readOnly,false);
+    assert.equal(pending['busy-note'].hidden,true);
+    pending.csv.value+='\nBROKEN';
+    pending.csv.oninput();
+    assert.equal(pending.approve.disabled,true);
+
+    const invalidPrice=await client(base);
+    invalidPrice.elements.price.value='12.345';
+    await invalidPrice.elements.draft.onclick();
+    assert.match(invalidPrice.elements.error.textContent,/at most two decimals/);
+    assert.equal(invalidPrice.elements.error.hidden,false);
+    assert.equal(invalidPrice.elements.error.focused,true);
+    assert.equal(invalidPrice.elements.price.readOnly,false);
+    assert.equal(invalidPrice.elements['busy-note'].hidden,true);
+    console.log('PASS: sample checkout, project resume, return reconciliation, recovery, in-flight input locks, changed-preview approval guard and error focus. DOM stubs; use browser_check.py for browser/layout checks.');
   } finally {
     server.kill('SIGTERM');
   }
