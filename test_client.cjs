@@ -12,13 +12,14 @@ const html = fs.readFileSync(path.join(__dirname, 'static/index.html'), 'utf8');
 const script = html.split('<script>')[1].split('</script>')[0];
 
 async function client(base, route='/', request=fetch) {
-  const elements = Object.fromEntries([...html.matchAll(/\bid="([^"]+)"/g)].map(([,id]) => [id, {value:'', innerHTML:'', textContent:'', files:[], focused:false, focus(){this.focused=true;}} ]));
+  const elements = Object.fromEntries([...html.matchAll(/\bid="([^"]+)"/g)].map(([,id]) => [id, {id,value:'',innerHTML:'',textContent:'',files:[],focused:false,attributes:{},focus(){this.focused=true;document.activeElement=this;},setAttribute(name,value){this.attributes[name]=value;},removeAttribute(name){delete this.attributes[name];}} ]));
   elements.price.value = '120.00';
   const buttons = [...html.matchAll(/<button\b[^>]*\bid="([^"]+)"/g)].map(([,id]) => elements[id]);
   let url = new URL(route, base);
   const requests = [];
+  const document = {getElementById:id=>elements[id],querySelectorAll:()=>buttons,activeElement:null};
   const context = vm.createContext({
-    document: {getElementById: id=>elements[id], querySelectorAll: ()=>buttons},
+    document,
     URLSearchParams,
     history: {replaceState: (_state,_title,target)=>{url=new URL(target,base);}},
     location: {get pathname(){return url.pathname;}, get search(){return url.search;}, assign: target=>{throw Error('Unexpected external navigation: '+target);}},
@@ -44,16 +45,34 @@ async function main() {
     assert.match(e.projects.innerHTML,/No saved projects yet/);
     await e.draft.onclick();
     const paidId = first.id;
+    assert.equal(e['scope-stage'].hidden,false);
+    assert.equal(e['scope-form'].hidden,true);
+    assert.equal(e.brief.readOnly,true);
     await e.agree.onclick();
+    assert.equal(e.delivery.hidden,false);
+    const beforeNavigation=first.requests.length;
+    await e['nav-scope'].onclick();
+    assert.equal(e['scope-stage'].hidden,false);
+    await e['nav-delivery'].onclick();
+    assert.equal(first.requests.length,beforeNavigation);
+    await e.failed.onclick();
+    await e.verify.onclick();
+    const blocked=await(await fetch(base+'/api/projects/'+paidId)).json();
+    assert.ok(e.results.innerHTML.indexOf('Unique values')<e.results.innerHTML.indexOf('Required columns'));
     await e.passed.onclick();
     await e.verify.onclick();
-    assert.equal(e.status.textContent,'VERIFIED');
+    assert.equal(e.status.textContent,'Ready for approval');
     await e.approve.onclick();
+    assert.equal(e.payment.hidden,false);
+    assert.equal(e.delivery.hidden,true);
     await e.order.onclick();
     await e.capture.onclick();
-    assert.equal(e.status.textContent,'PAID');
+    assert.equal(e.status.textContent,'Simulation complete');
     assert.match(e.receipt.innerHTML,/120.00/);
 
+    await e['new-project'].onclick();
+    assert.equal(first.id,null);
+    assert.equal(e.receipt.innerHTML,'');
     e.price.value='75.50';
     await e.draft.onclick();
     assert.notEqual(first.id,paidId);
@@ -68,7 +87,7 @@ async function main() {
     assert.match(e.brief.value,/Deliver a cleaned sales CSV/);
     assert.equal(e.csv.value,'');
     assert.equal(e.csv.readOnly,true);
-    assert.equal(e.status.textContent,'PAID');
+    assert.equal(e.status.textContent,'Simulation complete');
     assert.equal(e.projects.value,paidId);
     assert.match(e.projects.innerHTML,new RegExp(draftId));
 
@@ -76,11 +95,11 @@ async function main() {
     assert.equal(fresh.id,null);
     fresh.elements.projects.value=paidId;
     await fresh.elements.projects.onchange();
-    assert.equal(fresh.elements.status.textContent,'PAID');
+    assert.equal(fresh.elements.status.textContent,'Simulation complete');
     assert.match(fresh.elements.receipt.innerHTML,/SIM-CAPTURE-/);
 
     const returned=await client(base,'/return?project='+paidId+'&token=SIM-ORDER-'+paidId);
-    assert.equal(returned.elements.status.textContent,'PAID');
+    assert.equal(returned.elements.status.textContent,'Simulation complete');
     assert.equal(returned.requests.filter(r=>r.method==='POST'&&r.path.endsWith('/capture')).length,1);
     assert.equal(returned.elements.error.hidden,true);
     const invalid=await client(base,'/?project='+'0'.repeat(32));
@@ -90,6 +109,63 @@ async function main() {
     assert.match(foreignReturn.elements.error.textContent,/does not match/);
     assert.doesNotMatch(foreignReturn.elements.error.textContent,/Start the local app/);
     assert.equal(foreignReturn.requests.filter(r=>r.method==='POST').length,0);
+
+    const saved=await(await fetch(base+'/api/projects/'+paidId)).json();
+    async function fixtureClient(value,currentMode=value.payment_mode){
+      return client(base,'/?project='+paidId,async(url,options)=>{
+        if(url.pathname==='/api/projects/'+paidId&&!options?.method)return new Response(JSON.stringify(value));
+        if(url.pathname==='/api/config'){
+          const config=await(await fetch(url,options)).json();
+          return new Response(JSON.stringify({...config,payment_mode:currentMode}));
+        }
+        return fetch(url,options);
+      });
+    }
+    for(const [state,stage] of [
+      ['DRAFT','scope-stage'],['AGREED','delivery'],['BLOCKED','delivery'],['VERIFIED','delivery'],
+      ['APPROVED','payment'],['CHECKOUT_PENDING','payment'],['ORDER_CREATED','payment'],
+      ['PAYMENT_PENDING','payment'],['PAID','payment'],
+    ]){
+      const value=structuredClone(state==='BLOCKED'?blocked:saved);
+      value.status=state;
+      if(state!=='PAID')value.receipt=null;
+      if(!['ORDER_CREATED','PAYMENT_PENDING','PAID'].includes(state))value.order=null;
+      if(!['APPROVED','CHECKOUT_PENDING','ORDER_CREATED','PAYMENT_PENDING','PAID'].includes(state))value.approval=null;
+      if(['DRAFT','AGREED'].includes(state))value.verification=null;
+      if(state==='CHECKOUT_PENDING')value.checkout_attempted_at=Date.now()/1000;
+      const restored=await fixtureClient(value);
+      assert.equal(restored.elements[stage].hidden,false,state);
+      assert.equal(restored.elements['nav-'+(stage==='scope-stage'?'scope':stage)].attributes['aria-current'],'step',state);
+      if(['CHECKOUT_PENDING','ORDER_CREATED','PAYMENT_PENDING','PAID'].includes(state)){
+        assert.equal(restored.elements.csv.readOnly,true,state);
+        assert.equal(restored.elements.upload.disabled,true,state);
+      }
+      if(state==='CHECKOUT_PENDING')assert.match(restored.elements['pay-note'].textContent,/unresolved.*frozen/);
+      if(state==='PAYMENT_PENDING')assert.equal(restored.elements.status.textContent,'Payment pending');
+      if(state==='APPROVED')assert.equal(restored.elements.order.disabled,false);
+      assert.equal(restored.requests.filter(r=>r.method==='POST').length,0,state);
+    }
+    const ambiguous=structuredClone(saved);
+    Object.assign(ambiguous,{status:'DRAFT',receipt:null,approval:null,verification:null,order:null});
+    ambiguous.plan.clarifications=['Define an insightful result.'];
+    const clarification=await fixtureClient(ambiguous);
+    assert.equal(clarification.elements.agree.disabled,true);
+    assert.equal(clarification.elements['nav-delivery'].disabled,true);
+    assert.match(clarification.elements.clarifications.innerHTML,/Define an insightful result/);
+    const switchedMode=await fixtureClient(saved,'sandbox');
+    assert.equal(switchedMode.elements['mode-detail'].textContent,'Simulated payments');
+    assert.match(switchedMode.elements.receipt.innerHTML,/sample AI · simulation payment/);
+    assert.equal(switchedMode.elements['mode-warning'].hidden,false);
+    const mismatched=structuredClone(saved);
+    mismatched.receipt.delivery_sha256='0'.repeat(64);
+    const mismatch=await fixtureClient(mismatched);
+    assert.match(mismatch.elements.receipt.innerHTML,/Hash mismatch/);
+    assert.doesNotMatch(mismatch.elements.receipt.innerHTML,/Matching SHA-256/);
+    assert.match(mismatch.elements.receipt.innerHTML,/receipt-mismatch/);
+    const cancelledPaid=await client(base,'/?project='+paidId+'&cancelled=1');
+    assert.equal(cancelledPaid.elements.status.textContent,'Simulation complete');
+    assert.match(cancelledPaid.elements.error.textContent,/existing completed receipt is unchanged/);
+    assert.equal(cancelledPaid.requests.filter(r=>r.method==='POST').length,0);
 
     let releaseVerification, verificationStarted;
     const verificationGate=new Promise(resolve=>{releaseVerification=resolve;});
@@ -124,12 +200,24 @@ async function main() {
     assert.equal(pending.csv.readOnly,false);
     assert.equal(pending.upload.disabled,false);
     assert.equal(pending.projects.disabled,false);
-    assert.equal(pending.brief.readOnly,false);
-    assert.equal(pending.price.readOnly,false);
+    assert.equal(pending.brief.readOnly,true);
+    assert.equal(pending.price.readOnly,true);
     assert.equal(pending['busy-note'].hidden,true);
     pending.csv.value+='\nBROKEN';
     pending.csv.oninput();
     assert.equal(pending.approve.disabled,true);
+    assert.match(pending.results.innerHTML,/Results from the previous check/);
+    const changedPreview=pending.csv.value;
+    const navigationRequests=delayed.requests.length;
+    await pending['nav-scope'].onclick();
+    await pending['nav-delivery'].onclick();
+    assert.equal(pending.csv.value,changedPreview);
+    assert.equal(delayed.requests.length,navigationRequests);
+    const draftRequests=delayed.requests.length;
+    await pending['new-project'].onclick();
+    assert.equal(delayed.requests.length,draftRequests);
+    assert.equal(pending['scope-form'].hidden,false);
+    assert.equal(pending.brief.readOnly,false);
 
     const invalidPrice=await client(base);
     invalidPrice.elements.price.value='12.345';
@@ -139,7 +227,7 @@ async function main() {
     assert.equal(invalidPrice.elements.error.focused,true);
     assert.equal(invalidPrice.elements.price.readOnly,false);
     assert.equal(invalidPrice.elements['busy-note'].hidden,true);
-    console.log('PASS: sample checkout, project resume, return reconciliation, recovery, in-flight input locks, changed-preview approval guard and error focus. DOM stubs; use browser_check.py for browser/layout checks.');
+    console.log('PASS: nine lifecycle views, failure ordering, navigation, sample checkout, persisted modes, dirty-preview guards, pending locks, error focus and return recovery. DOM stubs; browser/layout checks are separate.');
   } finally {
     server.kill('SIGTERM');
   }
