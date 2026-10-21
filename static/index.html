@@ -12,7 +12,8 @@ select{font:inherit;border:1px solid #cdd5e2;border-radius:8px;padding:12px;widt
 <header><div class="brand"><svg viewBox="0 0 30 30" aria-hidden="true"><path d="M15 1L29 9v12l-14 8L1 21V9Z" fill="#4e80ff"/><path d="m8 15 5 5 9-10" fill="none" stroke="white" stroke-width="3"/></svg>prooflane</div><span class="head-note">PayPal AI Hackathon · Working starter</span></header>
 <div class="wrap">
 <div class="intro"><div><div class="eyebrow">Outcome checkout for data work</div><h1>Agree on the work.<br>See the proof. Then pay.</h1><p class="subtitle">Turn a client brief into clear acceptance checks. Review the delivered data and connect the approved result to a PayPal payment receipt.</p></div><div class="mode" aria-live="polite"><strong id="mode-title">Connecting to local app…</strong><span id="mode-detail">Local, single-operator starter. USD only.</span></div></div>
-<div id="error" class="error" role="alert" hidden></div>
+<div id="error" class="error" role="alert" tabindex="-1" hidden></div>
+<p class="hint" id="busy-note" role="status" hidden>Working… Please wait.</p>
 <section class="card project-history"><label for="projects">Resume a saved project</label><select id="projects" aria-describedby="history-note" disabled><option value="">Loading saved projects…</option></select><p class="hint" id="history-note">Projects stay on this computer. Switching projects clears any unsaved CSV preview.</p></section>
 <div class="grid"><main class="main">
 <section class="card"><div class="stephead"><span class="stepnum">01</span><div><h2>Make the brief testable</h2><p class="hint">Review the proposed checks before agreeing to a scope.</p></div></div>
@@ -37,12 +38,13 @@ const escapeHTML=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const usd=c=>'$'+(c/100).toFixed(2);
 const labels={required_columns:'Required columns',unique:'Unique values',not_empty:'No missing values',number_range:'Numeric bounds',row_count:'Row count'};
 function label(check){return labels[check.kind]+(check.column?' · '+check.column:check.columns?' · '+check.columns.join(', '):'');}
-function error(message){$('error').textContent=message;$('error').hidden=false;}
+function error(message){$('error').textContent=message;$('error').hidden=false;$('error').focus();}
 async function api(path,body){const options=body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json','X-Prooflane-Request':'1'},body:JSON.stringify(body)};const response=await fetch(path,options);const data=await response.json();if(!response.ok)throw Error(data.error||'Request failed');return data;}
 async function refreshProjects(){const saved=await api('/api/projects');$('projects').innerHTML='<option value="">'+(saved.length?'Choose a saved project':'No saved projects yet')+'</option>'+saved.map(p=>'<option value="'+escapeHTML(p.id)+'">'+escapeHTML(p.plan.title+' · '+usd(p.cents)+' · '+p.status.replaceAll('_',' ')+' · '+p.payment_mode+' · '+p.id.slice(0,8))+'</option>').join('');$('projects').value=project?.id||'';}
 function showProject(value){project=value;history.replaceState(null,'','/?project='+project.id);$('brief').value=project.brief;$('price').value=(project.cents/100).toFixed(2);$('csv').value='';$('upload').value='';dirty=false;}
-async function run(fn){if(busy)return;busy=true;$('error').hidden=true;document.querySelectorAll('button').forEach(b=>b.disabled=true);try{await fn();}catch(e){error(e.message);}finally{busy=false;render();}}
+async function run(fn){if(busy)return;busy=true;$('error').hidden=true;document.querySelectorAll('button').forEach(b=>b.disabled=true);try{render();await fn();}catch(e){error(e.message);}finally{busy=false;render();}}
 function render(){
+ $('busy-note').hidden=!busy;['brief','price'].forEach(id=>$(id).readOnly=busy);
  $('draft').disabled=busy||!config;$('sample').disabled=busy||!config;$('projects').disabled=busy||!config;$('projects').value=project?.id||'';
  if(!project)return;
  $('money').textContent=usd(project.cents);$('status').textContent=project.status.replaceAll('_',' ');
@@ -51,7 +53,7 @@ function render(){
  $('clarifications').innerHTML=project.plan.clarifications.length?'<p class="summary blocked">Needs clarification: '+project.plan.clarifications.map(escapeHTML).join(' · ')+'</p>':'';
  $('agree').disabled=busy||project.status!=='DRAFT'||project.plan.clarifications.length>0;
  $('delivery').hidden=project.status==='DRAFT';const frozen=!!project.checkout_attempted_at||['CHECKOUT_PENDING','ORDER_CREATED','PAYMENT_PENDING','PAID'].includes(project.status);
- ['verify','failed','passed'].forEach(id=>$(id).disabled=busy||frozen);$('upload').disabled=frozen;$('csv').readOnly=frozen;
+ ['verify','failed','passed'].forEach(id=>$(id).disabled=busy||frozen);$('upload').disabled=busy||frozen;$('csv').readOnly=busy||frozen;
  $('dirty-note').hidden=!dirty;
  const v=project.verification;
  $('results').innerHTML=v?'<div class="summary '+(v.passed?'passed':'blocked')+'"><b>'+(v.passed?'Every agreed check passed.':'Delivery needs changes.')+'</b><small>'+v.rows+' data rows · '+(v.passed?'Ready for your review.':'Checkout stays closed.')+'</small></div><div class="checks">'+v.checks.map(c=>'<div class="check"><div class="checktop"><b>'+escapeHTML(label(c))+'</b><span class="pill '+(c.passed?'pass':'fail')+'">'+(c.passed?'PASS':'FAIL')+'</span></div><p class="resultline">'+escapeHTML(c.detail)+(c.failed_rows.length?' · CSV lines '+c.failed_rows.join(', '):'')+'</p></div>').join('')+'</div><p class="hash">Delivery SHA-256: '+escapeHTML(v.sha256)+'</p>':'';
@@ -69,7 +71,7 @@ function render(){
 }
 async function action(name,body={}){const path='/api/projects/'+project.id;try{project=await api(path+'/'+name,body);if(name==='verify')dirty=false;}catch(e){try{project=await api(path);await refreshProjects();}catch{}throw e;}await refreshProjects();render();}
 $('draft').onclick=()=>run(async()=>{showProject(await api('/api/projects',{brief:$('brief').value,price:$('price').value}));await refreshProjects();});
-$('projects').onchange=()=>run(async()=>{const id=$('projects').value;if(id)showProject(await api('/api/projects/'+encodeURIComponent(id)));});
+$('projects').onchange=()=>{const id=$('projects').value;return run(async()=>{if(id)showProject(await api('/api/projects/'+encodeURIComponent(id)));});};
 $('sample').onclick=()=>{$('brief').value=config.sample_brief;};
 $('agree').onclick=()=>run(()=>action('agree'));
 $('verify').onclick=()=>run(()=>action('verify',{csv:$('csv').value}));
