@@ -85,6 +85,11 @@ def main():
                 allowed_ports.add(urlparse(base).port)
                 page.goto(base)
                 expect(page.locator("#mode-title")).to_contain_text("Sample AI fixture")
+                page.keyboard.press("Tab")
+                expect(page.get_by_role("link", name="Skip to workspace")).to_be_focused()
+                page.keyboard.press("Enter")
+                expect(page.locator("#workspace")).to_be_focused()
+                assert page.get_by_role("main").count() == 1
                 layout("initial")
                 page.locator("#draft").click()
                 expect(page.locator("#status")).to_have_text("Review scope")

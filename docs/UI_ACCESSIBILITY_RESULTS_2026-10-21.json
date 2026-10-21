@@ -1,0 +1,575 @@
+{
+  "checked_at": "2026-10-21",
+  "base_commit": "aa926eac6a9df3ed9c03c68a2d7e0c7b3693aac6",
+  "tested_ui_sha256": "98d11c0222581dd61f17c0712b6a01b8294f5b1f4deefcd821e94f8147b0f610",
+  "environment": {
+    "browser": "Connected Chrome on Windows",
+    "ai_mode": "sample",
+    "payment_mode": "simulation",
+    "separate_ignored_test_databases": true,
+    "new_provider_requests": 0
+  },
+  "native_upload": {
+    "file": "examples/passed.csv",
+    "selectedName": "passed.csv",
+    "dirty": true,
+    "allChecksPassed": true,
+    "oversized_file_bytes": 300001,
+    "oversized_recovery": {
+      "error": "Use a CSV smaller than 300 KB.",
+      "focus": "error",
+      "inputRestored": true,
+      "previewUnchanged": true
+    },
+    "native_chooser_passed": true
+  },
+  "native_download": {
+    "native_download_event_passed": true,
+    "saved_filename": "prooflane-38ea24db15a0477d84b0a3e152f713d6-evidence.json",
+    "format": "prooflane-evidence-v1",
+    "downloaded_bytes": 4040,
+    "receipt_hash_matches_checked_text": true,
+    "line_endings_normalized": true,
+    "amount": "120.00",
+    "currency": "USD",
+    "payment_mode": "simulation",
+    "csv_and_customer_rows_absent": true,
+    "single_capture_event": true
+  },
+  "automated_audit": {
+    "engine": "axe-core",
+    "version": "4.14.0",
+    "source": "https://registry.npmjs.org/axe-core",
+    "scope": [
+      "wcag2a",
+      "wcag2aa",
+      "wcag21a",
+      "wcag21aa",
+      "wcag22aa",
+      "best-practice"
+    ],
+    "qa_method": "Production HTML with a locally served scanner and excluded QA controls. No browser execution from the shell. No runtime dependency added.",
+    "standard_final_scans": 34,
+    "standard_violations": 0,
+    "scans": [
+      {
+        "state": "verified-desktop-final",
+        "viewport": {
+          "width": 929,
+          "height": 861
+        },
+        "passed_rules": 48,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "approved-desktop-final",
+        "viewport": {
+          "width": 929,
+          "height": 861
+        },
+        "passed_rules": 43,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "order-created-desktop-final",
+        "viewport": {
+          "width": 929,
+          "height": 861
+        },
+        "passed_rules": 43,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "receipt-desktop-final",
+        "viewport": {
+          "width": 929,
+          "height": 861
+        },
+        "passed_rules": 43,
+        "violations": 0,
+        "manual_review_targets": [
+          ".receipt-mark"
+        ]
+      },
+      {
+        "state": "receipt-320-actual-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 41,
+        "violations": 0,
+        "manual_review_targets": [
+          ".receipt-mark"
+        ]
+      },
+      {
+        "state": "receipt-expanded-320-actual-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 43,
+        "violations": 0,
+        "manual_review_targets": [
+          ".receipt-mark"
+        ]
+      },
+      {
+        "state": "scope-320-actual-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 43,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "initial-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 42,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "invalid-price-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 42,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "draft-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 43,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "delivery-empty-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 44,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "oversized-file-error-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 44,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "blocked-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 48,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "changed-preview-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 49,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "verified-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 48,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "verified-text-spacing-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 46,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "scope-text-spacing-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 41,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "receipt-text-spacing-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 41,
+        "violations": 0,
+        "manual_review_targets": [
+          ".receipt-mark"
+        ]
+      },
+      {
+        "state": "checkout-unresolved-fixture-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 41,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "payment-pending-fixture-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 41,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "clarification-fixture-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 43,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "mode-mismatch-fixture-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 41,
+        "violations": 0,
+        "manual_review_targets": [
+          ".receipt-mark"
+        ]
+      },
+      {
+        "state": "hash-mismatch-fixture-320-final",
+        "viewport": {
+          "width": 320,
+          "height": 844
+        },
+        "passed_rules": 41,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "hash-mismatch-fixture-390-final",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "passed_rules": 41,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "verified-390-final",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "passed_rules": 46,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "scope-390-final",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "passed_rules": 41,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "initial-390-final",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "passed_rules": 42,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "initial-1280-final",
+        "viewport": {
+          "width": 1280,
+          "height": 844
+        },
+        "passed_rules": 42,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "verified-1280-final",
+        "viewport": {
+          "width": 1280,
+          "height": 844
+        },
+        "passed_rules": 48,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "receipt-1280-final",
+        "viewport": {
+          "width": 1280,
+          "height": 844
+        },
+        "passed_rules": 43,
+        "violations": 0,
+        "manual_review_targets": [
+          ".receipt-mark"
+        ]
+      },
+      {
+        "state": "scope-landscape-final",
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "passed_rules": 43,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "reduced-motion-none-final",
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "passed_rules": 42,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "reduced-motion-final",
+        "viewport": {
+          "width": 929,
+          "height": 861
+        },
+        "passed_rules": 42,
+        "violations": 0,
+        "manual_review_targets": []
+      },
+      {
+        "state": "receipt-keyboard-final",
+        "viewport": {
+          "width": 929,
+          "height": 861
+        },
+        "passed_rules": 43,
+        "violations": 0,
+        "manual_review_targets": [
+          ".receipt-mark"
+        ]
+      }
+    ]
+  },
+  "manual_review": {
+    "keyboard_first_tab": {
+      "href": "#workspace",
+      "text": "Skip to workspace",
+      "top": 8,
+      "target": "workspace"
+    },
+    "skip_link": {
+      "bottom": 54.5,
+      "focused": true,
+      "left": 16,
+      "outline": "solid",
+      "top": 8
+    },
+    "keyboard_resume": {
+      "description": "Saved on this computer. Choosing a project opens its current stage and clears the unsaved CSV preview.",
+      "focus": "payment-heading",
+      "status": "Simulation complete",
+      "title": "Accessibility fixture: hash-mismatch"
+    },
+    "keyboard_payment_steps": {
+      "steps": [
+        {
+          "focus": "payment-heading",
+          "status": "Delivery approved"
+        },
+        {
+          "focus": "payment-heading",
+          "status": "Awaiting payment"
+        },
+        {
+          "focus": "payment-heading",
+          "status": "Simulation complete"
+        }
+      ],
+      "methods": [
+        "Space approval",
+        "Enter simulated checkout",
+        "Enter simulated capture"
+      ]
+    },
+    "visible_focus": {
+      "tested_production_stops": 12,
+      "all_visible_and_outside_hidden_views": true,
+      "outline_width": "3px"
+    },
+    "invalid_price": {
+      "bottom": 381.5,
+      "focus": "error",
+      "message": "Price must be a USD decimal string with at most two decimals.",
+      "role": "alert",
+      "top": 311.5,
+      "viewportHeight": 844
+    },
+    "mobile_table_ax_headers": [
+      {
+        "role": "table",
+        "name": "Acceptance check results"
+      },
+      {
+        "role": "rowheader",
+        "name": "Unique values Â· order_id"
+      },
+      {
+        "role": "rowheader",
+        "name": "No missing values Â· customer_email"
+      },
+      {
+        "role": "rowheader",
+        "name": "Numeric bounds Â· revenue"
+      },
+      {
+        "role": "rowheader",
+        "name": "Required columns Â· order_id, customer_email, revenue"
+      },
+      {
+        "role": "rowheader",
+        "name": "Row count"
+      },
+      {
+        "role": "columnheader",
+        "name": "AGREED RULE"
+      },
+      {
+        "role": "columnheader",
+        "name": "RESULT"
+      },
+      {
+        "role": "columnheader",
+        "name": "EVIDENCE"
+      }
+    ],
+    "reflow_measurements": 25,
+    "all_no_horizontal_overflow": true,
+    "all_visible_control_targets_at_least_24px": true,
+    "measured_widths": [
+      320,
+      390,
+      844,
+      1280
+    ],
+    "text_spacing_overrides": {
+      "width": 320,
+      "views": [
+        "scope",
+        "verified delivery",
+        "receipt"
+      ],
+      "line_height": 1.5,
+      "paragraph_spacing_em": 2,
+      "letter_spacing_em": 0.12,
+      "word_spacing_em": 0.16,
+      "no_lost_controls_or_horizontal_overflow": true
+    },
+    "reduced_motion": {
+      "animations": 0,
+      "reduce": true
+    },
+    "contrast": {
+      "old_input_border_on_white": 1.6926,
+      "new_control_border_on_white": 3.7003,
+      "new_control_border_on_page": 3.452,
+      "focus_on_white": 5.8566,
+      "focus_on_page": 5.4636,
+      "decorative_receipt_mark": 5.1931,
+      "receipt_mark_disposition": "Axe cannot classify the symbol. It is aria-hidden, noninteractive and redundant with the matching-hash text; rendered colors also pass."
+    },
+    "forced_colors": {
+      "emulated": true,
+      "automated_contrast_flagged_nodes": 23,
+      "manually_checked_rendered_colors_minimum_ratio": 19.556,
+      "upstream_issue": "https://github.com/dequelabs/axe-core/issues/3978",
+      "disposition": "Mixed forced/unforced color values reproduce the documented engine limitation. Manual rendered-color and screenshot review passes; this is not an unqualified axe pass."
+    },
+    "temporary_emulation_reset": true
+  },
+  "fixes": [
+    "Put project context, status, errors and stages inside the single main landmark.",
+    "Give the project modes a named group role.",
+    "Add a first-tab skip link and announce saved-project navigation in its description.",
+    "Raise input/select/secondary-button border contrast.",
+    "Remove the background transition that briefly paired dark button text with blue."
+  ],
+  "regression_checks": {
+    "python_tests": 22,
+    "python_result": "pass",
+    "node_controller": "pass",
+    "python_compilation": "pass",
+    "optional_browser_runner": "Updated and compiled; not executed in this run. Equivalent skip-link actions were exercised through the connected Chrome tab."
+  },
+  "artifacts": {
+    "ignored_folder": ".venv/ui-accessibility-2026-10-21/",
+    "raw_scans": "reports.json",
+    "forced_colors_screenshot": "forced-colors.jpg",
+    "screenshots_published": false
+  },
+  "remaining_limits": [
+    "Native 200% browser zoom is pending a manual Chrome menu step. Automated shortcuts had no effect; the browser URL policy blocked Chrome settings. Reflow tests do not substitute for this check.",
+    "Screen-reader speech, live-region announcements and physical assistive devices are not verified by the DOM/AX checks. Native app control is disabled in the connected tools.",
+    "Firefox, Safari, physical touch devices and independent disabled-user acceptance were not tested.",
+    "PayPal checkout and provider timing/authentication screens are outside this local sample audit. No new Gemini or PayPal request occurred."
+  ],
+  "full_accessibility_conformance_verified": false,
+  "phase4_gate_passed": false
+}
