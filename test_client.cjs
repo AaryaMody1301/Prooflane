@@ -135,6 +135,7 @@ async function main() {
       if(state==='CHECKOUT_PENDING')value.checkout_attempted_at=Date.now()/1000;
       const restored=await fixtureClient(value);
       assert.equal(restored.elements[stage].hidden,false,state);
+      if(state==='DRAFT')assert.equal(restored.elements['view-evidence'].hidden,true);
       assert.equal(restored.elements['nav-'+(stage==='scope-stage'?'scope':stage)].attributes['aria-current'],'step',state);
       if(['CHECKOUT_PENDING','ORDER_CREATED','PAYMENT_PENDING','PAID'].includes(state)){
         assert.equal(restored.elements.csv.readOnly,true,state);
@@ -218,6 +219,22 @@ async function main() {
     assert.equal(delayed.requests.length,draftRequests);
     assert.equal(pending['scope-form'].hidden,false);
     assert.equal(pending.brief.readOnly,false);
+
+    const uploaded=await client(base);
+    await uploaded.elements.draft.onclick();
+    await uploaded.elements.agree.onclick();
+    const fileText=fs.readFileSync(path.join(__dirname,'examples/passed.csv'),'utf8');
+    uploaded.elements.upload.files=[{name:'delivery.csv',size:Buffer.byteLength(fileText),text:async()=>fileText}];
+    await uploaded.elements.upload.onchange();
+    assert.equal(uploaded.elements.csv.value,fileText);
+    assert.equal(uploaded.elements['file-name'].textContent,'delivery.csv');
+    assert.equal(uploaded.elements.preview.open,true);
+    assert.equal(uploaded.elements.approve.disabled,true);
+    uploaded.elements.upload.files=[{name:'large.csv',size:300001,text:async()=>{throw Error('Oversized file must not be read');}}];
+    await uploaded.elements.upload.onchange();
+    assert.match(uploaded.elements.error.textContent,/smaller than 300 KB/);
+    assert.equal(uploaded.elements.csv.value,fileText);
+    assert.equal(uploaded.elements.upload.disabled,false);
 
     const invalidPrice=await client(base);
     invalidPrice.elements.price.value='12.345';

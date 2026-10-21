@@ -69,7 +69,7 @@ function render(){
  $('scope-stage').hidden=view!=='scope';$('delivery').hidden=view!=='delivery';$('payment').hidden=view!=='payment';$('scope-form').hidden=!!project;$('scope').hidden=!project;
  $('scope-heading').textContent=project?(state==='DRAFT'?'Review the proposed outcome.':'Review the agreed outcome.'):'Make the outcome clear.';$('scope-subtitle').textContent=project?'Check the requirements, source quotations and USD price.':'Describe the CSV work and set your USD price.';
  $('ai-note').textContent=config?.ai_mode==='sample'?'Sample mode uses a fixed acceptance plan. Configure Gemini for your own briefs.':'Only the brief goes to Gemini. Review the proposed checks; free-tier inputs may be used by Google to improve products.';
- $('proof').hidden=!project;$('activity-details').hidden=!project;$('view-evidence').hidden=!project;$('view-evidence').disabled=busy;
+ $('proof').hidden=!project;$('activity-details').hidden=!project;$('view-evidence').hidden=!project||state==='DRAFT';$('view-evidence').textContent=receipt?'View receipt & export':'View payment & export';$('view-evidence').disabled=busy;
  $('receipt').innerHTML='';$('evidence').hidden=!project;$('evidence').disabled=busy;$('evidence').className=receipt?'primary':'secondary';$('checkout').hidden=!!receipt;
  if(!project){$('proof-trail').innerHTML='';$('activity').innerHTML='';$('rail-note').textContent='Agree on measurable work, review the result, then pay.';return;}
  $('agreed-brief').textContent=project.brief;$('plan-title').textContent=state==='DRAFT'?'Proposed acceptance checks':'Agreed acceptance checks';
