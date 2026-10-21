@@ -154,6 +154,8 @@ Public hosting is a separate decision after Phase 3. Choose it only if it materi
 
 Gate: working fresh setup, independent walkthrough, browser findings resolved and payment evidence verified. Feature freeze begins 5 November.
 
+21 October workspace upgrade: the [research plan](UI_UPGRADE_PLAN_2026-10-21.md) is implemented as Scope, Delivery and Payment views using the existing APIs and saved-project format. The [QA record](UI_WORKSPACE_RESULTS_2026-10-21.json) covers the sample checkout, failure-first results, stale-preview approval guards, persisted modes, receipts and return recovery. All 22 Python tests, the extended controller and Linux/Windows CI pass for the code commit. Twenty DOM layout checks span 320–1440px; selected receipt text/control contrast is at least 5.19:1. These results do not certify accessibility or close the independent-user and real-service gates above.
+
 ## Phase 5 — submit
 
 - Confirm Devpost enrollment and eligibility.

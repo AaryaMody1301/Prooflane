@@ -1,0 +1,486 @@
+{
+  "format": "prooflane-ui-workspace-results-v1",
+  "checked_date_ist": "2026-10-21",
+  "recorded_at_utc": "2026-10-21T08:39:03+00:00",
+  "ui_implemented": true,
+  "reviewed_checks_passed": true,
+  "phase4_gate_passed": false,
+  "ui_source_commit": "1bf820d038bfdad6096a4576a13357a2a1f841ba",
+  "pull_request": "https://github.com/AaryaMody1301/Prooflane/pull/3",
+  "implementation": [
+    "Compact Scope, Delivery and Payment views, with default view derived from existing project state.",
+    "Read-only saved scope and explicit new-project action; navigation preserves unsaved CSV and makes no request.",
+    "Failure-first semantic results table, checked-version disclosure and collapsed replacement controls.",
+    "Persistent USD price and saved project modes, including mobile payment context before task content.",
+    "Receipt with actual approved/verified hash comparison, labeled simulation/sandbox mode, IDs and evidence export.",
+    "Existing human approval, pending-input locks, changed-preview guards and frozen checkout remain in place."
+  ],
+  "scope": {
+    "backend_api_changed": false,
+    "database_schema_changed": false,
+    "new_dependencies": false,
+    "ai_mode": "sample",
+    "payment_mode": "simulation",
+    "gemini_requests": 0,
+    "paypal_requests": 0,
+    "qa_database": ".venv/phase4-ui-2026-10-21.sqlite3",
+    "normal_app_database_modified": false
+  },
+  "validation": {
+    "python_tests_passed": 22,
+    "client_controller_passed": true,
+    "controller_lifecycle_fixtures": [
+      "DRAFT",
+      "AGREED",
+      "BLOCKED",
+      "VERIFIED",
+      "APPROVED",
+      "CHECKOUT_PENDING",
+      "ORDER_CREATED",
+      "PAYMENT_PENDING",
+      "PAID"
+    ],
+    "controller_additional_checks": [
+      "clarification blocks agreement",
+      "failure ordering",
+      "navigation without requests or preview loss",
+      "new-project reset",
+      "persisted receipt modes after config change",
+      "hash-mismatch display",
+      "cancellation return preserves an existing receipt",
+      "pending input locks",
+      "changed-preview approval and checkout guards",
+      "focused errors",
+      "mock File handler and oversized-file recovery",
+      "draft evidence shortcut cannot bypass scope navigation"
+    ],
+    "regression_before_implementation": "New workspace check failed because scope-stage was absent.",
+    "python_compilation_passed": true,
+    "optional_browser_runner": "Updated for new controls and stages; compiled, not executed in this run. Actual UI checks used the connected Chrome browser.",
+    "ci": {
+      "code_commit": "1bf820d038bfdad6096a4576a13357a2a1f841ba",
+      "run_url": "https://github.com/AaryaMody1301/Prooflane/actions/runs/39571275092",
+      "run_id": 39571275092,
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 119125774963,
+          "name": "windows-latest / Python 3.14",
+          "conclusion": "success"
+        },
+        {
+          "id": 119125775111,
+          "name": "ubuntu-latest / Python 3.11",
+          "conclusion": "success"
+        }
+      ],
+      "steps": [
+        "22 Python tests",
+        "Node controller",
+        "Python compilation"
+      ],
+      "note": "The complete UI and controller code checkpoint, including the draft navigation guard and mock-file checks. The later documentation-only head is checked separately in the PR."
+    }
+  },
+  "actual_browser": {
+    "browser": "Connected Chrome on Windows",
+    "method": "Actual UI interactions, read-only DOM measurements and screenshots on the isolated sample server.",
+    "layout": [
+      {
+        "stage": "blocked",
+        "clientWidth": 305,
+        "headingTop": 370,
+        "pageWidth": 305,
+        "projectAmount": "$120.00",
+        "status": "Changes needed",
+        "visibleControlsMeetMinimum": true,
+        "width": 320
+      },
+      {
+        "stage": "blocked",
+        "clientWidth": 375,
+        "headingTop": 315.75,
+        "pageWidth": 375,
+        "projectAmount": "$120.00",
+        "status": "Changes needed",
+        "visibleControlsMeetMinimum": true,
+        "width": 390
+      },
+      {
+        "stage": "blocked",
+        "clientWidth": 753,
+        "headingTop": 235.25,
+        "pageWidth": 753,
+        "projectAmount": "$120.00",
+        "status": "Changes needed",
+        "visibleControlsMeetMinimum": true,
+        "width": 768
+      },
+      {
+        "stage": "blocked",
+        "clientWidth": 1265,
+        "headingTop": 235.25,
+        "pageWidth": 1265,
+        "projectAmount": "$120.00",
+        "status": "Changes needed",
+        "visibleControlsMeetMinimum": true,
+        "width": 1280
+      },
+      {
+        "stage": "blocked",
+        "clientWidth": 1425,
+        "headingTop": 235.25,
+        "pageWidth": 1425,
+        "projectAmount": "$120.00",
+        "status": "Changes needed",
+        "visibleControlsMeetMinimum": true,
+        "width": 1440
+      },
+      {
+        "stage": "verified",
+        "clientWidth": 305,
+        "headingTop": 370,
+        "pageWidth": 305,
+        "projectAmount": "$120.00",
+        "status": "Ready for approval",
+        "visibleControlsMeetMinimum": true,
+        "width": 320
+      },
+      {
+        "stage": "verified",
+        "clientWidth": 375,
+        "headingTop": 341.25,
+        "pageWidth": 375,
+        "projectAmount": "$120.00",
+        "status": "Ready for approval",
+        "visibleControlsMeetMinimum": true,
+        "width": 390
+      },
+      {
+        "stage": "verified",
+        "clientWidth": 753,
+        "headingTop": 235.25,
+        "pageWidth": 753,
+        "projectAmount": "$120.00",
+        "status": "Ready for approval",
+        "visibleControlsMeetMinimum": true,
+        "width": 768
+      },
+      {
+        "stage": "verified",
+        "clientWidth": 1265,
+        "headingTop": 235.25,
+        "pageWidth": 1265,
+        "projectAmount": "$120.00",
+        "status": "Ready for approval",
+        "visibleControlsMeetMinimum": true,
+        "width": 1280
+      },
+      {
+        "stage": "verified",
+        "clientWidth": 1425,
+        "headingTop": 235.25,
+        "pageWidth": 1425,
+        "projectAmount": "$120.00",
+        "status": "Ready for approval",
+        "visibleControlsMeetMinimum": true,
+        "width": 1440
+      },
+      {
+        "stage": "scope",
+        "clientWidth": 305,
+        "headingTop": 370,
+        "pageWidth": 305,
+        "projectAmount": "$120.00",
+        "status": "Ready for approval",
+        "visibleControlsMeetMinimum": true,
+        "width": 320
+      },
+      {
+        "stage": "scope",
+        "clientWidth": 375,
+        "headingTop": 341.25,
+        "pageWidth": 375,
+        "projectAmount": "$120.00",
+        "status": "Ready for approval",
+        "visibleControlsMeetMinimum": true,
+        "width": 390
+      },
+      {
+        "stage": "scope",
+        "clientWidth": 753,
+        "headingTop": 235.25,
+        "pageWidth": 753,
+        "projectAmount": "$120.00",
+        "status": "Ready for approval",
+        "visibleControlsMeetMinimum": true,
+        "width": 768
+      },
+      {
+        "stage": "scope",
+        "clientWidth": 1265,
+        "headingTop": 235.25,
+        "pageWidth": 1265,
+        "projectAmount": "$120.00",
+        "status": "Ready for approval",
+        "visibleControlsMeetMinimum": true,
+        "width": 1280
+      },
+      {
+        "stage": "scope",
+        "clientWidth": 1425,
+        "headingTop": 235.25,
+        "pageWidth": 1425,
+        "projectAmount": "$120.00",
+        "status": "Ready for approval",
+        "visibleControlsMeetMinimum": true,
+        "width": 1440
+      },
+      {
+        "stage": "receipt",
+        "clientWidth": 305,
+        "headingTop": 370,
+        "pageWidth": 305,
+        "projectAmount": "$120.00",
+        "status": "Simulation complete",
+        "visibleControlsMeetMinimum": true,
+        "width": 320
+      },
+      {
+        "stage": "receipt",
+        "clientWidth": 375,
+        "headingTop": 341.25,
+        "pageWidth": 375,
+        "projectAmount": "$120.00",
+        "status": "Simulation complete",
+        "visibleControlsMeetMinimum": true,
+        "width": 390
+      },
+      {
+        "stage": "receipt",
+        "clientWidth": 753,
+        "headingTop": 235.25,
+        "pageWidth": 753,
+        "projectAmount": "$120.00",
+        "status": "Simulation complete",
+        "visibleControlsMeetMinimum": true,
+        "width": 768
+      },
+      {
+        "stage": "receipt",
+        "clientWidth": 1265,
+        "headingTop": 235.25,
+        "pageWidth": 1265,
+        "projectAmount": "$120.00",
+        "status": "Simulation complete",
+        "visibleControlsMeetMinimum": true,
+        "width": 1280
+      },
+      {
+        "stage": "receipt",
+        "clientWidth": 1425,
+        "headingTop": 235.25,
+        "pageWidth": 1425,
+        "projectAmount": "$120.00",
+        "status": "Simulation complete",
+        "visibleControlsMeetMinimum": true,
+        "width": 1440
+      }
+    ],
+    "checkpoints": {
+      "keyboard": {
+        "focused": "draft",
+        "outline": "solid",
+        "visibleFocus": true
+      },
+      "verified": {
+        "approveEnabled": true,
+        "focus": "delivery-heading",
+        "inputsClosed": true,
+        "passCount": 5,
+        "previewClosed": true,
+        "status": "Ready for approval"
+      },
+      "dirty": {
+        "approvalDisabled": true,
+        "previousResultsLabeled": true,
+        "status": "Preview changed"
+      },
+      "dirtyPayment": {
+        "checkoutDisabled": true,
+        "note": "The CSV preview changed. Run checks again and approve the checked version before checkout."
+      },
+      "nativeUpload": {
+        "attempted": true,
+        "completed": false,
+        "reason": "Chrome extension local-file access is disabled."
+      },
+      "scopeReadOnly": {
+        "agreedAmount": "Agreed payment: $120.00 USD",
+        "briefReadOnly": true,
+        "focus": "scope-heading",
+        "formHidden": true,
+        "quotes": 5
+      },
+      "completed": {
+        "deliveryFrozen": true,
+        "focus": "payment-heading",
+        "receiptMatches": true,
+        "simulationLabeled": true,
+        "status": "Simulation complete"
+      },
+      "receiptLayout": {
+        "headingTop": 215.25,
+        "pageHeight": 889,
+        "primaryBottom": 675.546875
+      },
+      "mobileReceipt": {
+        "amountTop": 111,
+        "headingTop": 321.25,
+        "modeTop": 204.75
+      },
+      "error": {
+        "busyHidden": true,
+        "focused": "error",
+        "priceEditable": true,
+        "top": 292,
+        "visible": true
+      },
+      "contrast": [
+        {
+          "background": "rgb(227, 243, 236)",
+          "element": "status",
+          "foreground": "rgb(8, 113, 91)",
+          "ratio": 5.19
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "element": "mode-title",
+          "foreground": "rgb(82, 98, 120)",
+          "ratio": 6.22
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "element": "mode-detail",
+          "foreground": "rgb(82, 98, 120)",
+          "ratio": 6.22
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "element": "payment-heading",
+          "foreground": "rgb(22, 35, 56)",
+          "ratio": 15.77
+        },
+        {
+          "background": "rgb(239, 248, 243)",
+          "element": "receipt-check",
+          "foreground": "rgb(8, 113, 91)",
+          "ratio": 5.5
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "element": "receipt-modes",
+          "foreground": "rgb(82, 98, 120)",
+          "ratio": 6.22
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "element": "notice",
+          "foreground": "rgb(82, 98, 120)",
+          "ratio": 6.22
+        },
+        {
+          "background": "rgb(54, 87, 223)",
+          "element": "evidence",
+          "foreground": "rgb(255, 255, 255)",
+          "ratio": 5.86
+        },
+        {
+          "background": "rgb(255, 255, 255)",
+          "element": "notice",
+          "foreground": "rgb(82, 98, 120)",
+          "ratio": 6.22
+        },
+        {
+          "background": "rgb(237, 241, 247)",
+          "element": "rail-status",
+          "foreground": "rgb(82, 98, 120)",
+          "ratio": 5.49
+        }
+      ],
+      "validReturn": {
+        "errorHidden": true,
+        "receiptView": true,
+        "status": "Simulation complete"
+      },
+      "foreignReturn": {
+        "error": "Return token does not match this stored order. Payment was not captured.",
+        "focus": "error",
+        "status": "Simulation complete"
+      },
+      "reflow640": {
+        "clientWidth": 625,
+        "note": "640 CSS pixel reflow check; native 200% browser zoom was not exercised.",
+        "pageWidth": 625,
+        "width": 640
+      },
+      "twoProjectResume": {
+        "amount": "$75.50",
+        "previewCleared": true,
+        "status": "Changes needed"
+      },
+      "consoleErrorCount": 0,
+      "draftGate": {
+        "evidenceShortcutHidden": true,
+        "paymentNavigationDisabled": true,
+        "scopeVisible": true
+      }
+    },
+    "desktop_density": {
+      "viewport": {
+        "width": 1280,
+        "height": 844
+      },
+      "blocked_heading_top": 235.25,
+      "blocked_primary_action_bottom": 795.046875,
+      "results_top": 360.546875,
+      "note": "CSS-pixel document positions of the blocked sample after the density refinement."
+    },
+    "contrast_note": "Selected rendered receipt text, mode/status labels and primary controls have contrast ratios of at least 5.19:1. This is a sampled check, not a conformance audit.",
+    "callback_note": "Valid completed return preserved the paid receipt; a foreign token produced a focused error without changing payment state. Both are simulated callbacks.",
+    "viewport_override_reset": true
+  },
+  "evidence_attachment_api": {
+    "project_id": "38ea24db15a0477d84b0a3e152f713d6",
+    "amount": "120.00",
+    "currency": "USD",
+    "ai_mode": "sample",
+    "payment_mode": "simulation",
+    "order_id": "SIM-ORDER-38ea24db15a0477d84b0a3e152f713d6",
+    "capture_id": "SIM-CAPTURE-38ea24db15a0477d84b0a3e152f713d6",
+    "delivery_sha256": "63b500480384b3cc711da1596f901eda79ffa3599ceefa5c9d01f706f2e6cd0c",
+    "receipt_approval_verification_hash_match": true,
+    "completed_event_count_after_return_replay": 1,
+    "attachment_header": true,
+    "raw_csv_and_sample_emails_absent": true
+  },
+  "local_artifacts": {
+    "ignored_directory": ".venv/ui-workspace-2026-10-21/",
+    "measurements": "checks.json",
+    "api_assertions": "receipt-api-check.json",
+    "reviewed_screenshots": [
+      "workspace-desktop.jpg",
+      "receipt-mobile.jpg"
+    ],
+    "screenshots_published": false,
+    "capture_note": "Screenshots show the visible browser window; responsive widths above are separately measured from the DOM."
+  },
+  "remaining_limits": [
+    "Native file chooser upload was attempted but blocked by Chrome extension local-file permission; the subsequent browser restart did not establish a successful upload. No permission was changed by the agent.",
+    "Browser download-event automation was not repeated; attachment headers, receipt contents and absence of CSV rows were verified through the API.",
+    "Native 200% browser zoom was not exercised. Additional reflow at 640 CSS pixels passed.",
+    "Physical mobile devices, screen readers and independent-user task completion were not tested.",
+    "A second real-AI/sandbox delivery example, independent fresh setup and target-user feedback remain Phase 4 gates.",
+    "Pending capture, checkout uncertainty and mode mismatch view fixtures are offline UI checks, not new provider acceptance."
+  ]
+}

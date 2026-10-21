@@ -436,7 +436,7 @@ class Checks(unittest.TestCase):
                 return json.load(response)
         try:
             with urlopen(base) as response:
-                self.assertIn(b"See the proof. Then pay.", response.read())
+                self.assertIn(b"<title>Prooflane", response.read())
             with self.assertRaises(HTTPError) as error:
                 post("/api/projects", {"brief": SAMPLE_BRIEF, "price": "120.00"}, {"Origin": "https://evil.example"})
             self.assertEqual(error.exception.code, 403)
