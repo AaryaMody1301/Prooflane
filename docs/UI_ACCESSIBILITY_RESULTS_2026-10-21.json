@@ -542,7 +542,96 @@
       "upstream_issue": "https://github.com/dequelabs/axe-core/issues/3978",
       "disposition": "Mixed forced/unforced color values reproduce the documented engine limitation. Manual rendered-color and screenshot review passes; this is not an unqualified axe pass."
     },
-    "temporary_emulation_reset": true
+    "temporary_emulation_reset": true,
+    "native_200_percent_zoom": {
+      "passed": true,
+      "set_through_native_chrome_menu_by_user": true,
+      "no_device_emulation_on_test_tab": true,
+      "before": {
+        "dpr": 1,
+        "height": 861,
+        "width": 929
+      },
+      "measurements": [
+        {
+          "state": "receipt",
+          "clientWidth": 457,
+          "dpr": 2,
+          "focus": "workspace",
+          "height": 430,
+          "scrollWidth": 457,
+          "width": 464
+        },
+        {
+          "state": "receipt-expanded",
+          "clientWidth": 457,
+          "dpr": 2,
+          "focus": "",
+          "height": 430,
+          "scrollWidth": 457,
+          "width": 464
+        },
+        {
+          "state": "scope",
+          "clientWidth": 457,
+          "dpr": 2,
+          "focus": "scope-heading",
+          "height": 430,
+          "scrollWidth": 457,
+          "width": 464
+        },
+        {
+          "state": "verified-frozen-delivery",
+          "clientWidth": 457,
+          "dpr": 2,
+          "focus": "delivery-heading",
+          "height": 430,
+          "scrollWidth": 457,
+          "width": 464
+        },
+        {
+          "state": "new-project-form",
+          "clientWidth": 457,
+          "dpr": 2,
+          "focus": "scope-heading",
+          "height": 430,
+          "scrollWidth": 457,
+          "width": 464
+        },
+        {
+          "state": "price-error",
+          "clientWidth": 457,
+          "dpr": 2,
+          "focus": "error",
+          "height": 430,
+          "scrollWidth": 457,
+          "width": 464
+        }
+      ],
+      "all_visible_controls_at_least_24px": true,
+      "price_tab_focus": "price",
+      "focused_error": {
+        "bottom": 239.75,
+        "focus": true,
+        "role": "alert",
+        "text": "Price must be a USD decimal string with at most two decimals.",
+        "top": 190.75,
+        "viewportHeight": 430
+      },
+      "export_focus": {
+        "bottom": 237.34375,
+        "focus": true,
+        "outline": "solid",
+        "top": 192.84375,
+        "viewportHeight": 430
+      },
+      "restored_100_percent": {
+        "dpr": 1,
+        "height": 861,
+        "width": 929
+      },
+      "screenshot": "native-zoom-200-receipt.jpg"
+    }
   },
   "fixes": [
     "Put project context, status, errors and stages inside the single main landmark.",
@@ -556,7 +645,13 @@
     "python_result": "pass",
     "node_controller": "pass",
     "python_compilation": "pass",
-    "optional_browser_runner": "Updated and compiled; not executed in this run. Equivalent skip-link actions were exercised through the connected Chrome tab."
+    "optional_browser_runner": "Updated and compiled; not executed in this run. Equivalent skip-link actions were exercised through the connected Chrome tab.",
+    "code_ci": {
+      "commit": "972f55c57d7abf9f092b4da804a66cd9201b3b01",
+      "run": "https://github.com/AaryaMody1301/Prooflane/actions/runs/39577407446",
+      "windows_python_3_14": "success",
+      "ubuntu_python_3_11": "success"
+    }
   },
   "artifacts": {
     "ignored_folder": ".venv/ui-accessibility-2026-10-21/",
@@ -565,7 +660,6 @@
     "screenshots_published": false
   },
   "remaining_limits": [
-    "Native 200% browser zoom is pending a manual Chrome menu step. Automated shortcuts had no effect; the browser URL policy blocked Chrome settings. Reflow tests do not substitute for this check.",
     "Screen-reader speech, live-region announcements and physical assistive devices are not verified by the DOM/AX checks. Native app control is disabled in the connected tools.",
     "Firefox, Safari, physical touch devices and independent disabled-user acceptance were not tested.",
     "PayPal checkout and provider timing/authentication screens are outside this local sample audit. No new Gemini or PayPal request occurred."

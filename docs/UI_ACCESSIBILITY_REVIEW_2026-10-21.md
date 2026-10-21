@@ -1,6 +1,6 @@
 # Native files and accessibility review — 21 October 2026
 
-Chrome native CSV upload and evidence download now pass. The repaired UI has zero violations across 34 standard axe-core 4.14.0 scans. Keyboard, error recovery, table semantics, reflow, text spacing and preference checks pass within the tested local workflow. This does not establish full accessibility conformance: native 200% zoom and spoken screen-reader behavior remain open.
+Chrome native CSV upload, evidence download and 200% browser zoom now pass. The repaired UI has zero violations across 34 standard axe-core 4.14.0 scans. Keyboard, error recovery, table semantics, reflow, text spacing and preference checks pass within the tested local workflow. This does not establish full accessibility conformance: spoken screen-reader behavior and physical assistive devices remain open.
 
 The [machine-readable results](UI_ACCESSIBILITY_RESULTS_2026-10-21.json) record the exact tested UI content hash, scan states, measured widths and limitations. This follow-up supersedes the native-file limitations in the earlier [workspace checkpoint](UI_WORKSPACE_RESULTS_2026-10-21.json); that historical record is unchanged.
 
@@ -34,6 +34,7 @@ These are synthetic local sample/simulation checks in separate ignored databases
 | Focus | Twelve production tab stops remain visible with a 3px outline; errors receive focus; approval/order/capture each focus the payment heading |
 | Names and structure | One main, named modes/navigation, associated labels, valid ARIA references, descriptive title/headings; mobile Chrome AX tree retains the table, five row headers and three column headers |
 | Reflow and targets | 25 valid measurements at 320, 390, 844, 929 and 1280 CSS pixels; no horizontal overflow; visible tested controls at least 24×24px; 844×390 landscape checked |
+| Native 200% zoom | User set Chrome's native menu to 200%; observed DPR 1→2 and viewport 929×861→464×430. Receipt, expanded receipt, Scope, Delivery, new-project form and price error have no horizontal overflow or undersized controls. Error and export focus stay fully visible. User restored 100%, observed DPR 1 and 929×861 again |
 | Text spacing | At 320px, Scope, verified Delivery and Receipt retain controls and content with 1.5 line height, 2em paragraph spacing, .12em letter spacing and .16em word spacing |
 | Reduced motion | Emulated preference matches and no production animation/transition remains |
 | Forced colors | Manual rendered-color review passes all 23 flagged nodes, minimum 19.56:1; native Windows contrast themes were not exercised |
@@ -43,11 +44,10 @@ Axe leaves the decorative receipt checkmark for manual color review. It is nonin
 
 The scanner was served only in an ignored QA copy of the production HTML, with its test controls excluded. Its pinned npm version/origin, raw scans, measurements, fixtures and screenshots remain under `.venv/ui-accessibility-2026-10-21/`. Production gains no dependency or audit controls. Temporary viewport and preference emulation was reset.
 
-All 22 Python tests, the Node controller suite and compilation pass. The optional browser runner now protects first-tab skip-link activation and the single main landmark; it was compiled, not executed in this run. The corresponding actions were verified through connected Chrome.
+All 22 Python tests, the Node controller suite and compilation pass locally and in [Windows/Ubuntu CI on the code commit](https://github.com/AaryaMody1301/Prooflane/actions/runs/39577407446). The optional browser runner now protects first-tab skip-link activation and the single main landmark; it was compiled, not executed in this run. The corresponding actions were verified through connected Chrome.
 
 ## Open acceptance checks
 
-- Native 200% Chrome zoom: automated shortcuts did not change it; browser URL policy blocked Chrome settings. A manual menu step was requested. The successful 320px reflow check is separate evidence.
 - Actual screen-reader announcements and assistive-device operation. The connected tools expose DOM/AX information, with native application control disabled.
 - Firefox, Safari, physical touch devices and independent disabled-user completion.
 - PayPal's external authentication, timing and checkout screens are outside this local sample audit. The remaining Phase 4 real-service and independent-user gates are unchanged.

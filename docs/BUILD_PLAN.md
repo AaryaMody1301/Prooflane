@@ -15,7 +15,7 @@ Dates are working targets in IST, not automatic phase transitions. Keep 12 Novem
 | 1. Local MVP | 17–18 October | Sample brief, review, CSV checks, approval, simulated receipt, saved-project resume, evidence export | Reproducible local flow; faulty file blocked; corrected file paid in simulation; restart/resume preserves evidence | Complete 17 October; headed Edge and desktop/390px visual gates passed |
 | 2. Real AI | 19–21 October | Gemini configuration and custom measurable briefs with human review | Actual provider responses for measurable and ambiguous briefs; errors never silently use the sample fixture | Complete 20 October for the reviewed Gemini 3.6 inventory flow; source/coverage review, real browser and ambiguity blocking verified |
 | 3. PayPal sandbox | 22–25 October | Actual create, buyer approval, capture/readback, cancellation and retry | One real sandbox capture linked to the approved hash; cancellation unpaid; retry and amount mismatch handled | Complete 20 October for the reviewed inventory flow; actual USD 1.00 capture/readback, repeated reconciliation and separate normal cancellation pass; wrong-amount/pending/timeout cases remain offline contracts |
-| 4. Usability and reliability | 26 October–4 November | Desktop/mobile QA, a second use case, fresh setup, user feedback, final recovery checks | Another person completes the judge path; evidence agrees with the provider; issues fixed | In progress; CI, recovery, native files and standard accessibility scans pass; native zoom/screen readers, second real-service case, independent setup and feedback remain open |
+| 4. Usability and reliability | 26 October–4 November | Desktop/mobile QA, a second use case, fresh setup, user feedback, final recovery checks | Another person completes the judge path; evidence agrees with the provider; issues fixed | In progress; CI, recovery, native files and standard accessibility scans pass; screen readers/physical devices, second real-service case, independent setup and feedback remain open |
 | 5. Submission | 5–11 November | Feature freeze, demonstration, project description, judge instructions and submission | Public links work; video under 3 minutes; Devpost submission confirmed | Planned |
 
 ## Phase 1 — local MVP
@@ -143,7 +143,7 @@ Started 20 October after Phase 3 passed. The first recovery check passes: restar
 
 The following gates remain open:
 
-- Complete native 200% zoom, actual screen-reader announcements and physical-device acceptance; DOM reflow and AX semantics do not substitute for those checks.
+- Complete actual screen-reader announcements and physical-device acceptance; native 200% zoom now passes, while AX semantics do not substitute for spoken-screen-reader checks.
 - Test a second synthetic data-delivery example through real AI and sandbox checkout.
 - Ask target data freelancers/clients to try scope review. Aim for three conversations; document real observations, without inventing interview results or savings metrics.
 - Have someone run a fresh checkout from the public repo, add their local credentials and follow the README without coaching.
@@ -169,7 +169,7 @@ Gate: submitted project with functioning access, working links and evidence supp
 
 ## Scope rules and blockers
 
-Phases 1–3 are complete for the reviewed inventory case. This checkout runs Gemini 3.6 Flash with sandbox payments; Gemini 3.8 failures and the explicit model comparison remain in the evidence. The India buyer/merchant currency blocker was resolved for testing by using the approved US sandbox buyer on the original order. One completed USD 1.00 capture matches the evidence; repeated reconciliation, normal cancellation and restart recovery pass. Phase 4 now has passing CI, native file checks and repaired browser accessibility checks; native zoom/screen readers, a second real-service case, independent setup and user-feedback gates remain open. Configure credentials locally; do not paste them into chat or commit `.env`.
+Phases 1–3 are complete for the reviewed inventory case. This checkout runs Gemini 3.6 Flash with sandbox payments; Gemini 3.8 failures and the explicit model comparison remain in the evidence. The India buyer/merchant currency blocker was resolved for testing by using the approved US sandbox buyer on the original order. One completed USD 1.00 capture matches the evidence; repeated reconciliation, normal cancellation and restart recovery pass. Phase 4 now has passing CI, native file checks and repaired browser accessibility checks; screen readers/physical devices, a second real-service case, independent setup and user-feedback gates remain open. Configure credentials locally; do not paste them into chat or commit `.env`.
 
 Keep one delivery, one agreed amount and one capture. Defer escrow, automatic payouts, refunds, multi-milestone work, arbitrary generated code, additional file formats, marketplace features and sponsor integrations. Add an item only if observed user feedback or a broken completion gate requires it.
 
