@@ -2,6 +2,8 @@
 import copy
 import io
 import json
+import subprocess
+import sys
 import tempfile
 import threading
 import unittest
@@ -12,7 +14,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from http.server import ThreadingHTTPServer
 
-from app import Handler, PayPal, Problem, ROOT, SAMPLE_BRIEF, Store, doctor, draft_plan, money, sample_plan, validate_plan, verify_csv
+from app import Handler, PayPal, Problem, ROOT, SAMPLE_BRIEF, SOURCE_BRIEF, CLARIFY_BRIEF, SOURCE_REQUIREMENTS, Store, doctor, draft_plan, money, sample_plan, source_plan, source_snapshot, payment_reference, validate_plan, verify_csv, verify_evidence
 
 FAILED = (ROOT / "examples/failed.csv").read_text()
 PASSED = (ROOT / "examples/passed.csv").read_text()
@@ -39,7 +41,7 @@ def ready(store):
 
 def order_result(p, state="COMPLETED", currency="USD", value="120.00"):
     capture = {"id": "SANDBOX-CAPTURE", "status": state, "amount": {"currency_code": currency, "value": value}}
-    return {"id": p["order"]["id"], "status": "COMPLETED", "purchase_units": [{"custom_id": p["id"], "amount": {"currency_code": "USD", "value": "120.00", "breakdown": {}}, "payments": {"captures": [capture]}}]}
+    return {"id": p["order"]["id"], "status": "COMPLETED", "purchase_units": [{"custom_id": payment_reference(p), "amount": {"currency_code": "USD", "value": "120.00", "breakdown": {}}, "payments": {"captures": [capture]}}]}
 
 
 class FakePayPal:
@@ -49,7 +51,7 @@ class FakePayPal:
 
     def create(self, p, origin):
         self.creates += 1
-        return {"id": "SANDBOX-ORDER", "status": "CREATED", "purchase_units": [{"custom_id": p["id"], "amount": {"currency_code": "USD", "value": "120.00", "breakdown": {}}}], "links": [{"rel": "payer-action", "href": "https://www.sandbox.paypal.com/checkoutnow?token=SANDBOX-ORDER"}]}
+        return {"id": "SANDBOX-ORDER", "status": "CREATED", "purchase_units": [{"custom_id": payment_reference(p), "amount": {"currency_code": "USD", "value": "120.00", "breakdown": {}}}], "links": [{"rel": "payer-action", "href": "https://www.sandbox.paypal.com/checkoutnow?token=SANDBOX-ORDER"}]}
 
     def capture(self, p):
         self.captures += 1
@@ -414,6 +416,182 @@ class Checks(unittest.TestCase):
                 ai.assert_not_called()
                 auth.assert_not_called()
 
+    def source_project(self, sandbox=False):
+        if sandbox:
+            self.store.payment_mode, self.store.paypal = "sandbox", FakePayPal()
+        p = self.store.create({"brief": SOURCE_BRIEF, "price": "120.00"})
+        for action, body in [("agree", {"source_csv": PASSED}), ("verify", {"csv": PASSED, "source_csv": PASSED}), ("approve", {})]:
+            p = self.store.act(p["id"], action, body, "http://127.0.0.1:8787")
+        return p
+
+    def paid_source(self, sandbox=False):
+        p = self.source_project(sandbox)
+        p = self.store.act(p["id"], "order", {}, "http://127.0.0.1:8787")
+        return self.store.act(p["id"], "capture", {"order_id": p["order"]["id"]}, "")
+
+    def test_source_comparison_catches_valid_looking_substitution_and_decimal_change(self):
+        self.assertEqual(validate_plan(source_plan(), SOURCE_BRIEF), source_plan())
+        for file, failed_kind in [("substituted", "source_keys"), ("changed-value", "source_values")]:
+            raw = (ROOT / ("examples/" + file + ".csv")).read_text()
+            self.assertTrue(verify_csv(raw, sample_plan()["checks"])["passed"])
+            result = verify_csv(raw, source_plan()["checks"], PASSED)
+            self.assertFalse(result["passed"])
+            self.assertFalse(next(c for c in result["checks"] if c["kind"] == failed_kind)["passed"])
+            self.assertNotIn("mila@example.com", json.dumps(result))
+        self.assertTrue(verify_csv(PASSED.replace(",125", ",125.00"), source_plan()["checks"], PASSED)["passed"])
+        duplicate = PASSED.replace("ord_102", "ord_101")
+        with self.assertRaises(Problem):
+            source_snapshot(duplicate, source_plan()["checks"])
+        for value in ["NaN", "1e999999999", "1e-19", "1" * 65, "abc"]:
+            with self.subTest(value=value), self.assertRaises(Problem):
+                source_snapshot(PASSED.replace(",125", "," + value), source_plan()["checks"])
+
+    def test_gemini_source_plan_uses_existing_structured_fields_and_exact_quotes(self):
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "test-placeholder"}), patch("app.json_request", return_value=gemini_response(source_plan())):
+            self.assertEqual(draft_plan(SOURCE_BRIEF, "gemini", "gemini-3.6-flash"), source_plan())
+        wrong = source_plan()
+        wrong["checks"][-1]["columns"] = ["revenue", "revenue"]
+        with self.assertRaises(Problem):
+            validate_plan(wrong, SOURCE_BRIEF)
+
+    def test_source_agreement_and_reattachment_are_frozen_without_saving_raw_rows(self):
+        p = self.store.create({"brief": SOURCE_BRIEF, "price": "120.00"})
+        with self.assertRaises(Problem):
+            self.store.act(p["id"], "agree", {}, "")
+        self.assertEqual(self.store.get(p["id"])["status"], "DRAFT")
+        p = self.source_project()
+        self.assertNotIn("mila@example.com", json.dumps(p))
+        self.assertEqual(p["verification"]["source_sha256"], p["source"]["sha256"])
+        before = copy.deepcopy(p)
+        with self.assertRaises(Problem):
+            self.store.act(p["id"], "verify", {"csv": PASSED, "source_csv": PASSED.replace("125", "124")}, "")
+        self.assertEqual(self.store.get(p["id"]), before)
+        p = self.store.act(p["id"], "verify", {"csv": FAILED, "source_csv": PASSED}, "")
+        self.assertIsNone(p["approval"])
+        self.assertIsNone(p["manifest"])
+        with self.assertRaises(Problem):
+            self.store.act(p["id"], "order", {}, "")
+
+    def test_source_correction_preview_is_read_only_and_never_guesses_conflicting_keys(self):
+        p = self.source_project()
+        for file in ["substituted", "changed-value"]:
+            original = (ROOT / ("examples/" + file + ".csv")).read_text()
+            preview = self.store.act(p["id"], "repair", {"csv": original, "source_csv": PASSED}, "")
+            self.assertTrue(preview["verification"]["passed"])
+            self.assertGreater(preview["change_count"], 0)
+            self.assertEqual(self.store.get(p["id"]), p)
+            self.assertTrue(verify_csv(preview["csv"], source_plan()["checks"], PASSED)["passed"])
+        for raw in [PASSED.replace("ord_102", "ord_101"), PASSED.replace("order_id,", "other_id,")]:
+            with self.assertRaises(Problem):
+                self.store.act(p["id"], "repair", {"csv": raw, "source_csv": PASSED}, "")
+        with self.assertRaises(Problem):
+            self.store.act(p["id"], "repair", {"csv": FAILED, "source_csv": PASSED.replace("125", "124")}, "")
+        self.store.act(p["id"], "order", {}, "")
+        with self.assertRaises(Problem):
+            self.store.act(p["id"], "repair", {"csv": FAILED, "source_csv": PASSED}, "")
+
+    def test_csv_hash_normalization_and_invalid_unicode(self):
+        original = source_snapshot(PASSED, source_plan()["checks"])
+        self.assertEqual(original, source_snapshot("\ufeff" + PASSED.replace("\n", "\r\n"), source_plan()["checks"]))
+        with self.assertRaises(Problem):
+            verify_csv("a\n\ud800", sample_plan()["checks"])
+
+    def test_manifest_changes_block_checkout_and_provider_metadata_mismatch(self):
+        p = self.source_project(sandbox=True)
+        reference = payment_reference(p)
+        self.assertLessEqual(len(reference), 255)
+        for field, value in [("cents", 100), ("brief", p["brief"] + " changed")]:
+            changed = copy.deepcopy(p)
+            changed[field] = value
+            self.store.save(changed)
+            with self.assertRaises(Problem):
+                self.store.act(p["id"], "order", {}, "")
+            self.assertEqual(self.store.paypal.creates, 0)
+        self.store.save(p)
+        p = self.store.act(p["id"], "order", {}, "http://127.0.0.1:8787")
+        response = order_result(p)
+        response["status"] = "APPROVED"
+        response["purchase_units"][0]["custom_id"] = p["id"]
+        adapter = PayPal("test", "test")
+        with patch.object(adapter, "call", return_value=response) as call, self.assertRaises(Problem):
+            adapter.capture(p)
+        self.assertEqual(call.call_count, 1)
+
+    def test_independent_evidence_checks_files_and_reads_provider_without_capturing(self):
+        p = self.paid_source(sandbox=True)
+        evidence = {"format": "prooflane-evidence-v1", "project": p}
+        local = verify_evidence(evidence, PASSED, PASSED)
+        self.assertEqual(local["payment_status"], "unverified")
+        self.assertFalse(local["payment_verified"])
+        adapter = PayPal("test", "test")
+        with patch.object(adapter, "call", return_value=order_result(p)) as call, patch.object(adapter, "capture") as capture:
+            confirmed = verify_evidence(evidence, PASSED, PASSED, adapter)
+            self.assertTrue(confirmed["payment_verified"])
+            call.assert_called_once_with("/v2/checkout/orders/" + p["order"]["id"])
+            capture.assert_not_called()
+        for delivery, source in [(PASSED.replace("125", "125.01"), PASSED), (PASSED, PASSED.replace("125", "125.01"))]:
+            with self.assertRaises(Problem):
+                verify_evidence(evidence, delivery, source)
+        for field, value in [("cents", 100), ("brief", p["brief"] + " changed")]:
+            changed = copy.deepcopy(evidence)
+            changed["project"][field] = value
+            with self.assertRaises(Problem):
+                verify_evidence(changed, PASSED, PASSED)
+        for field, value in [("source", None), ("verification", {**p["verification"], "passed": False}), ("receipt", {**p["receipt"], "capture_id": ""})]:
+            changed = copy.deepcopy(evidence)
+            changed["project"][field] = value
+            with self.assertRaises(Problem):
+                verify_evidence(changed, PASSED, PASSED)
+        wrong = order_result(p, state="PENDING")
+        with patch.object(adapter, "call", return_value=wrong), self.assertRaises(Problem):
+            verify_evidence(evidence, PASSED, PASSED, adapter)
+        with patch.object(adapter, "call", side_effect=Problem("Provider unavailable", 502)), self.assertRaises(Problem):
+            verify_evidence(evidence, PASSED, PASSED, adapter)
+
+    def test_legacy_approval_and_receipt_keep_original_provider_reference(self):
+        p = ready(self.store)
+        p.pop("manifest")
+        p["approval"].pop("manifest_sha256")
+        self.store.save(p)
+        self.assertEqual(payment_reference(p), p["id"])
+        p = self.store.act(p["id"], "order", {}, "")
+        p = self.store.act(p["id"], "capture", {"order_id": p["order"]["id"]}, "")
+        self.assertNotIn("manifest_sha256", p["receipt"])
+        with self.assertRaisesRegex(Problem, "legacy"):
+            verify_evidence({"format": "prooflane-evidence-v1", "project": p}, PASSED)
+
+    def test_clarification_creates_new_reviewable_scope_preserving_original_and_price(self):
+        p = self.store.create({"brief": CLARIFY_BRIEF, "price": "42.50"})
+        self.assertTrue(p["plan"]["clarifications"])
+        revised = self.store.act(p["id"], "clarify", {"brief": SOURCE_BRIEF, "price": "1.00"}, "")
+        self.assertNotEqual(revised["id"], p["id"])
+        self.assertEqual(revised["revision_of"], p["id"])
+        self.assertEqual(revised["cents"], 4250)
+        self.assertEqual(self.store.get(p["id"]), p)
+        self.assertEqual(len(revised["plan"]["checks"]), 7)
+        self.assertFalse(revised["plan"]["clarifications"])
+        with self.assertRaises(Problem):
+            self.store.act(revised["id"], "agree", {}, "")
+        self.store.act(revised["id"], "agree", {"source_csv": PASSED}, "")
+        with self.assertRaises(Problem):
+            self.store.act(revised["id"], "clarify", {"brief": SOURCE_BRIEF}, "")
+
+    def test_receipt_verifier_cli_is_database_independent_and_fails_changed_delivery(self):
+        p = self.paid_source()
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            (folder / "receipt.json").write_text(json.dumps({"format": "prooflane-evidence-v1", "project": p}), encoding="utf-8")
+            (folder / "source.csv").write_text(PASSED, encoding="utf-8")
+            (folder / "delivery.csv").write_text(PASSED, encoding="utf-8")
+            command = [sys.executable, str(ROOT / "verify_receipt.py"), str(folder / "receipt.json"), str(folder / "delivery.csv"), "--source", str(folder / "source.csv")]
+            result = subprocess.run(command, capture_output=True, text=True, cwd=directory, timeout=15)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(json.loads(result.stdout)["payment_status"], "simulated")
+            (folder / "delivery.csv").write_text(PASSED.replace("125", "125.01"), encoding="utf-8")
+            result = subprocess.run(command, capture_output=True, text=True, cwd=directory, timeout=15)
+            self.assertEqual(result.returncode, 1)
+            self.assertFalse(json.loads(result.stdout)["payment_verified"])
+
     def test_persistence(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "test.sqlite3"
@@ -441,6 +619,11 @@ class Checks(unittest.TestCase):
                 post("/api/projects", {"brief": SAMPLE_BRIEF, "price": "120.00"}, {"Origin": "https://evil.example"})
             self.assertEqual(error.exception.code, 403)
             error.exception.close()
+            nested = Request(base + "/api/verify-evidence", data=b'{"evidence":' + b'[' * 1200 + b'0' + b']' * 1200 + b'}', headers={"Content-Type": "application/json", "X-Prooflane-Request": "1"})
+            with self.assertRaises(HTTPError) as error:
+                urlopen(nested, timeout=5)
+            self.assertEqual(error.exception.code, 400)
+            error.exception.close()
             p = post("/api/projects", {"brief": SAMPLE_BRIEF, "price": "120.00"})
             path = "/api/projects/" + p["id"]
             for action, body in [("agree", {}), ("verify", {"csv": FAILED}), ("verify", {"csv": PASSED}), ("approve", {}), ("order", {})]:
@@ -467,6 +650,17 @@ class Checks(unittest.TestCase):
             self.assertEqual(resumed, results[0])
             self.assertEqual(resumed["receipt"]["amount"], "120.00")
             self.assertEqual(saved[0]["cents"], 7550)
+            verified = post("/api/verify-evidence", {"evidence": evidence, "csv": PASSED})
+            self.assertEqual(verified["payment_status"], "simulated")
+            self.assertFalse(verified["payment_verified"])
+            source_project = post("/api/projects", {"brief": SOURCE_BRIEF, "price": "120.00"})
+            source_path = "/api/projects/" + source_project["id"]
+            large = "order_id,customer_email,revenue\n" + "".join(f"order_{i},{'p' * 190}@example.com,1\n" for i in range(1100))
+            self.assertLess(len(large.encode()), 300_000)
+            self.assertGreater(len(json.dumps({"csv": large, "source_csv": large}).encode()), 400_000)
+            post(source_path + "/agree", {"source_csv": large})
+            result = post(source_path + "/verify", {"csv": large, "source_csv": large})
+            self.assertTrue(result["verification"]["passed"])
         finally:
             server.shutdown()
             server.server_close()

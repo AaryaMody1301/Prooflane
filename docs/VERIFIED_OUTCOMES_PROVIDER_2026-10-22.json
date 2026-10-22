@@ -1,0 +1,182 @@
+{
+  "format": "prooflane-outcomes-provider-review-v1",
+  "date": "2026-10-22",
+  "note": "Synthetic briefs and isolated test databases. This evidence is a diagnostic, not a digitally signed attestation. No credentials or raw provider customer details are included.",
+  "first_source_probe": {
+    "checked_at_utc": "2026-10-22T12:14:03.586212+00:00",
+    "model": "gemini-3.6-flash",
+    "brief": "Deliver a sales CSV with order_id, customer_email and revenue columns. Every order_id must be unique. Every customer_email must be present. Revenue must be a number greater than or equal to 0. Include at least 3 rows. The delivery must contain exactly the source order_id values. For each order_id, revenue must equal the source revenue.",
+    "note": "Synthetic plan and sandbox authentication only. No project, order or capture created.",
+    "ai_error": "Provider returned HTTP 503. Check credentials, quota, or sandbox approval; no simulated fallback was used.",
+    "paypal_authentication": true
+  },
+  "reviewed_source_probe": {
+    "checked_at_utc": "2026-10-22T12:32:18.411805+00:00",
+    "model": "gemini-3.6-flash",
+    "brief": "Deliver a sales CSV with order_id, customer_email and revenue columns. Every order_id must be unique. Every customer_email must be present. Revenue must be a number greater than or equal to 0. Include at least 3 rows. The delivery must contain exactly the source order_id values. For each order_id, revenue must equal the source revenue.",
+    "note": "Synthetic plan and sandbox authentication only. No project, order or capture created.",
+    "plan": {
+      "title": "Sales CSV Acceptance Plan",
+      "checks": [
+        {
+          "kind": "required_columns",
+          "source": "Deliver a sales CSV with order_id, customer_email and revenue columns.",
+          "columns": [
+            "order_id",
+            "customer_email",
+            "revenue"
+          ]
+        },
+        {
+          "kind": "unique",
+          "source": "Every order_id must be unique.",
+          "column": "order_id"
+        },
+        {
+          "kind": "not_empty",
+          "source": "Every customer_email must be present.",
+          "column": "customer_email"
+        },
+        {
+          "kind": "number_range",
+          "source": "Revenue must be a number greater than or equal to 0.",
+          "column": "revenue",
+          "min": 0
+        },
+        {
+          "kind": "row_count",
+          "source": "Include at least 3 rows.",
+          "min": 3
+        },
+        {
+          "kind": "source_keys",
+          "source": "The delivery must contain exactly the source order_id values.",
+          "column": "order_id"
+        },
+        {
+          "kind": "source_values",
+          "source": "For each order_id, revenue must equal the source revenue.",
+          "columns": [
+            "order_id",
+            "revenue"
+          ]
+        }
+      ],
+      "clarifications": []
+    },
+    "reviewed_coverage_matches": true,
+    "paypal_authentication": true
+  },
+  "clarification": {
+    "checked_at_utc": "2026-10-22T12:34:55.958183+00:00",
+    "model": "gemini-3.6-flash",
+    "original_brief": "Deliver a sales CSV with order_id, customer_email and revenue columns. Every order_id must be unique. Every customer_email must be present. Revenue must be a number greater than or equal to 0. Include at least 3 rows. Keep the source data intact.",
+    "original_plan": {
+      "title": "Sales Data Acceptance Plan",
+      "checks": [
+        {
+          "kind": "required_columns",
+          "source": "Deliver a sales CSV with order_id, customer_email and revenue columns.",
+          "columns": [
+            "order_id",
+            "customer_email",
+            "revenue"
+          ]
+        },
+        {
+          "kind": "unique",
+          "source": "Every order_id must be unique.",
+          "column": "order_id"
+        },
+        {
+          "kind": "not_empty",
+          "source": "Every customer_email must be present.",
+          "column": "customer_email"
+        },
+        {
+          "kind": "number_range",
+          "source": "Revenue must be a number greater than or equal to 0.",
+          "column": "revenue",
+          "min": 0
+        },
+        {
+          "kind": "row_count",
+          "source": "Include at least 3 rows.",
+          "min": 3
+        }
+      ],
+      "clarifications": [
+        "The requirement 'Keep the source data intact.' is vague and does not specify source dataset details, key columns, or numeric fields required for automated source validation."
+      ]
+    },
+    "revised_brief": "Deliver a sales CSV with order_id, customer_email and revenue columns. Every order_id must be unique. Every customer_email must be present. Revenue must be a number greater than or equal to 0. Include at least 3 rows. The delivery must contain exactly the source order_id values. For each order_id, revenue must equal the source revenue.",
+    "revised_plan": {
+      "title": "Sales CSV Acceptance Plan",
+      "checks": [
+        {
+          "kind": "required_columns",
+          "source": "Deliver a sales CSV with order_id, customer_email and revenue columns.",
+          "columns": [
+            "order_id",
+            "customer_email",
+            "revenue"
+          ]
+        },
+        {
+          "kind": "unique",
+          "source": "Every order_id must be unique.",
+          "column": "order_id"
+        },
+        {
+          "kind": "not_empty",
+          "source": "Every customer_email must be present.",
+          "column": "customer_email"
+        },
+        {
+          "kind": "number_range",
+          "source": "Revenue must be a number greater than or equal to 0.",
+          "column": "revenue",
+          "min": 0
+        },
+        {
+          "kind": "row_count",
+          "source": "Include at least 3 rows.",
+          "min": 3
+        },
+        {
+          "kind": "source_keys",
+          "source": "The delivery must contain exactly the source order_id values.",
+          "column": "order_id"
+        },
+        {
+          "kind": "source_values",
+          "source": "For each order_id, revenue must equal the source revenue.",
+          "columns": [
+            "order_id",
+            "revenue"
+          ]
+        }
+      ],
+      "clarifications": []
+    },
+    "reviewed_coverage_matches": true,
+    "original_preserved": true,
+    "price_preserved": true,
+    "cents": 4250,
+    "payment_mode": "simulation"
+  },
+  "sandbox_order_readback": {
+    "provider_order_status": "PAYER_ACTION_REQUIRED",
+    "local_status": "ORDER_CREATED",
+    "reference_matches": true,
+    "amount_matches": true,
+    "ai_mode": "sample",
+    "payment_mode": "sandbox",
+    "receipt_recorded": false
+  },
+  "acceptance_limits": [
+    "The expanded sandbox order is awaiting buyer approval; no completed capture is claimed.",
+    "The sandbox order uses the explicitly labelled sample AI fixture; Gemini probes are separate.",
+    "This does not establish a combined fresh Gemini and sandbox checkout or a submitted hackathon entry."
+  ]
+}

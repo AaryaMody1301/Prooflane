@@ -160,6 +160,8 @@ Gate: working fresh setup, independent walkthrough, browser findings resolved an
 
 The later [component-focused judging review](UI_COMPONENT_REVIEW_2026-10-22.md) adds the current ink-and-mint presentation, live saved-evidence preview, quoted source disclosures, workflow cards and safer reopening of changed previews. A fresh sample checkout, actual evidence download, 30 axe scans and 20 layout measurements pass. This improves the Design and Presentation evidence; target-user feedback, independent setup and the second real-service case remain required.
 
+The [source-to-payment upgrade](VERIFIED_OUTCOMES_2026-10-22.md) implements the approved [product strategy](PRODUCT_STRATEGY_2026-10-22.md): source-key/value comparisons, frozen source agreement, clarification revisions, reviewed corrections with Undo, a versioned PayPal reference and standalone receipt verification. All 32 backend tests and the expanded controller pass locally. The new source flow has native file and Chrome checks. Fresh Gemini responses verify the seven-rule plan and clarification revision after an initial HTTP 503; its USD 1.00 sandbox order is waiting for buyer approval. These additions do not close Phase 4 until the expanded live case, independent setup and feedback have evidence.
+
 ## Phase 5 — submit
 
 - Confirm Devpost enrollment and eligibility.

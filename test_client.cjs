@@ -17,16 +17,18 @@ async function client(base, route='/', request=fetch) {
   const buttons = [...html.matchAll(/<button\b[^>]*\bid="([^"]+)"/g)].map(([,id]) => elements[id]);
   let url = new URL(route, base);
   const requests = [];
-  const document = {getElementById:id=>elements[id],querySelectorAll:()=>buttons,activeElement:null};
+  const downloads = [];
+  const document = {getElementById:id=>elements[id],querySelectorAll:()=>buttons,activeElement:null,createElement:()=>({click(){downloads.push({href:this.href,filename:this.download});}})};
   const context = vm.createContext({
     document,
     URLSearchParams,
+    URL, Blob, setTimeout,
     history: {replaceState: (_state,_title,target)=>{url=new URL(target,base);}},
     location: {get pathname(){return url.pathname;}, get search(){return url.search;}, assign: target=>{throw Error('Unexpected external navigation: '+target);}},
     fetch: (target,options)=>{requests.push({path:target,method:options?.method||'GET'});return request(new URL(target,base),options);},
   });
   await vm.runInContext(script, context);
-  return {elements,requests,get id(){return url.searchParams.get('project');}};
+  return {elements,requests,downloads,get id(){return url.searchParams.get('project');}};
 }
 
 async function main() {
@@ -77,7 +79,7 @@ async function main() {
     const studioRequests=first.requests.length,blockedPreview=e.csv.value;
     await e['studio-delivery'].onclick();
     assert.match(e['studio-body'].innerHTML,/FAIL/);
-    assert.match(e['studio-body'].innerHTML,/CSV lines 3/);
+    assert.match(e['studio-body'].innerHTML,/CSV records 3/);
     await e['nav-delivery'].onclick();
     assert.equal(e.csv.value,blockedPreview);
     assert.equal(e.delivery.hidden,false);
@@ -122,7 +124,7 @@ async function main() {
     await e.projects.onchange();
     assert.equal(first.id,paidId);
     assert.equal(e.price.value,'120.00');
-    assert.match(e.brief.value,/Deliver a cleaned sales CSV/);
+    assert.match(e.brief.value,/Deliver a sales CSV/);
     assert.equal(e.csv.value,'');
     assert.equal(e.csv.readOnly,true);
     assert.equal(e.status.textContent,'Simulation complete');
@@ -354,7 +356,106 @@ async function main() {
     await studioMismatch.elements['studio-payment'].onclick();
     assert.match(studioMismatch.elements['studio-body'].innerHTML,/Hash mismatch/);
     assert.match(studioMismatch.elements.receipt.innerHTML,/Hash mismatch/);
-    console.log('PASS: evidence preview without extra requests, source disclosures/escaping, project library/search, result filters, shared file/drop validation, nine lifecycle views, sample checkout, dirty-preview preservation, pending locks and return recovery. DOM stubs; browser/layout checks are separate.');
+    const sourceFlow=await client(base);
+    const sf=sourceFlow.elements;
+    await sf['library-compare'].onclick();
+    await sf.draft.onclick();
+    assert.equal(sf['source-panel'].hidden,false);
+    assert.equal(sf.agree.disabled,true);
+    await sf['source-example'].onclick();
+    assert.equal(sf.agree.disabled,false);
+    await sf.agree.onclick();
+    const sourceId=sourceFlow.id;
+    const agreedSource=sf['source-csv'].value;
+    await sf.substituted.onclick();
+    await sf.verify.onclick();
+    assert.match(sf.results.innerHTML,/1 missing, 1 unexpected/);
+    assert.match(sf.results.innerHTML,/Same source records/);
+    assert.equal(sf.approve.hidden,true);
+    await sf['changed-value'].onclick();
+    await sf.verify.onclick();
+    assert.match(sf.results.innerHTML,/difference -0.01/);
+    const beforeRepair=sf.csv.value;
+    const storedBeforeRepair=await(await fetch(base+'/api/projects/'+sourceId)).json();
+    await sf.repair.onclick();
+    assert.equal(sf.csv.value,beforeRepair);
+    assert.match(sf['repair-preview'].innerHTML,/Restore source value/);
+    assert.deepEqual(await(await fetch(base+'/api/projects/'+sourceId)).json(),storedBeforeRepair);
+    await sf['apply-repair'].onclick();
+    assert.notEqual(sf.csv.value,beforeRepair);
+    assert.equal(sf['undo-repair'].hidden,false);
+    assert.equal(sf['download-csv'].disabled,false);
+    await sf['download-csv'].onclick();
+    const download = await fetch(sourceFlow.downloads[0].href);
+    assert.match(download.headers.get('content-type'),/^text\/csv/);
+    const downloadedCSV = await download.text();
+    assert.equal(downloadedCSV,sf.csv.value);
+    assert.equal(sourceFlow.downloads[0].filename,'prooflane-'+sourceId+'-delivery.csv');
+    await sf.verify.onclick();
+    assert.equal(sf.approve.disabled,false);
+    await sf['undo-repair'].onclick();
+    assert.equal(sf.csv.value,beforeRepair);
+    assert.equal(sf.approve.disabled,true);
+    await sf.verify.onclick();
+    await sf.repair.onclick();
+    await sf['apply-repair'].onclick();
+    await sf.verify.onclick();
+    assert.match(sf.results.innerHTML,/All 7 checks passed/);
+    await sf.approve.onclick();
+    sf['source-upload'].files=[{name:'original-again.csv',size:Buffer.byteLength(agreedSource),text:async()=>agreedSource}];
+    await sf['source-upload'].onchange();
+    assert.equal(sf.order.disabled,true);
+    await sf['nav-projects'].onclick();
+    await sf['studio-open'].onclick();
+    assert.equal(sf['source-csv'].value,agreedSource);
+    assert.equal(sf.order.disabled,true);
+    await sf.verify.onclick();
+    await sf.approve.onclick();
+    await sf.order.onclick();
+    await sf.capture.onclick();
+    const sourceReceipt=await(await fetch(base+'/api/projects/'+sourceId+'/evidence')).json();
+    assert.match(sourceReceipt.project.receipt.provider_reference,/^pl2:/);
+    assert.equal(sourceReceipt.project.manifest.source.sha256,sourceReceipt.project.source.sha256);
+    assert.doesNotMatch(JSON.stringify(sourceReceipt),/mila@example.com/);
+    const restoredSource=await client(base,'/?project='+sourceId);
+    assert.equal(restoredSource.elements['source-csv'].value,'');
+    assert.match(restoredSource.elements['receipt-binding'].textContent,/Version 2/);
+    await sf['open-verifier'].onclick();
+    assert.equal(sf['verifier-panel'].open,true);
+    const evidenceText=JSON.stringify(sourceReceipt);
+    sf['verifier-evidence'].files=[{size:Buffer.byteLength(evidenceText),text:async()=>evidenceText}];
+    sf['verifier-source'].files=[{size:Buffer.byteLength(agreedSource),text:async()=>agreedSource}];
+    sf['verifier-delivery'].files=[{size:Buffer.byteLength(downloadedCSV),text:async()=>downloadedCSV}];
+    await sf['verify-export'].onclick();
+    assert.match(sf['verifier-result'].innerHTML,/Local file and agreement checks passed/);
+    assert.match(sf['verifier-result'].innerHTML,/Simulated payment/);
+    sf['verifier-delivery'].files=[{size:200,text:async()=>downloadedCSV.replace('125','125.01')}];
+    await sf['verifier-delivery'].onchange();
+    assert.equal(sf['verifier-result'].innerHTML,'');
+    await sf['verify-export'].onclick();
+    assert.match(sf.error.textContent,/does not match/);
+    assert.equal(sf['verifier-result'].innerHTML,'');
+    const revisedFlow=await client(base);
+    const rf=revisedFlow.elements;
+    await rf['new-project'].onclick();
+    await rf['sample-clarify'].onclick();
+    rf.price.value='42.50';
+    await rf.draft.onclick();
+    const originalDraft=revisedFlow.id;
+    assert.equal(rf['clarify-form'].hidden,false);
+    assert.equal(rf.agree.disabled,true);
+    await rf['clarify-example'].onclick();
+    await rf.clarify.onclick();
+    assert.notEqual(revisedFlow.id,originalDraft);
+    assert.equal(rf.price.value,'42.50');
+    assert.equal(rf['clarify-form'].hidden,true);
+    assert.match(rf['revision-note'].textContent,new RegExp(originalDraft));
+    assert.equal((await(await fetch(base+'/api/projects/'+originalDraft)).json()).status,'DRAFT');
+    assert.equal(rf.agree.disabled,true);
+    await rf['source-example'].onclick();
+    await rf.agree.onclick();
+
+    console.log('PASS: source comparisons, correction preview/apply/undo, clarification revisions, independent receipt verification, evidence escaping, library/search, result filters, file/drop validation, nine lifecycle views, sample checkout, dirty previews, pending locks and return recovery. DOM stubs; browser/layout checks are separate.');
   } finally {
     server.kill('SIGTERM');
   }
