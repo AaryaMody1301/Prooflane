@@ -12,6 +12,10 @@ New project started on 11 October 2026 for the [PayPal AI Hackathon](https://pay
 
 Follow the [five-phase build plan](docs/BUILD_PLAN.md): local MVP → real AI → PayPal sandbox → usability/reliability → submission. **Phases 1–3 are complete for the reviewed inventory flow. Phase 4 has started:** Gemini 3.6 Flash drafts the reviewed checks, an actual USD 1.00 sandbox capture matches the approved delivery, repeated reconciliation keeps one capture, and a separate cancelled checkout stays unpaid. The paid receipt and frozen evidence survive restart. See the [AI completion evidence](docs/PHASE2_AI_COMPLETION_2026-10-20.json) and [sandbox completion evidence](docs/PHASE3_SANDBOX_COMPLETION_2026-10-20.json). Independent setup, user feedback and the remaining usability checks are still open.
 
+The [22 October submission-readiness check](docs/SUBMISSION_READINESS_2026-10-22.md) verifies a clean merged build, downloaded evidence, restart recovery and a fresh real-provider preflight. It also removes an ambiguous word from the starter brief. The prototype works; the public demo video, final Devpost materials and independent acceptance checks remain open.
+
+The [source-to-payment upgrade](docs/VERIFIED_OUTCOMES_2026-10-22.md) adds source reconciliation, reviewed corrections with Undo, revised scope drafts, and a receipt verifier that works without the project database. New approvals bind the agreed scope, price, source and delivery to a versioned manifest included in PayPal's reconciliation reference. The [product strategy](docs/PRODUCT_STRATEGY_2026-10-22.md) explains the judging case and remaining user-validation work. Fresh Gemini probes verify all seven checks and a clarification revision after an initial HTTP 503; the expanded PayPal order still needs buyer approval and capture.
+
 ## Run
 
 Requires Python 3.11 or newer. No pip install, Node, database account, or paid service is needed for sample mode.
@@ -31,6 +35,29 @@ Open **http://127.0.0.1:8787**. On Windows, use `python app.py` if `python3` is 
 7. Restart the app, then open the receipt from **All projects** or **Resume a saved project**. Search by project name or ID, or filter to **Need review** and **Receipts**. Its brief, price, checks and payment state are restored. Use the stage buttons to revisit the agreed scope or delivery evidence. Visiting **All projects** keeps the current preview; opening another project or choosing **New project** clears it. CSV previews are not saved across reloads. Upload again to replace a delivery before checkout starts; saved terms stay read-only.
 
 **Default mode is a fixed acceptance-plan fixture plus a payment simulator. It does not call an AI model or PayPal.** The UI and receipts label both modes. The CSV evaluation, state transitions, hashes, persistence, and HTTP requests work in either mode.
+
+### Compare the delivery with its source
+
+Choose **Compare a delivery with its source** in All projects, draft the supplied comparison brief, and attach `examples/source.csv` before agreeing. The seven checks include the original five plus exact source key coverage and decimal revenue equality per order. **Try a substituted order** passes the original five rules and preserves the total, but fails source reconciliation. **Try changed revenue** exposes a one-cent difference.
+
+After a failure, **Preview source corrections** shows proposed changes using the agreed source. **Apply reviewed corrections** changes the in-memory delivery preview; **Undo CSV changes** restores it. Run checks again and explicitly approve before payment. Expand **View or edit CSV preview** and choose **Download this CSV preview** to keep the exact file for later verification. Applying corrections never overwrites files on disk. Empty/duplicate keys and differing schemas need manual review. Reloading clears both CSV previews; reattach the exact agreed source before checking another delivery.
+
+**Try a clarification example** demonstrates an ambiguous brief. Edit the **Revised measurable brief** to replace vague wording, then draft a revised scope. The app preserves the original draft and price. Review and agree to the new draft, including its source attachment. Sample mode accepts only the supplied example briefs; Gemini handles custom wording.
+
+### Verify an exported receipt independently
+
+From All projects, expand **Verify files and an exported receipt**, or open it from a receipt. Choose the downloaded evidence JSON, delivered CSV and original source CSV. Local file/agreement checks run without opening the saved project. The optional PayPal checkbox performs an authenticated, read-only sandbox lookup using this computer's configured merchant credentials.
+
+The same check works from a terminal without the original SQLite database:
+
+```bash
+python3 verify_receipt.py path/to/evidence.json path/to/delivery.csv --source path/to/source.csv
+python3 verify_receipt.py path/to/evidence.json path/to/delivery.csv --source path/to/source.csv --paypal
+```
+
+Omit `--source` for agreements without source comparisons. The first command is offline. `--paypal` reads the local sandbox credentials and verifies the order, manifest reference, completed capture and exact USD amount; it never creates orders or captures. Local checks alone do not authenticate a payment, and simulated receipts are always labelled as simulated. Failed validation exits with status 1. Legacy receipts remain readable in the app but lack the version 2 binding required by this verifier.
+
+CSV hashes identify UTF-8 text with leading BOMs removed and CRLF/CR normalized to LF. Other whitespace, record order and decimal spelling still affect the file hash. Record positions include the header as record 1; a quoted multiline field remains one record. Source checks trim key whitespace and compare numeric values as decimals (up to 64 characters, 18 decimal places and absolute value 1e12). The manifest is a consistency digest, not a digital signature; PayPal records its reference while Prooflane evaluates the work. Keep both CSVs to reproduce verification; their raw rows are not saved in the evidence export.
 
 ## Connect real services
 
@@ -148,7 +175,7 @@ If order creation times out, the delivery freezes immediately in `CHECKOUT_PENDI
 python3 -m unittest -v test_app.py
 ```
 
-Twenty-two tests cover malformed plans and CSVs, exact money values, failed deliveries, stale approvals, frozen checkout evidence after a provider timeout, the retry window, pending and mismatched captures, repeated requests, persistence, offline/provider setup diagnostics, and a localhost HTTP flow with concurrent capture replays and an evidence download. Order readback accepts PayPal's optional amount breakdown while rejecting missing/malformed totals and actual currency/value mismatches. Gemini checks include replay of the captured bad plans, exact quoted bounds, missing-sentence review, nullable wire fields, unfinished responses, decimal underflow, bounded HTTP retries and clarification-blocked agreement. The AI-only diagnostic tests cover missing keys, wrong modes, provider errors, incomplete coverage and no PayPal calls. These are offline contract checks, separate from the linked provider results. Tests do not require network access or credentials.
+Thirty-two tests cover malformed plans and CSVs, exact money values, failed deliveries, stale approvals, frozen checkout evidence after a provider timeout, the retry window, pending and mismatched captures, repeated requests, persistence, offline/provider setup diagnostics, and a localhost HTTP flow with concurrent capture replays and an evidence download. Source cases include substituted records, one-cent differences, conflicting keys, exact source reattachment, correction previews, revised scopes, manifest changes, legacy compatibility and database-independent CLI verification. Order readback accepts PayPal's optional amount breakdown while rejecting missing/malformed totals and actual currency/value mismatches. Gemini checks include replay of captured bad plans, exact quoted bounds, source comparison fields, missing-sentence review, nullable wire fields, unfinished responses, decimal underflow, bounded HTTP retries and clarification-blocked agreement. These are offline contract checks, separate from the linked provider results. Tests do not require network access or credentials.
 
 Optional client controller check with Node 20 or newer (no npm packages):
 
@@ -160,7 +187,9 @@ On Windows, select the interpreter explicitly if `python3` is unavailable: `$env
 
 This starts a temporary Python HTTP server and runs the actual client handlers against it using DOM stubs. It checks simulated checkout, saved-project selection, restored brief/price/receipt, cleared previews, fresh-page resume, return reconciliation, invalid-return recovery, input locks during verification, changed-preview approval guards and error focus. It also checks nine lifecycle view defaults, project search/filter counts and escaped titles, result filters, recorded progress, navigation without requests or lost previews, saved receipt modes, hash-mismatch display, shared file/drop validation and oversized-file recovery. Lifecycle fixtures are frontend checks, not new provider acceptance. It does not validate browser layout, native controls or accessibility. The Python app and core test suite do not require Node.
 
-[GitHub Actions checks](.github/workflows/checks.yml) run the 22 Python tests, Node controller check and Python compilation on Ubuntu with Python 3.11 and Windows with Python 3.14, using Node 24. They run for pull requests and pushes to `main`, without provider credentials, npm packages or external-service calls. Both jobs [passed for the Phase 4 code changes](https://github.com/AaryaMody1301/Prooflane/actions/runs/39547552760). Browser review and real-service acceptance remain separate checks.
+The controller also checks source agreement and reattachment, both comparison attacks, correction preview/apply/undo, fresh-check guards, preserved clarification drafts/prices and independent file verification with stale-success clearing.
+
+[GitHub Actions checks](.github/workflows/checks.yml) run the Python suite, Node controller check and Python compilation, including the verifier entry point, on Ubuntu with Python 3.11 and Windows with Python 3.14, using Node 24. They run for pull requests and pushes to `main`, without provider credentials, npm packages or external-service calls. Both jobs [passed for the earlier Phase 4 code changes](https://github.com/AaryaMody1301/Prooflane/actions/runs/39547552760). The source-to-payment upgrade records local validation; consult its pull request checks for remote CI results. Browser review and real-service acceptance remain separate checks.
 
 ### Real-browser Phase 1 check
 
@@ -188,13 +217,14 @@ The runner prints `PASS` only after its assertions finish; failures exit with an
 - `test_app.py`: runnable checks.
 - `test_client.cjs`: optional controller regression check against the real localhost API.
 - `browser_check.py`: optional real-browser Phase 1 workflow, layout and restart check.
+- `verify_receipt.py`: offline evidence/file verification with optional read-only PayPal sandbox confirmation; no project database required.
 - `docs/BUILD_PLAN.md`: immediate integration gates, project scope and submission checklist.
 - `docs/PHASE2_AI_RESULTS.json`: historical 18 October Gemini responses, reviewed gaps and provider errors before Phase 2 passed.
 - `docs/PHASE2_AI_COMPLETION_2026-10-20.json`: later reviewed Gemini 3.6 probes and real-AI browser completion evidence.
 - `docs/PHASE3_SANDBOX_PROGRESS_2026-10-20.json`: historical checkpoint before capture, preserving the initial orders/readback, metadata fix, currency blocker and unpaid error/cancel return.
 - `docs/PHASE3_SANDBOX_COMPLETION_2026-10-20.json`: completed USD 1.00 sandbox capture, matching evidence, repeated reconciliation, normal cancellation and post-capture restart recovery. The progress record above is historical.
 
-Supported checks: required columns, unique nonempty values, nonempty values, numeric ranges and row counts. Up to 300 KB, 5,000 data rows, 30 columns and 20 checks. AI output is data only; no generated code is executed. Prices use integer cents, never floats. Deliveries cannot change after an order starts. A stable `PayPal-Request-Id` is reused for each create and capture action. Capture retries first retrieve the existing order. An uncertain create result older than 15 minutes requires manual inspection rather than blindly creating another order.
+Supported checks: required columns, unique nonempty values, nonempty values, numeric ranges, row counts, source key coverage and numeric source values per key. Each CSV supports up to 300 KB, 5,000 data rows and 30 columns; plans support 20 checks. AI output is data only; no generated code is executed. Prices use integer cents, never floats. Deliveries cannot change after an order starts. A stable `PayPal-Request-Id` is reused for each create and capture action. Capture retries first retrieve the existing order. An uncertain create result older than 15 minutes requires manual inspection rather than blindly creating another order.
 
 ## Current boundary and next work
 

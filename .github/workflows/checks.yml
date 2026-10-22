@@ -38,4 +38,4 @@ jobs:
       - name: Client controller checks
         run: node test_client.cjs
       - name: Compile Python entry points
-        run: python -m py_compile app.py test_app.py browser_check.py
+        run: python -m py_compile app.py test_app.py browser_check.py verify_receipt.py
