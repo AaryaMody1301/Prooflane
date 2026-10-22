@@ -156,6 +156,8 @@ Gate: working fresh setup, independent walkthrough, browser findings resolved an
 
 21 October workspace upgrade: the [research plan](UI_UPGRADE_PLAN_2026-10-21.md) is implemented as Scope, Delivery and Payment views using the existing APIs and saved-project format. The [QA record](UI_WORKSPACE_RESULTS_2026-10-21.json) covers the sample checkout, failure-first results, stale-preview approval guards, persisted modes, receipts and return recovery. All 22 Python tests, the extended controller and Linux/Windows CI pass for the code commit. Twenty DOM layout checks span 320–1440px; selected receipt text/control contrast is at least 5.19:1. These results do not certify accessibility or close the independent-user and real-service gates above.
 
+22 October [interface redesign](UI_REDESIGN_2026-10-22.md): modern project library, search/filter controls, sidebar navigation, recorded progress, CSV drop zone, result filters and redesigned project/receipt surfaces are implemented. Backend and expanded controller checks pass locally. Fresh Chrome sample checkout, native upload/download, 20 layout checks at 320–1440px and 21 axe scans pass after repairing narrow text-spacing navigation. The downloaded receipt matches the checked/approved CSV. Screen-reader speech, physical devices and native 200% zoom remain unverified for this revision; the earlier evidence stays historical.
+
 ## Phase 5 — submit
 
 - Confirm Devpost enrollment and eligibility.

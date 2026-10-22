@@ -91,6 +91,8 @@ def main():
                 expect(page.locator("#workspace")).to_be_focused()
                 assert page.get_by_role("main").count() == 1
                 layout("initial")
+                expect(page.locator("#library")).to_be_visible()
+                page.locator("#new-project").click()
                 page.locator("#draft").click()
                 expect(page.locator("#status")).to_have_text("Review scope")
                 project_id = parse_qs(urlparse(page.url).query)["project"][0]
@@ -102,6 +104,10 @@ def main():
                 expect(page.locator("#results .pill.fail")).to_have_count(3)
                 expect(page.locator("#order")).to_be_disabled()
                 expect(page.locator("#approve")).to_be_hidden()
+                page.locator("#filter-failed").click()
+                expect(page.locator("#results .pill.fail")).to_have_count(3)
+                expect(page.locator("#results .pill.pass")).to_have_count(0)
+                page.locator("#filter-all").click()
                 layout("blocked")
 
                 passed = (ROOT / "examples/passed.csv").read_text()
@@ -115,6 +121,11 @@ def main():
                 page.locator("#csv").fill(passed + "\n")
                 expect(page.locator("#approve")).to_be_disabled()
                 expect(page.locator("#dirty-note")).to_be_visible()
+                page.locator("#nav-projects").click()
+                expect(page.locator("#library")).to_be_visible()
+                page.locator("#nav-delivery").click()
+                expect(page.locator("#csv")).to_have_value(passed + "\n")
+                expect(page.locator("#approve")).to_be_disabled()
                 layout("changed-preview")
                 page.locator("#verify").click()
                 page.locator("#approve").click()

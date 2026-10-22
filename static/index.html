@@ -4,72 +4,400 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Prooflane · Review the work. Then pay.</title>
 <style>
-:root{--ink:#162338;--muted:#526278;--line:#dce1e8;--control:#78869a;--page:#f6f7f9;--blue:#3657df;--green:#08715b;--red:#b4323b}*{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button,summary{cursor:pointer}button{border:1px solid var(--control);border-radius:8px;background:white;color:var(--ink);padding:10px 16px;font-weight:650;min-height:44px}button.primary{background:var(--blue);color:white;border-color:var(--blue)}button.secondary{background:white;color:var(--ink)}button.plain{border:0;background:transparent;color:var(--muted)}button:disabled{opacity:.5;cursor:default}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible,[tabindex="-1"]:focus-visible{outline:3px solid var(--blue);outline-offset:3px}a{color:var(--blue)}[hidden]{display:none!important}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
-.top{background:white;border-bottom:1px solid var(--line);padding:11px max(24px,calc((100vw - 1224px)/2));display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:9px;font-size:23px;letter-spacing:-.8px;font-weight:750}.brand svg{width:29px;height:29px}.brand-note{border-left:1px solid var(--line);padding-left:17px;margin-left:9px;font-size:13px;font-weight:400;letter-spacing:0;color:var(--muted)}.project-switch{display:flex;align-items:center;gap:12px;min-width:0}select{border:1px solid var(--control);border-radius:8px;background:white;color:var(--muted);padding:10px;max-width:310px;min-width:0;min-height:44px;font-size:13px}
-.wrap{max-width:1280px;padding:23px 28px 36px;margin:auto}.project-head{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:17px}.project-head>div{min-width:0}h1{font-size:27px;line-height:1.25;letter-spacing:-.8px;margin:0 0 6px;overflow-wrap:anywhere}h2{font-size:21px;line-height:1.3;letter-spacing:-.4px;margin:0 0 5px}h3{font-size:15px;margin:0 0 12px}.hint,.sub{font-size:13px;color:var(--muted);margin:4px 0 10px}.sub{margin:0}.modes{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;max-width:340px}.chip{display:inline-flex;padding:5px 9px;border:1px solid var(--line);border-radius:6px;background:white;color:var(--muted);font-size:12px}.project-state{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.status,.pill{display:inline-block;padding:4px 8px;border-radius:5px;background:#edf1f7;color:var(--muted);font-size:12px;font-weight:650}.status.fail,.pill.fail{background:#fcecef;color:var(--red)}.status.pass,.pill.pass{background:#e3f3ec;color:var(--green)}.mobile-amount{display:none}
-.steps{display:flex;gap:28px;border-bottom:1px solid var(--line);margin:0 0 18px}.steps button{border:0;border-radius:0;background:transparent;padding:8px 1px 13px;color:var(--muted);font-size:13px;min-height:44px}.steps button[aria-current=step]{border-bottom:2px solid var(--blue);color:var(--blue)}.grid{display:grid;grid-template-columns:minmax(0,1fr) 292px;gap:22px;align-items:start}.main,.side{min-width:0}.card{background:white;border:1px solid var(--line);border-radius:12px;overflow:hidden}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;padding:20px 22px 15px;border-bottom:1px solid var(--line)}.panel-body{padding:20px 22px}.panel-head h2{margin-bottom:5px}.eyebrow{font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
-label{display:block;font-size:14px;font-weight:650;margin:14px 0 7px}input,textarea{width:100%;border:1px solid var(--control);border-radius:8px;padding:12px;background:white;color:var(--ink)}input:read-only,textarea:read-only{background:#f6f7fa}.price{max-width:180px}textarea{resize:vertical;min-height:130px}#brief{min-height:132px}#csv{min-height:145px;font:13px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace}.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}.actionbar{padding:15px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid var(--line)}.actionbar p{font-size:13px;color:var(--muted);margin:0}.actionbar .actions{margin:0}.notice{font-size:13px;color:var(--muted);margin:12px 0 0;overflow-wrap:anywhere}.scope-note{padding:12px 14px;background:#f4f6fa;border-radius:7px;font-size:13px;color:var(--muted)}.checks{display:grid}.check{padding:13px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.check:last-child{border:0}.check b{font-size:14px}.check q{display:block;margin-top:6px;padding-left:12px;border-left:2px solid #dbe2fa;font-size:13px;color:var(--muted)}
-.summary{border:1px solid var(--line);background:#f4f6fa;border-radius:8px;padding:12px 14px;margin:0 0 15px;font-size:14px}.summary small{display:block;font-size:13px;color:var(--muted);margin-top:3px}.summary.blocked{background:#fff4f4;border-color:#efd4d9;color:var(--red)}.summary.passed{background:#eff8f3;border-color:#d2e9dc;color:var(--green)}.error{border:1px solid #e9b7bf;background:#fff1f2;color:var(--red);padding:13px 16px;border-radius:9px;margin-bottom:16px;font-size:14px;overflow-wrap:anywhere}.busy{font-size:13px;color:var(--blue);margin:0 0 12px}
-.filebox{padding:16px 22px 10px}.filebox label{margin:0 0 6px}.filebox input{padding:8px;font-size:13px}input::file-selector-button{border:0;border-radius:5px;background:#edf1ff;color:#2644b7;padding:8px 11px;font:inherit;margin-right:10px;min-height:34px}.file-meta{padding:13px 22px 0;font-size:14px;font-weight:600;overflow-wrap:anywhere}.file-meta .hint{font-weight:400;margin-bottom:0}.examples{margin:0 22px 12px}.examples .actions{margin-top:5px}.examples button{font-size:13px}summary{font-size:13px;color:var(--muted);padding:10px 0;min-height:40px}details .notice{margin-top:5px}
-.results{padding:13px 22px 0}table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}th,td{text-align:left;vertical-align:top;padding:12px 10px 12px 0;border-bottom:1px solid #e6ebf1;overflow-wrap:anywhere}thead th{font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.4px;border-top:1px solid var(--line);padding-block:8px}thead th:first-child{width:36%}thead th:nth-child(2){width:86px}tbody th{font-size:14px;font-weight:600}td .pill{font-size:11px;white-space:nowrap}td .line-detail{display:block;color:var(--red);font-size:13px;margin-top:4px}td:last-child{color:var(--muted)}tr:last-child th,tr:last-child td{border-bottom:0}.preview{margin:0 22px 10px}.preview label{margin-top:6px}.preview .notice{font-size:12px}.dirty{margin:12px 22px 0;border-left:3px solid #9a6429;background:#fff8ea;padding:10px 12px;color:#765021;font-size:13px}.hash{font:12px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;color:var(--muted)}
-.side .summary-card{padding:20px}.money{font-size:35px;line-height:1.2;font-weight:740;letter-spacing:-1px;margin:8px 0}.rail-note{font-size:13px;color:var(--muted);margin:10px 0 0}.proof{padding:18px 20px;border-top:1px solid var(--line)}.proof ol{list-style:none;margin:0;padding:0}.proof li{display:flex;gap:10px;font-size:13px;color:var(--muted);padding-bottom:16px}.proof li:last-child{padding-bottom:0}.proof li:before{content:"";height:9px;width:9px;border:2px solid #aeb9c8;border-radius:50%;flex-shrink:0;margin-top:5px}.proof li.done:before{background:var(--green);border-color:var(--green)}.proof li.issue:before{background:var(--red);border-color:var(--red)}.proof b{display:block;color:var(--ink);font-size:13px}.side-details{margin-top:14px;padding:2px 16px 12px}.timeline{list-style:none;padding:0;margin:8px 0}.timeline li{border-left:1px solid var(--line);padding:0 0 15px 13px;font-size:13px;color:var(--muted)}.timeline b{display:block;color:var(--ink);font-size:12px}.timeline time{font-size:12px}.timeline .hash{font-size:11px}
-.receipt-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;border-block:1px solid var(--line);margin:22px 0}.receipt-grid div{padding:16px 0;min-width:0}.receipt-grid span{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}.receipt-grid strong{font-size:18px;overflow-wrap:anywhere}.receipt-check{padding:14px;background:#eff8f3;color:var(--green);border:1px solid #d2e9dc;border-radius:8px;font-size:14px}.receipt-modes{font-size:13px;color:var(--muted);margin:17px 0 7px}.receipt details{margin-top:12px}.receipt .hash{padding:6px 0}.receipt-mark{width:43px;height:43px;background:#e3f3ec;color:var(--green);border-radius:50%;display:grid;place-items:center;font-size:25px;margin-bottom:14px}.payment-amount{font-size:32px;font-weight:730;letter-spacing:-1px;margin:12px 0}.payment-proof{margin:18px 0}.payment-proof b{display:block;margin-bottom:5px}footer{font-size:12px;color:var(--muted);margin-top:21px;line-height:1.8}footer details{max-width:780px}footer summary{display:inline-block}.empty{color:var(--muted);font-size:13px}.read-brief{font-size:14px;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 15px}.mode-warning{margin-bottom:16px;font-size:13px;border-left:3px solid #9a6429;padding:10px 13px;background:#fff8ea;color:#765021}
-.file-context{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;padding:0 22px}.file-context .file-meta{padding-inline:0}.file-context .filebox{padding-inline:0}.file-context .examples{margin-inline:0}#delivery-inputs{min-width:0}#delivery-inputs[open]{grid-column:1/-1}.input-summary{padding-block:13px}.wrap{padding-top:16px}.project-head{margin-bottom:12px}.steps{margin-bottom:12px}.panel-head{padding-top:16px}.results th,.results td{padding-block:9px}.results tbody th{font-size:13px}.results .summary{padding:10px 12px}.results details summary{min-height:38px;padding-block:8px}.actionbar{padding-block:12px}
-@media(min-width:741px){td .line-detail{display:inline;margin:0 0 0 6px}.results .summary small{display:inline;margin:0 0 0 10px}}
-@media(max-width:1000px){.brand-note{display:none}.wrap{padding-inline:22px}.grid{grid-template-columns:minmax(0,1fr) 255px;gap:18px}.top{padding-inline:22px}.project-switch select{max-width:250px}}
-@media(max-width:740px){.top{flex-wrap:wrap;padding:12px 16px;gap:10px}.brand{font-size:22px}.project-switch{width:100%;gap:8px}.project-switch select{max-width:none;flex:1;width:0}.project-switch button{padding:10px 12px;font-size:13px;flex-shrink:0}.wrap{padding:18px 15px 26px}.project-head{align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:12px}.project-head>div:first-child{flex:1;min-width:150px}h1{font-size:23px}.project-state{gap:6px}.status{font-size:11px}.modes{width:100%;justify-content:flex-start;max-width:none;gap:5px}.chip{font-size:11px;padding:4px 7px}.mobile-amount{display:block;font-size:19px;font-weight:700;white-space:nowrap}.mobile-amount small{display:block;font-size:11px;font-weight:400;color:var(--muted);text-align:right}.steps{justify-content:space-between;gap:9px;margin-bottom:15px}.steps button{font-size:12px;padding-inline:0}.grid{display:flex;flex-direction:column;gap:16px}.main,.side{width:100%}.side .proof{display:none}.side .summary-card{padding:16px}.side .money{font-size:25px}.side-details{margin-top:12px}.panel-head{padding:17px 16px 13px}.panel-head h2{font-size:20px}.panel-body{padding:17px 16px}.hint,.notice,.sub{font-size:13px}.panel-head>.pill{font-size:11px}.actionbar{padding:14px 16px;align-items:stretch;flex-direction:column;gap:10px}.actionbar .actions{flex-direction:column;align-items:stretch}.actions button{min-height:44px}.actionbar button{width:100%}.filebox{padding:15px 16px 8px}.file-meta{padding:12px 16px 0}.results{padding:12px 16px 0}.preview{margin:0 16px 10px}.examples{margin-inline:16px}.examples .actions{align-items:stretch;flex-direction:column}.dirty{margin-inline:16px}table,tbody{display:block}thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:12px 0;border-bottom:1px solid var(--line)}tbody th,tbody td{display:block;padding:0;border:0}tbody td:last-child{grid-column:1/-1;font-size:13px}tbody th{font-size:14px}.receipt-grid{gap:0 12px}.receipt-grid strong{font-size:16px}.side .rail-note{font-size:12px}footer{font-size:12px}.check q{font-size:13px}}
-@media(max-width:740px){.file-context{grid-template-columns:minmax(0,1fr);padding-inline:16px}.file-context .file-meta{padding-top:12px}}
-@media(prefers-reduced-motion:no-preference){button:hover:enabled{filter:brightness(.96)}}
-.receipt-mismatch{background:#fcecef;color:var(--red);border-color:#e9b7bf}
-.skip-link{position:absolute;top:8px;left:16px;z-index:1;transform:translateY(-160%);padding:10px 16px;background:white;border:2px solid var(--blue);border-radius:6px;font-weight:650}.skip-link:focus{transform:none;outline:3px solid var(--blue);outline-offset:3px}
+:root{--ink:#242638;--muted:#596579;--line:#e2e5ed;--control:#78869a;--page:#f7f8fc;--blue:#5b4bd7;--blue-soft:#eeebff;--green:#08715b;--red:#b4323b;--radius:16px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:15px/1.55 "Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit}
+button,summary{cursor:pointer}
+button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 17px;border:1px solid var(--control);border-radius:10px;background:white;color:var(--ink);font-weight:650;line-height:1.4}
+button.primary{background:var(--blue);border-color:var(--blue);color:white;box-shadow:0 3px 7px #5b4bd71c}
+button.secondary{background:white;color:var(--ink)}
+button.plain{border-color:transparent;background:transparent;color:var(--muted);box-shadow:none}
+button:disabled{opacity:.48;cursor:default;box-shadow:none}
+a{color:var(--blue)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible,[tabindex="-1"]:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.icon{display:inline-block;flex-shrink:0;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.icon-defs{position:absolute;width:0;height:0;overflow:hidden}
+.skip-link{position:absolute;top:10px;left:16px;z-index:20;transform:translateY(-180%);padding:10px 16px;background:white;border:2px solid var(--blue);border-radius:9px;font-weight:650}
+.skip-link:focus{transform:none}
+.app{display:grid;grid-template-columns:216px minmax(0,1fr);min-height:100svh}
+.sidebar{position:sticky;top:0;display:flex;flex-direction:column;align-self:start;height:100svh;padding:30px 16px 20px;background:white;border-right:1px solid var(--line);overflow-y:auto}
+.brand{display:flex;gap:9px;align-items:center;padding:0 10px 28px;font-size:25px;font-weight:760;letter-spacing:-1.1px}
+.brand svg{width:33px;height:35px;flex-shrink:0}
+.sidebar-label{padding:0 13px;margin:22px 0 10px;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+.workspace-link{justify-content:flex-start;width:100%;border-color:transparent;background:transparent;border-radius:10px;padding:12px 13px;color:var(--muted);font-size:14px}
+.workspace-link[aria-current=page]{background:var(--blue-soft);color:var(--blue)}
+.workspace-link .icon{width:19px;height:19px}
+.sidebar-count{margin-left:auto;min-width:23px;border-radius:6px;background:#e3defc;padding:2px 5px;font-size:11px;text-align:center}
+.steps{display:grid;gap:5px}
+.steps button{width:100%;justify-content:flex-start;text-align:left;border:1px solid transparent;background:transparent;padding:11px 12px;color:var(--muted);min-height:68px}
+.steps button[aria-current=step]{background:var(--blue-soft);color:var(--blue)}
+.step-index{display:grid;place-items:center;flex-shrink:0;width:29px;height:29px;border:1px solid #c6cbd8;border-radius:9px;font-size:11px;font-weight:700;background:white;color:var(--muted)}
+.steps b{display:block;font-size:14px;font-weight:650}
+.steps small{display:block;margin-top:2px;color:var(--muted);font-size:11px;font-weight:400}
+.steps button[aria-current=step] .step-index{background:var(--blue);border-color:var(--blue);color:white}
+.steps button[data-complete=true]:not([aria-current]) .step-index{background:#e4f4ed;border-color:#a0cbb9;color:var(--green)}
+.sidebar-bottom{margin-top:auto;padding:24px 12px 0}
+.local-label{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600}
+.local-label .icon{width:15px;height:15px;color:var(--muted)}
+.sidebar-bottom p{font-size:11px;color:var(--muted);line-height:1.7;margin:7px 0 0}
+.main-shell{min-width:0}
+.topbar{min-height:82px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:16px 34px;border-bottom:1px solid var(--line);background:#ffffffc9}
+.breadcrumb{display:flex;gap:10px;align-items:center;min-width:0;color:var(--muted);font-size:13px}
+.breadcrumb .icon{width:16px;height:16px}
+.breadcrumb b{font-weight:600;color:var(--ink)}
+.project-switch{display:flex;align-items:center;gap:10px;min-width:0}
+select{min-width:0;max-width:240px;min-height:44px;border:1px solid var(--control);border-radius:10px;background:white;color:var(--muted);padding:10px 32px 10px 12px;font:inherit;font-size:12px}
+.project-switch button{font-size:13px;white-space:nowrap}
+.wrap{max-width:1370px;margin:auto;padding:30px 34px 26px}
+h1{font-size:clamp(28px,3.2vw,39px);font-weight:720;line-height:1.18;letter-spacing:-1.25px;margin:8px 0 12px;overflow-wrap:anywhere}
+h2{font-size:22px;font-weight:690;line-height:1.3;letter-spacing:-.55px;margin:0 0 6px;overflow-wrap:anywhere}
+h3{font-size:15px;font-weight:650;margin:0 0 10px;letter-spacing:-.15px}
+p{margin-top:0}
+.eyebrow{font-size:10px;line-height:1.5;font-weight:750;text-transform:uppercase;letter-spacing:1.65px;color:var(--muted)}
+.sub,.hint{font-size:13px;line-height:1.6;color:var(--muted);margin:4px 0 0}
+.notice{font-size:12px;color:var(--muted);line-height:1.7;margin:13px 0 0;overflow-wrap:anywhere}
+.section-kicker{display:inline-flex;gap:7px;align-items:center;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--blue);margin:0 0 10px}
+.section-kicker .icon{width:15px;height:15px}
+.project-head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:22px}
+.project-head>div{min-width:0}
+.project-head h1{font-size:31px;margin-top:5px;margin-bottom:10px}
+.project-state{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.modes{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;padding-top:6px;max-width:330px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border:1px solid #d5d9e4;background:white;border-radius:7px;color:var(--muted);font-size:11px;font-weight:500}
+.status,.pill{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:6px;background:#edf0f6;color:#49566d;font-size:11px;font-weight:650;line-height:1.4}
+.status.fail,.pill.fail{background:#fcecef;color:var(--red)}
+.status.pass,.pill.pass{background:#e3f3ec;color:var(--green)}
+.mobile-amount{display:none}
+.project-progress{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:25px;padding:15px 20px;border:1px solid var(--line);border-radius:12px;background:white;font-size:12px}
+.project-progress>div{display:flex;align-items:center;gap:9px}
+.project-progress .icon{width:17px;height:17px;color:var(--blue)}
+.project-progress b{font-weight:650}
+.progress-track{display:flex;align-items:center;gap:12px;color:var(--muted)}
+progress{width:130px;height:6px;border:0;border-radius:9px;overflow:hidden;accent-color:var(--blue)}
+progress::-webkit-progress-bar{background:#e9e6f8;border-radius:9px}
+progress::-webkit-progress-value{background:var(--blue);border-radius:9px}
+progress::-moz-progress-bar{background:var(--blue);border-radius:9px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 268px;gap:22px;align-items:start}
+.main,.side{min-width:0}
+.card{background:white;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:0 3px 8px #24263803}
+.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:24px 26px 20px;border-bottom:1px solid var(--line)}
+.panel-body{padding:24px 26px}
+.panel-icon{display:grid;place-items:center;flex-shrink:0;width:39px;height:39px;background:var(--blue-soft);color:var(--blue);border-radius:11px}
+label{display:block;font-size:13px;font-weight:650;margin:16px 0 8px}
+input,textarea{width:100%;min-width:0;border:1px solid var(--control);border-radius:10px;padding:12px;background:white;color:var(--ink)}
+input:read-only,textarea:read-only{background:#f7f8fb}
+textarea{resize:vertical;min-height:150px;line-height:1.7}
+#brief{min-height:194px;font-size:14px}
+.field-heading{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.field-heading label{margin:0}
+.field-heading span{color:var(--muted);font-size:11px}
+.price{max-width:180px;font-size:19px;font-weight:650;letter-spacing:-.3px}
+.price-row{display:flex;align-items:center;gap:17px;padding-top:6px}
+.price-row .hint{max-width:250px;font-size:12px}
+.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:20px}
+.actionbar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 26px;border-top:1px solid var(--line);background:#fbfcfe}
+.actionbar p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+.actionbar .actions{margin:0}
+.scope-note{background:#f5f6fb;border:1px solid var(--line);border-radius:10px;padding:13px 15px;font-size:12px;color:var(--muted);margin-top:20px}
+.read-brief{font-size:14px;line-height:1.8;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0 24px}
+.checks{counter-reset:check}
+.check{position:relative;padding:18px 0 18px 42px;border-bottom:1px solid var(--line);overflow-wrap:anywhere;counter-increment:check}
+.check:before{content:counter(check,decimal-leading-zero);position:absolute;left:0;top:18px;display:grid;place-items:center;width:27px;height:27px;background:#f0edff;border-radius:8px;color:var(--blue);font-size:11px;font-weight:700}
+.check:last-child{border-bottom:0}
+.check b{font-size:14px;font-weight:650}
+.check q{display:block;color:var(--muted);font-size:13px;line-height:1.7;margin-top:7px}
+.summary{border:1px solid var(--line);background:#f4f5fa;border-radius:11px;padding:15px 17px;margin:0 0 18px;font-size:14px}
+.summary small{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
+.summary.blocked{background:#fff5f5;border-color:#edd0d5;color:var(--red)}
+.summary.passed{background:#eff9f4;border-color:#bbdfce;color:var(--green)}
+.error{border:1px solid #d9909d;background:#fff1f2;color:var(--red);padding:15px 18px;border-radius:11px;font-size:14px;margin-bottom:20px;overflow-wrap:anywhere}
+.busy{color:var(--blue);font-size:13px;padding:13px 17px;border:1px solid #cfc8fa;background:var(--blue-soft);border-radius:11px;margin:0 0 20px}
+.busy:before{content:"";display:inline-block;width:12px;height:12px;border:2px solid #c2b9f2;border-top-color:var(--blue);border-radius:50%;margin-right:9px;vertical-align:-2px}
+.mode-warning{color:#765021;background:#fff8ea;border:1px solid #d6b279;padding:13px 16px;border-radius:10px;font-size:13px;margin-bottom:20px}
+.file-context{padding:0 26px}
+.file-meta{display:flex;align-items:center;gap:11px;padding:19px 0 14px;font-size:13px;font-weight:650;overflow-wrap:anywhere}
+.file-meta>.icon{width:32px;height:36px;padding:6px;color:var(--blue);background:var(--blue-soft);border-radius:7px}
+.file-meta .hint{margin-top:2px;font-size:11px;font-weight:400}
+summary{min-height:44px;padding:11px 0;font-size:12px;font-weight:600;color:var(--muted)}
+details[open]>summary{margin-bottom:4px}
+.input-summary{color:var(--blue)}
+.dropzone{position:relative;padding:24px 20px;text-align:center;border:1.5px dashed var(--control);border-radius:12px;background:#fafaff}
+.dropzone>.icon{width:33px;height:33px;padding:6px;box-sizing:content-box;color:var(--blue);background:#eeebff;border-radius:12px;margin-bottom:8px}
+.dropzone label{margin:0 0 5px;font-size:14px}
+.dropzone .hint{font-size:12px}
+.dropzone[data-dragging=true]{background:#eae5ff;border-color:var(--blue);box-shadow:0 0 0 3px #5b4bd720}
+.filebox input{margin-top:16px;background:white;padding:7px;font-size:12px}
+input::file-selector-button{border:0;border-radius:7px;padding:9px 12px;background:var(--blue-soft);color:#4334b0;font:inherit;font-weight:600;min-height:34px;margin-right:10px}
+.examples{margin:16px 0 12px;padding-bottom:6px}
+.examples .actions{margin-top:8px}
+.examples button{font-size:12px;min-height:40px;padding:9px 12px}
+.examples .hint{font-size:11px}
+.results{padding:18px 26px 0}
+.result-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 26px;padding:15px 0 0;border-top:1px solid var(--line)}
+.result-tools p{font-size:12px;font-weight:650;margin:0}
+.filter-group{display:flex;gap:5px;flex-wrap:wrap}
+.filter-group button{font-size:11px;min-height:36px;padding:7px 11px;border-color:transparent;background:transparent;color:var(--muted)}
+.filter-group button[aria-pressed=true]{background:var(--blue-soft);color:#4535b8;border-color:#c4b9f2}
+table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px}
+th,td{text-align:left;vertical-align:top;padding:14px 12px 14px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+thead th{font-size:10px;letter-spacing:1px;color:var(--muted);font-weight:650;text-transform:uppercase;padding-block:10px}
+thead th:first-child{width:37%}
+thead th:nth-child(2){width:76px}
+tbody th{font-size:13px;font-weight:600}
+td .pill{font-size:10px;padding:4px 7px}
+td:last-child{color:var(--muted)}
+td .line-detail{display:block;color:var(--red);font-size:12px;margin-top:5px;font-weight:500}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+.hash{font:11px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;color:var(--muted)}
+.preview{margin:8px 26px 14px}
+.preview label{margin-top:6px}
+#csv{min-height:155px;font:12px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace}
+.dirty{padding:12px 15px;margin:12px 26px 0;border:1px solid #dfbf8e;background:#fff8ea;border-radius:10px;color:#765021;font-size:12px}
+.summary-card{background:#28233f;color:white;padding:24px}
+.summary-card .eyebrow{color:#c9c3df;font-size:10px}
+.money{font-size:37px;line-height:1.2;letter-spacing:-1.3px;font-weight:700;margin:12px 0}
+.rail-status{display:inline-block;font-size:11px;background:#ffffff16;color:#ede8ff;border:1px solid #9286b7;border-radius:6px;padding:5px 8px}
+.rail-note{font-size:12px;line-height:1.8;color:#d0cadd;margin:13px 0 0}
+.proof{padding:23px 22px;background:white}
+.proof h3{font-size:13px;margin-bottom:19px}
+.proof ol{list-style:none;padding:0;margin:0}
+.proof li{position:relative;padding:0 0 22px 29px;color:var(--muted);font-size:11px;line-height:1.7}
+.proof li:last-child{padding-bottom:0}
+.proof li:before{content:"";position:absolute;left:0;top:3px;width:15px;height:15px;border:1px solid var(--control);background:white;border-radius:50%;z-index:1}
+.proof li:not(:last-child):after{content:"";position:absolute;left:7px;top:19px;width:1px;height:calc(100% - 16px);background:#dce2e9}
+.proof li.done:before{content:"✓";display:grid;place-items:center;background:#e2f3eb;border-color:#8ebda7;color:var(--green);font-size:10px;font-weight:700}
+.proof li.issue:before{content:"!";display:grid;place-items:center;background:#fcecef;border-color:#dba6af;color:var(--red);font-size:10px;font-weight:700}
+.proof b{display:block;color:var(--ink);font-size:12px;margin-bottom:3px}
+.side-details{padding:6px 20px 14px;margin-top:16px}
+.side-details summary{font-size:12px}
+.side-details button{width:100%;font-size:12px}
+.timeline{list-style:none;margin:10px 0 0;padding:0}
+.timeline li{border-left:1px solid var(--line);padding:0 0 18px 12px;font-size:11px;color:var(--muted)}
+.timeline b{display:block;font-size:10px;letter-spacing:.4px;color:var(--ink);margin-bottom:3px}
+.timeline time{font-size:10px}
+.timeline .hash{font-size:10px;margin-top:4px}
+.intro-card{padding:26px;border-radius:var(--radius);background:#efeafb;border:1px solid #d8cff0}
+.intro-card>.icon{width:34px;height:34px;color:var(--blue);margin-bottom:14px}
+.intro-card h3{font-size:23px;line-height:1.3;font-weight:650;letter-spacing:-.6px;margin:0 0 14px}
+.intro-card p{font-size:12px;line-height:1.8;color:#5e5478;margin:0}
+.principles{list-style:none;padding:16px 0 0;margin:18px 0 0;border-top:1px solid #d2c7e8}
+.principles li{display:flex;align-items:center;gap:8px;color:#4d4464;font-size:11px;margin-bottom:13px}
+.principles li:last-child{margin-bottom:0}
+.principles .icon{width:15px;height:15px}
+.payment-amount{font-size:42px;font-weight:700;letter-spacing:-1.5px;margin:10px 0 0}
+.payment-proof{margin:24px 0;padding:16px;border:1px solid var(--line);border-radius:10px;background:#f8f9fd}
+.payment-proof b{display:block;font-size:12px;margin-bottom:7px}
+.receipt-mark{display:grid;place-items:center;width:51px;height:51px;border-radius:16px;background:#e3f3ec;color:var(--green);font-size:28px;margin:0 0 22px;box-shadow:0 0 0 6px #f3faf6}
+.receipt-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:0 0 22px;padding:20px 0;border-block:1px solid var(--line)}
+.receipt-grid>div{min-width:0}
+.receipt-grid span{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}
+.receipt-grid strong{font-size:22px;letter-spacing:-.5px;overflow-wrap:anywhere}
+.receipt-check{border:1px solid #b5d9c8;background:#eff9f4;border-radius:11px;padding:15px;color:var(--green);font-size:13px;line-height:1.8}
+.receipt-modes{font-size:11px;color:var(--muted);margin:17px 0 9px}
+.receipt .hash{padding:7px 0}
+.receipt details p{font-size:12px;margin:12px 0 0}
+.receipt-mismatch{background:#fcecef;color:var(--red);border-color:#dca5af;box-shadow:none}
+.library-hero{position:relative;display:flex;align-items:center;justify-content:space-between;gap:25px;padding:31px 34px;border:1px solid #dcd7ef;background:#f0edf9;border-radius:20px;overflow:hidden;margin-bottom:24px}
+.library-hero h1{max-width:530px;margin-top:8px;margin-bottom:12px;font-size:40px;line-height:1.15;letter-spacing:-1.6px;font-weight:680}
+.library-hero h1 em{font-style:normal;color:var(--blue)}
+.library-hero p{color:#5d5574;max-width:430px;font-size:13px;line-height:1.8;margin:0}
+.hero-art{position:relative;width:215px;height:164px;flex-shrink:0;margin-right:6px}
+.hero-orbit{position:absolute;width:175px;height:175px;border:1px solid #d3c9ef;border-radius:50%;top:-5px;left:20px}
+.hero-orbit:after{content:"";position:absolute;inset:18px;border:1px dashed #d3c9ef;border-radius:50%}
+.art-card{position:absolute;background:white;border:1px solid #dcd5ed;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 8px 16px #4d3b8a0b;font-size:11px;font-weight:650;width:140px}
+.art-card .icon{width:24px;height:24px;border-radius:6px;padding:4px;box-sizing:content-box;background:#eeebff;color:var(--blue)}
+.art-card:nth-child(2){left:2px;top:6px;transform:rotate(-9deg)}
+.art-card:nth-child(3){left:65px;top:57px;transform:rotate(4deg)}
+.art-card:nth-child(4){left:27px;top:111px;transform:rotate(-4deg);background:var(--blue);border-color:var(--blue);color:white}
+.art-card:nth-child(4) .icon{color:white;background:#ffffff17}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:27px}
+.metric{display:flex;align-items:center;gap:13px;background:white;border:1px solid var(--line);border-radius:13px;padding:19px 20px}
+.metric>.icon{width:24px;height:24px;box-sizing:content-box;padding:10px;border-radius:11px;background:#f0edff;color:var(--blue)}
+.metric:nth-child(2)>.icon{background:#fff4df;color:#8b611b}
+.metric:nth-child(3)>.icon{background:#e8f5ed;color:var(--green)}
+.metric b{display:block;font-size:25px;font-weight:690;letter-spacing:-.6px;line-height:1.2}
+.metric span{font-size:11px;color:var(--muted)}
+.library-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.library-heading h2{font-size:20px;margin:0}
+.library-mode{font-size:11px;color:var(--muted);text-align:right}
+.library-toolbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:19px}
+.search-box{display:flex;align-items:center;gap:9px;width:280px;min-width:0;padding:0 12px;border:1px solid var(--control);background:white;border-radius:9px}
+.search-box>.icon{width:17px;height:17px;color:var(--muted)}
+.search-box input{border:0;border-radius:7px;padding:11px 0;font-size:12px;min-height:44px}
+.search-box input:focus-visible{outline-offset:0}
+.library-toolbar .filter-group{padding:3px;border:1px solid #d7dce6;border-radius:10px;background:white}
+.library-toolbar .filter-group button{font-size:12px;min-height:38px;padding:8px 12px}
+.project-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.project-card{display:flex;flex-direction:column;padding:22px;border:1px solid var(--line);border-radius:15px;background:white;box-shadow:0 3px 8px #24263803;min-width:0}
+.project-card header{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:19px}
+.project-card .project-icon{width:37px;height:37px;padding:9px;background:var(--blue-soft);color:var(--blue);border-radius:10px}
+.project-card h3{font-size:17px;font-weight:650;margin:0 0 5px;line-height:1.4;overflow-wrap:anywhere}
+.project-card .project-id{font-size:10px;color:var(--muted);font-family:ui-monospace,monospace;margin:0}
+.project-card .card-mode{color:var(--muted);font-size:11px;margin:14px 0 20px}
+.project-card footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:16px;margin-top:auto;border-top:1px solid var(--line)}
+.project-card footer strong{font-size:20px;letter-spacing:-.6px}
+.project-card footer strong small{font-size:10px;color:var(--muted);font-weight:500;letter-spacing:0;margin-left:4px}
+.project-card footer button{font-size:11px;min-height:40px;padding:8px 11px}
+.empty-state{grid-column:1/-1;display:grid;justify-items:center;text-align:center;padding:43px 24px;background:white;border:1px dashed var(--control);border-radius:16px}
+.empty-state>.icon{width:32px;height:32px;padding:16px;box-sizing:content-box;background:var(--blue-soft);color:var(--blue);border-radius:17px;margin-bottom:18px}
+.empty-state h3{font-size:18px;margin-bottom:8px}
+.empty-state p{font-size:13px;color:var(--muted);max-width:340px;line-height:1.8;margin-bottom:0}
+.library-note{margin:15px 0 0;font-size:11px;color:var(--muted)}
+.app-footer{display:flex;align-items:flex-start;justify-content:space-between;gap:25px;font-size:11px;color:var(--muted);margin-top:25px;border-top:1px solid var(--line);padding-top:16px;line-height:1.8}
+.app-footer p{max-width:620px;margin:0}
+.app-footer summary{white-space:nowrap;min-height:30px;padding-top:0;font-size:11px}
+.app-footer details[open]{max-width:430px}
+.app-footer details[open] summary{margin-bottom:6px}
+.empty{color:var(--muted);font-size:13px}
+@media(min-width:1500px){.wrap{padding-inline:45px;padding-top:38px}.topbar{padding-inline:45px}.library-hero{padding:40px}.project-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1180px){.grid{grid-template-columns:minmax(0,1fr)}.side{display:grid;grid-template-columns:1fr 1fr;gap:17px}.side-details{margin-top:0;align-self:start}.intro-card{grid-column:1/-1}.intro-card h3{max-width:310px}.principles{display:flex;gap:20px;flex-wrap:wrap}.principles li{margin:0}.library-hero h1{font-size:35px}.hero-art{transform:scale(.86);transform-origin:center right;width:185px;margin-left:-12px}.metrics{gap:10px}.metric{padding:16px 13px;gap:10px}.metric>.icon{padding:8px;width:19px;height:19px}}
+@media(max-width:1000px){.app{grid-template-columns:188px minmax(0,1fr)}.sidebar{padding-inline:12px}.brand{font-size:23px;padding-inline:9px}.wrap{padding:25px}.topbar{padding:14px 25px}.breadcrumb span:first-of-type,.breadcrumb .crumb-slash{display:none}.project-switch select{max-width:180px}.library-hero{padding:27px}.library-hero h1{font-size:32px}.hero-art{display:none}.library-hero p{max-width:470px}.project-card{padding:19px}.project-card footer{align-items:flex-start;flex-direction:column;gap:13px}.project-card footer button{width:100%}.project-head{flex-wrap:wrap;gap:10px}.modes{justify-content:flex-start;padding-top:0;max-width:none}.project-progress{padding:13px 16px;gap:12px}.project-progress>div{gap:6px}.project-progress .icon{display:none}.project-progress b{font-size:11px}.progress-track{gap:8px;font-size:10px}progress{width:75px}}
+@media(max-width:740px){.app{display:block}.sidebar{position:static;height:auto;padding:16px 16px 11px;border-right:0;border-bottom:1px solid var(--line);display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;gap:0 12px;overflow:visible}.brand{font-size:23px;padding:0;margin-right:auto}.brand svg{width:29px;height:31px}.workspace-link{width:auto;font-size:12px;min-height:42px;padding:9px 12px;border:1px solid var(--line)}.sidebar-count{display:none}.sidebar-label,.sidebar-bottom{display:none}.steps{width:100%;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:14px}.steps button{min-height:47px;padding:8px;gap:7px;justify-content:center}.steps b{font-size:12px}.steps small{display:none}.step-index{width:23px;height:23px;border-radius:7px;font-size:9px}.topbar{padding:11px 16px;min-height:65px;background:white}.breadcrumb{display:none}.project-switch{width:100%;gap:8px}.project-switch select{max-width:none;width:0;flex:1;font-size:11px}.project-switch button{min-height:44px;padding:9px 12px;font-size:12px}.project-switch button .icon{width:16px;height:16px}.wrap{padding:21px 16px}.project-head{gap:12px;position:relative;margin-bottom:16px}.project-head>div:first-child{flex:1;min-width:160px}.project-head h1{font-size:25px;letter-spacing:-.8px;margin-top:4px}.project-head .eyebrow{font-size:9px}.project-state{gap:6px}.status{font-size:10px}.project-state .sub{font-size:11px}.modes{width:100%;gap:6px}.chip{font-size:10px}.mobile-amount{display:block;text-align:right;font-size:19px;font-weight:700;letter-spacing:-.4px;white-space:nowrap;padding-top:15px}.mobile-amount small{display:block;font-size:10px;font-weight:400;letter-spacing:0;color:var(--muted)}.project-progress{margin-bottom:18px;flex-wrap:wrap;padding:12px 14px}.project-progress>div{gap:8px}.progress-track{flex:1;justify-content:flex-end;min-width:120px}.project-progress progress{width:80px}.grid{gap:16px}.panel-head{padding:20px 18px 16px}.panel-head h2{font-size:20px}.panel-icon{width:34px;height:34px;border-radius:10px}.panel-body{padding:20px 18px}.sub,.hint{font-size:12px}.field-heading{gap:7px}.field-heading span{font-size:10px}#brief{min-height:225px;font-size:13px}.price-row{gap:13px}.price{max-width:137px;font-size:17px}.price-row .hint{font-size:11px}.actions{gap:8px}.actions button{font-size:12px}.actionbar{padding:16px 18px;align-items:stretch;flex-direction:column;gap:12px}.actionbar .actions{flex-direction:column;align-items:stretch}.actionbar button{width:100%}.actionbar p{font-size:12px}.file-context{padding-inline:18px}.dropzone{padding:20px 14px}.dropzone label{font-size:13px}.filebox input{font-size:11px}.examples .actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.examples button{font-size:11px;padding-inline:7px;min-height:44px}.results{padding:15px 18px 0}.result-tools{margin-inline:18px;align-items:flex-start;flex-direction:column;gap:7px}.result-tools .filter-group{width:100%}.result-tools .filter-group button{flex:1;min-height:40px}.preview{margin-inline:18px}.dirty{margin-inline:18px}.summary{padding:13px 14px;font-size:13px}table,tbody{display:block}thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:14px 0;border-bottom:1px solid var(--line)}tbody th,tbody td{display:block;padding:0;border:0}tbody td:last-child{grid-column:1/-1;font-size:12px}tbody th{font-size:13px}.side{display:block}.side .proof{display:none}.side-details{margin-top:14px}.summary-card{padding:21px}.money{font-size:31px;margin:8px 0}.receipt-grid{gap:15px}.receipt-grid strong{font-size:20px}.receipt-check{font-size:12px}.payment-amount{font-size:35px}.intro-card{padding:23px}.intro-card h3{font-size:22px}.principles{gap:12px;flex-direction:column}.library-hero{padding:25px 22px;border-radius:16px;margin-bottom:16px}.library-hero h1{font-size:31px;letter-spacing:-1.1px}.library-hero p{font-size:12px}.section-kicker{font-size:9px;letter-spacing:1.1px}.metrics{gap:7px;margin-bottom:22px}.metric{display:block;padding:13px 11px}.metric>.icon{width:17px;height:17px;padding:7px;border-radius:8px;margin-bottom:8px}.metric b{font-size:23px}.metric span{font-size:10px;line-height:1.5;display:block}.library-heading{align-items:flex-start;gap:10px}.library-heading h2{font-size:19px}.library-mode{font-size:10px;max-width:150px}.library-toolbar{display:block}.search-box{width:100%;margin-bottom:11px}.library-toolbar>.filter-group{display:flex}.library-toolbar .filter-group button{flex:1;font-size:11px;min-height:40px;padding:8px 6px}.project-grid{grid-template-columns:1fr;gap:13px}.project-card{padding:20px}.project-card header{margin-bottom:14px}.project-card footer{flex-direction:row;align-items:center}.project-card footer button{width:auto}.project-card h3{font-size:17px}.empty-state{padding:30px 19px}.app-footer{display:block;font-size:10px;margin-top:22px}.app-footer p{margin-bottom:12px}.app-footer summary{min-height:40px;font-size:11px}.library-note{font-size:10px}}
+@media(max-width:380px){.steps .step-index{display:none}}
+@media(prefers-reduced-motion:no-preference){button{transition:transform .15s ease,box-shadow .15s ease}.primary:hover:enabled{transform:translateY(-1px);box-shadow:0 5px 12px #5b4bd72a}.project-card{transition:transform .18s ease,box-shadow .18s ease}.project-card:hover,.project-card:focus-within{transform:translateY(-2px);box-shadow:0 9px 24px #28233f0c}.busy:before{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}}
 </style>
 </head>
 <body>
 <a class="skip-link" href="#workspace">Skip to workspace</a>
-<header class="top"><div class="brand"><svg viewBox="0 0 30 30" aria-hidden="true"><path d="M15 1L29 9v12l-14 8L1 21V9Z" fill="#3657df"/><path d="m8 15 5 5 9-10" fill="none" stroke="white" stroke-width="3"/></svg>prooflane<span class="brand-note">Delivery assurance for data work</span></div><div class="project-switch"><label class="sr-only" for="projects">Resume a saved project</label><select id="projects" aria-describedby="history-note" disabled><option value="">Loading saved projects…</option></select><button id="new-project" disabled>＋ New project</button></div></header>
-<div class="wrap">
-<main id="workspace" tabindex="-1">
-<div class="project-head"><div><h1 id="project-title">Agree on the work. See the proof.</h1><div class="project-state"><span class="status" id="status">Start a project</span><span class="sub" id="project-subtitle">Review the delivery before you pay.</span></div></div><div class="mobile-amount"><span id="project-amount">USD</span><small id="amount-label">Set your price</small></div><div class="modes" role="group" aria-label="Project modes"><span class="chip" id="mode-title">Connecting…</span><span class="chip" id="mode-detail">Local app</span></div></div>
-<div id="error" class="error" role="alert" tabindex="-1" hidden></div><p id="mode-warning" class="mode-warning" hidden></p><p id="busy-note" class="busy" role="status" hidden>Working… Please wait.</p>
-<nav class="steps" aria-label="Project stages"><button id="nav-scope" aria-current="step">1 Scope</button><button id="nav-delivery" disabled>2 Delivery</button><button id="nav-payment" disabled>3 Payment</button></nav>
-<div class="grid"><div class="main">
-<section class="card" id="scope-stage" aria-labelledby="scope-heading"><div class="panel-head"><div><h2 id="scope-heading" tabindex="-1">Make the outcome clear.</h2><p class="sub" id="scope-subtitle">Describe the CSV work and set your USD price.</p></div></div>
-<div class="panel-body"><div id="scope-form"><label for="brief">Client brief</label><textarea id="brief" maxlength="6000" aria-describedby="ai-note"></textarea><label for="price">Proposed payment · USD</label><input class="price" id="price" type="text" inputmode="decimal" value="120.00" aria-describedby="price-hint"><p class="hint" id="price-hint">You set the price. The AI cannot change it.</p><div class="actions"><button class="primary" id="draft" disabled>Draft acceptance plan</button><button class="plain" id="sample" disabled>Load sample brief</button></div><p class="notice" id="ai-note">Only your brief is used to propose checks.</p></div>
-<div id="scope" hidden><div class="eyebrow">Client brief</div><p class="read-brief" id="agreed-brief"></p><div id="clarifications"></div><h3 id="plan-title">Proposed checks</h3><p class="hint">Review every requirement and its source quotation before agreeing.</p><div class="checks" id="plan-checks"></div><p class="scope-note">One local operator demonstrates both sides of the review. Independent client and freelancer accounts are not available.</p><div class="actionbar"><p id="scope-price"></p><button class="primary" id="agree">Agree on these checks</button></div></div></div></section>
-<section class="card" id="delivery" aria-labelledby="delivery-heading" hidden><div class="panel-head"><div><h2 id="delivery-heading" tabindex="-1">Check the work before you pay.</h2><p class="sub">Results against the acceptance checks you agreed to.</p></div></div><div class="file-context"><div class="file-meta"><span id="file-name">Choose your delivery</span><p class="hint" id="file-meta">UTF-8 CSV · up to 300 KB / 5,000 rows</p></div><details id="delivery-inputs" open><summary class="input-summary">Choose or replace CSV</summary><div class="filebox" id="upload-group"><label for="upload">Choose a UTF-8 CSV</label><input id="upload" type="file" accept=".csv,text/csv" aria-describedby="csv-privacy"><p class="hint" id="csv-privacy">CSV rows are checked locally and never sent to the AI.</p></div><div class="examples" id="examples"><p class="hint">Or try a sample delivery</p><div class="actions"><button class="secondary" id="failed">Load faulty example</button><button class="secondary" id="passed">Load corrected example</button></div></div></details></div><p class="dirty" id="dirty-note" role="status" hidden>The preview changed. Run checks on this version before approval or checkout.</p><div class="results" id="results"></div><div class="actionbar"><p id="review-note">Every agreed check must pass before your approval.</p><div class="actions"><button class="primary" id="verify">Run acceptance checks</button><button class="primary" id="approve" hidden>Approve this delivery</button><button class="primary" id="to-payment" hidden>View payment →</button></div></div><details class="preview" id="preview"><summary>View or edit CSV preview</summary><label for="csv">Delivery preview</label><textarea id="csv" spellcheck="false" placeholder="Choose a CSV or load an example."></textarea><p class="notice" id="preview-note">CSV previews are not saved. Switching projects clears unsaved changes.</p></details></section>
-<section class="card" id="payment" aria-labelledby="payment-heading" hidden><div class="panel-head"><div><h2 id="payment-heading" tabindex="-1">Review and pay.</h2><p class="sub" id="payment-subtitle">Your payment stays linked to the approved delivery.</p></div></div><div class="panel-body"><div id="checkout"><div class="eyebrow">Project payment · USD</div><div class="payment-amount" id="checkout-money"></div><p id="pay-note" class="notice"></p><div id="payment-proof" class="payment-proof"></div><div class="actions"><button class="primary" id="order" disabled>Create checkout</button><button class="primary" id="capture" hidden>Complete simulated payment</button><button class="secondary" id="reopen" hidden>Open PayPal sandbox</button><button class="secondary" id="back-delivery">Review delivery</button></div></div><div id="receipt" class="receipt"></div><div class="actions"><button class="primary" id="evidence" hidden>Download evidence record</button></div><p class="notice">Prooflane does not hold funds or guarantee payment. This starter supports simulated payments and PayPal sandbox only.</p></div></section>
-</div><aside class="side" aria-label="Payment context and project evidence"><div class="card"><div class="summary-card"><div class="eyebrow" id="money-label">Your USD price</div><div class="money" id="money">—</div><span class="status" id="rail-status">Start with a scope</span><p class="rail-note" id="rail-note">Agree on measurable work, review the result, then pay.</p></div><div class="proof" id="proof"><h3>Proof trail</h3><ol id="proof-trail"></ol></div></div><details class="card side-details" id="activity-details"><summary>Evidence & activity</summary><div class="empty" id="activity">The project's review and payment history will appear here.</div><p class="notice">The export includes checks, approval and payment IDs, without CSV rows.</p><button class="secondary" id="view-evidence" hidden>View receipt & export</button></details></aside></div>
-</main>
-<footer><p id="history-note">Saved on this computer. Choosing a project opens its current stage and clears the unsaved CSV preview.</p><details><summary>About this demo</summary><p>Prooflane is a local, single-operator demonstration for data freelancers and clients. AI proposes reviewable checks; code evaluates the CSV; a person approves the checked version. Modes are labeled on every saved project and receipt. Evidence is not digitally signed. No live-money payments are supported.</p></details></footer>
+<svg class="icon-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m6 12 4 4 8-8"/><path d="M21 12a9 9 0 1 1-5-8"/></symbol>
+<symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24"><path d="m13 3 2.4 6.6L22 12l-6.6 2.4L13 21l-2.4-6.6L4 12l6.6-2.4ZM4 2v5M1.5 4.5h5"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m-4 4 4-4 4 4M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v13m-4-4 4 4 4-4M4 16v4h16v-4"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="m10.3 4-8 14a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3l-8-14a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 7a7 7 0 0 1 11-2l3 3M4 16l3 3a7 7 0 0 0 11-2"/></symbol>
+</defs></svg>
+<div class="app">
+<aside class="sidebar" aria-label="Workspace navigation">
+ <div class="brand"><svg viewBox="0 0 34 36" aria-hidden="true"><path d="M6 1h21a5 5 0 0 1 5 5v20L19 35 2 26V6a5 5 0 0 1 4-5Z" fill="#5b4bd7"/><path d="m10 17 5 5 10-11" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>prooflane<span class="sr-only">workspace</span></div>
+ <nav aria-label="Workspace"><button class="workspace-link" id="nav-projects" aria-current="page" aria-controls="library"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>All projects<span class="sidebar-count" id="sidebar-count">0</span></button></nav>
+ <p class="sidebar-label">Your project</p>
+ <nav class="steps" aria-label="Project stages">
+  <button id="nav-scope" aria-controls="scope-stage"><span class="step-index" aria-hidden="true">01</span><span><b>Scope</b><small id="step-scope-note">Define the outcome</small></span></button>
+  <button id="nav-delivery" aria-controls="delivery" disabled><span class="step-index" aria-hidden="true">02</span><span><b>Delivery</b><small id="step-delivery-note">Review the proof</small></span></button>
+  <button id="nav-payment" aria-controls="payment" disabled><span class="step-index" aria-hidden="true">03</span><span><b>Payment</b><small id="step-payment-note">Close the loop</small></span></button>
+ </nav>
+ <div class="sidebar-bottom"><div class="local-label"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Local workspace</div><p>Your projects stay on this computer. You stay in control of every approval.</p></div>
+</aside>
+<div class="main-shell">
+ <header class="topbar"><div class="breadcrumb"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg><span>Workspace</span><span class="crumb-slash" aria-hidden="true">/</span><b id="breadcrumb-stage">All projects</b></div><div class="project-switch"><label class="sr-only" for="projects">Resume a saved project</label><select id="projects" aria-describedby="history-note" disabled><option value="">Loading saved projects…</option></select><button class="primary" id="new-project" disabled><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>New project</button></div></header>
+ <div class="wrap">
+ <main id="workspace" tabindex="-1">
+  <div id="error" class="error" role="alert" tabindex="-1" hidden></div><p id="mode-warning" class="mode-warning" hidden></p><p id="busy-note" class="busy" role="status" hidden>Working… Please wait.</p>
+  <section id="library" aria-labelledby="library-title">
+   <div class="library-hero"><div><span class="section-kicker"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>A better handoff starts here</span><h1 id="library-title">Great work.<br>A clear path to <em>done.</em></h1><p>Agree on the outcome, see the delivery proof, and connect your approval to a payment record.</p><div class="actions"><button class="primary" id="library-start"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Start a project</button></div></div><div class="hero-art" aria-hidden="true"><div class="hero-orbit"></div><div class="art-card"><svg class="icon"><use href="#i-file"/></svg>Clear scope</div><div class="art-card"><svg class="icon"><use href="#i-check"/></svg>Delivery proof</div><div class="art-card"><svg class="icon"><use href="#i-card"/></svg>Your approval</div></div></div>
+   <div class="metrics" role="group" aria-label="Saved project totals"><div class="metric"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg><div><b id="library-total">0</b><span>Total projects</span></div></div><div class="metric"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><div><b id="library-review">0</b><span>Need your review</span></div></div><div class="metric"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><div><b id="library-paid">0</b><span>Receipts recorded</span></div></div></div>
+   <div class="library-heading"><h2 id="projects-heading" tabindex="-1">Your projects</h2><span id="library-mode" class="library-mode">Connecting to your workspace…</span></div>
+   <div class="library-toolbar"><label class="sr-only" for="project-search">Search saved projects</label><div class="search-box"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input id="project-search" type="search" placeholder="Find a project…" autocomplete="off" aria-controls="project-grid" aria-describedby="library-note"></div><div class="filter-group" role="group" aria-label="Filter projects"><button id="projects-all" aria-pressed="true">All projects</button><button id="projects-review" aria-pressed="false">Need review</button><button id="projects-paid" aria-pressed="false">Receipts</button></div></div>
+   <div id="project-grid" class="project-grid"></div>
+   <div id="library-empty" class="empty-state"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg><h3 id="empty-heading">A clean slate. A clear outcome.</h3><p id="empty-detail">Create your first project to turn a brief into reviewable checks and a delivery you can approve.</p><div class="actions"><button class="primary" id="empty-new">Create your first project<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button><button class="secondary" id="clear-project-filter" hidden>Clear filters</button></div></div>
+   <p id="library-note" class="library-note" role="status">Projects are saved on this computer.</p>
+  </section>
+  <div id="project-workspace" hidden>
+   <div class="project-head"><div><div class="eyebrow">Delivery workspace</div><h1 id="project-title">Start with a clear outcome.</h1><div class="project-state"><span class="status" id="status">Start a project</span><span class="sub" id="project-subtitle">Your next great handoff starts here.</span></div></div><div class="mobile-amount"><span id="project-amount">USD</span><small id="amount-label">Set your price</small></div><div class="modes" role="group" aria-label="Project modes"><span class="chip" id="mode-title">Connecting…</span><span class="chip" id="mode-detail">Local app</span></div></div>
+   <div class="project-progress" id="project-progress"><div><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><b>Every step, backed by evidence</b></div><div class="progress-track"><span id="progress-label">0 of 4 checkpoints</span><progress id="progress-meter" max="4" value="0" aria-label="Recorded project checkpoints"></progress></div></div>
+   <div class="grid"><div class="main">
+    <section class="card" id="scope-stage" aria-labelledby="scope-heading"><div class="panel-head"><div><div class="section-kicker">01 · Define success</div><h2 id="scope-heading" tabindex="-1">Make the outcome clear.</h2><p class="sub" id="scope-subtitle">Describe the CSV work and set your USD price.</p></div><div class="panel-icon"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg></div></div>
+     <div class="panel-body"><div id="scope-form"><div class="field-heading"><label for="brief">Client brief</label><span id="brief-count">0 / 6,000</span></div><textarea id="brief" maxlength="6000" aria-describedby="ai-note brief-count" placeholder="Describe the data, required columns, and the rules that define a good delivery."></textarea><label for="price">Proposed payment · USD</label><div class="price-row"><input class="price" id="price" type="text" inputmode="decimal" value="120.00" aria-describedby="price-hint"><p class="hint" id="price-hint">You set the price.<br>The AI cannot change it.</p></div><div class="actions"><button class="primary" id="draft">Draft acceptance plan<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button><button class="plain" id="sample"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg>Load sample brief</button></div><p class="notice" id="ai-note">Only your brief is used to propose checks.</p></div>
+     <div id="scope" hidden><div class="eyebrow">The client brief</div><p class="read-brief" id="agreed-brief"></p><div id="clarifications"></div><h3 id="plan-title">Proposed acceptance checks</h3><p class="hint">Review every rule and its original source before you agree.</p><div class="checks" id="plan-checks"></div><p class="scope-note">One local operator demonstrates both sides of the review. Independent client and freelancer accounts are not available.</p><div class="actionbar"><p id="scope-price"></p><button class="primary" id="agree">Agree on these checks</button></div></div></div>
+    </section>
+    <section class="card" id="delivery" aria-labelledby="delivery-heading" hidden><div class="panel-head"><div><div class="section-kicker">02 · Review the proof</div><h2 id="delivery-heading" tabindex="-1">Check the work before you pay.</h2><p class="sub">Real results against the checks you agreed to.</p></div><div class="panel-icon"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></div></div>
+     <div class="file-context"><div class="file-meta"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg><div><span id="file-name">Choose your delivery</span><p class="hint" id="file-meta">UTF-8 CSV · up to 300 KB / 5,000 rows</p></div></div><details id="delivery-inputs" open><summary class="input-summary">Choose or replace CSV</summary><div class="filebox" id="upload-group"><div class="dropzone" id="dropzone"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg><label for="upload">Drop your CSV here, or choose a file</label><p class="hint">UTF-8 CSV · up to 300 KB / 5,000 rows</p><input id="upload" type="file" accept=".csv,text/csv" aria-describedby="csv-privacy"><p class="hint" id="csv-privacy">CSV rows are checked locally and never sent to the AI.</p></div></div><div class="examples" id="examples"><p class="hint">Just exploring? Try a sample delivery.</p><div class="actions"><button class="secondary" id="failed">Load faulty example</button><button class="secondary" id="passed">Load corrected example</button></div></div></details></div>
+     <p class="dirty" id="dirty-note" role="status" hidden>The preview changed. Run checks on this version before approval or checkout.</p>
+     <div class="result-tools" id="result-tools" hidden><p>Acceptance checks</p><div class="filter-group" role="group" aria-label="Filter acceptance results"><button id="filter-all" aria-pressed="true" aria-controls="results">All checks</button><button id="filter-failed" aria-pressed="false" aria-controls="results">Needs attention</button></div></div>
+     <div class="results" id="results"></div><div class="actionbar"><p id="review-note">Every agreed check must pass before your approval.</p><div class="actions"><button class="primary" id="verify">Run acceptance checks</button><button class="primary" id="approve" hidden>Approve this delivery</button><button class="primary" id="to-payment" hidden>View payment →</button></div></div><details class="preview" id="preview"><summary>View or edit CSV preview</summary><label for="csv">Delivery preview</label><textarea id="csv" spellcheck="false" placeholder="Choose a CSV or load an example."></textarea><p class="notice" id="preview-note">CSV previews are not saved. Switching projects clears unsaved changes.</p></details>
+    </section>
+    <section class="card" id="payment" aria-labelledby="payment-heading" hidden><div class="panel-head"><div><div class="section-kicker">03 · Close the loop</div><h2 id="payment-heading" tabindex="-1">Review and pay.</h2><p class="sub" id="payment-subtitle">Your payment stays linked to the approved delivery.</p></div><div class="panel-icon"><svg class="icon" aria-hidden="true"><use href="#i-card"/></svg></div></div><div class="panel-body"><div id="checkout"><div class="eyebrow">Project payment · USD</div><div class="payment-amount" id="checkout-money"></div><p id="pay-note" class="notice"></p><div id="payment-proof" class="payment-proof"></div><div class="actions"><button class="primary" id="order" disabled>Create checkout</button><button class="primary" id="capture" hidden>Complete simulated payment</button><button class="secondary" id="reopen" hidden>Open PayPal sandbox</button><button class="plain" id="back-delivery">Review delivery</button></div></div><div id="receipt" class="receipt"></div><div class="actions"><button class="primary" id="evidence" hidden><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Download evidence record</button></div><p class="notice">Prooflane does not hold funds or guarantee payment. This workspace supports simulated payments and PayPal sandbox only.</p></div></section>
+   </div><aside class="side" aria-label="Payment context and project evidence">
+    <div id="intro-card" class="intro-card"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><h3>Good work starts<br>with a shared definition of done.</h3><p>Set clear expectations before the delivery. Review what passed, approve the exact version, then move to payment.</p><ul class="principles"><li><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>Checks grounded in your brief</li><li><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Your CSV stays out of the AI</li><li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>You make the final approval</li></ul></div>
+    <section class="card" id="summary-project" hidden><div class="summary-card"><div class="eyebrow" id="money-label">Agreed payment · USD</div><div class="money" id="money">—</div><span class="rail-status" id="rail-status">Start a project</span><p class="rail-note" id="rail-note">Agree on measurable work, review the result, then pay.</p></div><div class="proof" id="proof"><h3>The proof trail</h3><ol id="proof-trail"></ol></div></section>
+    <details class="card side-details" id="activity-details" hidden><summary>Evidence & activity</summary><div id="activity"></div><p class="notice">Your scope, approval and payment IDs, without CSV rows.</p><div class="actions"><button class="secondary" id="view-evidence">View payment & export</button></div></details>
+   </aside></div>
+  </div>
+ </main>
+ <footer class="app-footer"><p id="history-note">Saved on this computer. Choosing a project opens its current stage and clears the unsaved CSV preview.</p><details><summary>About this workspace</summary><p>Prooflane is a local, single-operator demonstration for data freelancers and clients. AI proposes reviewable checks; code evaluates the CSV; a person approves the checked version. Modes are labeled on every saved project and receipt. Evidence is not digitally signed. No live-money payments are supported.</p></details></footer>
+ </div>
 </div>
+</div>
+
 <script>
-let config,project,busy=false,dirty=false,view='scope',filename='';
+let config,project,busy=false,dirty=false,view='projects',filename='',savedProjects=[],libraryFilter='all',resultFilter='all';
 const $=id=>document.getElementById(id);
 const escapeHTML=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const usd=c=>'$'+(c/100).toFixed(2);
 const labels={required_columns:'Required columns',unique:'Unique values',not_empty:'No missing values',number_range:'Numeric bounds',row_count:'Row count'};
 function label(check){return labels[check.kind]+(check.column?' · '+check.column:check.columns?' · '+check.columns.join(', '):'');}
-function defaultView(){return !project||project.status==='DRAFT'?'scope':['APPROVED','CHECKOUT_PENDING','ORDER_CREATED','PAYMENT_PENDING','PAID'].includes(project.status)?'payment':'delivery';}
-function heading(){return $(view==='scope'?'scope-heading':view==='delivery'?'delivery-heading':'payment-heading');}
+const reviewStates=['DRAFT','BLOCKED','VERIFIED'];
+function stageFor(value){return !value?'projects':value.status==='DRAFT'?'scope':['APPROVED','CHECKOUT_PENDING','ORDER_CREATED','PAYMENT_PENDING','PAID'].includes(value.status)?'payment':'delivery';}
+function defaultView(){return stageFor(project);}
+function statusText(value){return ({DRAFT:value.plan.clarifications.length?'Needs clarification':'Review scope',AGREED:'Awaiting delivery',BLOCKED:'Changes needed',VERIFIED:'Ready for approval',APPROVED:'Delivery approved',CHECKOUT_PENDING:'Checkout unresolved',ORDER_CREATED:'Awaiting payment',PAYMENT_PENDING:'Payment pending',PAID:value.payment_mode==='simulation'?'Simulation complete':'Sandbox payment reconciled'})[value.status];}
+function deliveryFrozen(){return !!project?.checkout_attempted_at||['CHECKOUT_PENDING','ORDER_CREATED','PAYMENT_PENDING','PAID'].includes(project?.status);}
+function heading(){return $(view==='projects'?'projects-heading':view==='scope'?'scope-heading':view==='delivery'?'delivery-heading':'payment-heading');}
+function renderLibrary(){
+ const query=$('project-search').value.trim().toLowerCase();
+ const matches=savedProjects.filter(p=>(libraryFilter==='all'||libraryFilter==='review'&&reviewStates.includes(p.status)||libraryFilter==='paid'&&!!p.receipt)&&(!query||(p.plan.title+' '+p.id).toLowerCase().includes(query)));
+ $('library-total').textContent=savedProjects.length;$('sidebar-count').textContent=savedProjects.length;
+ $('library-review').textContent=savedProjects.filter(p=>reviewStates.includes(p.status)).length;
+ $('library-paid').textContent=savedProjects.filter(p=>p.receipt).length;
+ $('library-mode').textContent=config?(config.ai_mode==='sample'?'Sample AI':'Gemini AI')+' · '+(config.payment_mode==='simulation'?'Simulated payments':'PayPal sandbox'):'Connecting…';
+ $('project-search').disabled=busy||!config;
+ for(const filter of ['all','review','paid']){const button=$('projects-'+filter);button.disabled=busy||!config;button.setAttribute('aria-pressed',String(libraryFilter===filter));}
+ ['library-start','empty-new','clear-project-filter'].forEach(id=>$(id).disabled=busy||!config);
+ $('project-grid').innerHTML=matches.map(p=>{
+  const actionLabel=p.receipt?'View receipt':stageFor(p)==='scope'?'Review scope':stageFor(p)==='payment'?'View payment':'Review delivery';
+  const tone=p.status==='BLOCKED'?'fail':p.receipt?'pass':'';
+  return '<article class="project-card"><header><svg class="icon project-icon" aria-hidden="true"><use href="#i-file"/></svg><span class="status '+tone+'">'+escapeHTML(statusText(p))+'</span></header><h3>'+escapeHTML(p.plan.title)+'</h3><p class="project-id">PROJECT '+escapeHTML(p.id.slice(0,8).toUpperCase())+'</p><p class="card-mode">'+escapeHTML(p.ai_mode==='sample'?'Sample AI fixture':'Gemini AI')+' · '+escapeHTML(p.payment_mode==='simulation'?'Simulated payments':'PayPal sandbox')+'</p><footer><strong>'+usd(p.cents)+'<small>USD</small></strong><button class="secondary" data-project="'+escapeHTML(p.id)+'" aria-label="'+escapeHTML(actionLabel+' · '+p.plan.title+' · '+p.id.slice(0,8))+'"'+(busy?' disabled':'')+'>'+actionLabel+'<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button></footer></article>';
+ }).join('');
+ $('library-empty').hidden=!!matches.length||!config;$('empty-new').hidden=!!savedProjects.length;$('clear-project-filter').hidden=!savedProjects.length;
+ $('empty-heading').textContent=savedProjects.length?'No projects match your filters.':'A clean slate. A clear outcome.';
+ $('empty-detail').textContent=savedProjects.length?'Try another project name or clear the filters to see all your saved work.':'Create your first project to turn a brief into reviewable checks and a delivery you can approve.';
+ $('library-note').textContent=matches.length+' of '+savedProjects.length+' saved projects. '+(dirty?'Opening another project clears your changed CSV preview.':'Opening a project takes you to its current stage.');
+}
 function error(message){$('error').textContent=message;$('error').hidden=false;$('error').focus();}
 async function api(path,body){const options=body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json','X-Prooflane-Request':'1'},body:JSON.stringify(body)};const response=await fetch(path,options);const data=await response.json();if(!response.ok)throw Error(data.error||'Request failed');return data;}
-async function refreshProjects(){const saved=await api('/api/projects');$('projects').innerHTML='<option value="">'+(saved.length?'Choose a saved project':'No saved projects yet')+'</option>'+saved.map(p=>'<option value="'+escapeHTML(p.id)+'">'+escapeHTML(p.plan.title+' · '+usd(p.cents)+' · '+p.status.replaceAll('_',' ')+' · '+p.payment_mode+' · '+p.id.slice(0,8))+'</option>').join('');$('projects').value=project?.id||'';}
-function showProject(value){project=value;view=defaultView();history.replaceState(null,'','/?project='+project.id);$('brief').value=project.brief;$('price').value=(project.cents/100).toFixed(2);$('csv').value='';$('upload').value='';$('preview').open=false;$('delivery-inputs').open=!project.verification;filename='';dirty=false;}
+async function refreshProjects(){savedProjects=await api('/api/projects');$('projects').innerHTML='<option value="">'+(savedProjects.length?'Choose a saved project':'No saved projects yet')+'</option>'+savedProjects.map(p=>'<option value="'+escapeHTML(p.id)+'">'+escapeHTML(p.plan.title+' · '+usd(p.cents)+' · '+p.status.replaceAll('_',' ')+' · '+p.payment_mode+' · '+p.id.slice(0,8))+'</option>').join('');$('projects').value=project?.id||'';}
+function showProject(value){project=value;view=defaultView();resultFilter='all';history.replaceState(null,'','/?project='+project.id);$('brief').value=project.brief;$('price').value=(project.cents/100).toFixed(2);$('csv').value='';$('upload').value='';$('preview').open=false;$('delivery-inputs').open=!project.verification;filename='';dirty=false;}
 function navigate(stage){view=stage;render();heading().focus();}
 async function run(fn){if(busy)return;const previousView=view,previousStatus=project?.status,previousFocus=document.activeElement;busy=true;$('error').hidden=true;document.querySelectorAll('button').forEach(b=>b.disabled=true);try{render();await fn();}catch(e){error(e.message);}finally{busy=false;render();if($('error').hidden){if(view!==previousView||project?.status!==previousStatus)heading().focus();else previousFocus?.focus();}}}
 function render(){
  const state=project?.status,receipt=project?.receipt,v=project?.verification;
- const frozen=!!project?.checkout_attempted_at||['CHECKOUT_PENDING','ORDER_CREATED','PAYMENT_PENDING','PAID'].includes(state);
+ const frozen=deliveryFrozen();
  const mode=project||config,mismatch=!!project&&project.payment_mode!==config?.payment_mode;
- const status=!project?'Start a project':dirty&&!frozen?'Preview changed':({DRAFT:project.plan.clarifications.length?'Needs clarification':'Review scope',AGREED:'Awaiting delivery',BLOCKED:'Changes needed',VERIFIED:'Ready for approval',APPROVED:'Delivery approved',CHECKOUT_PENDING:'Checkout unresolved',ORDER_CREATED:'Awaiting payment',PAYMENT_PENDING:'Payment pending',PAID:project.payment_mode==='simulation'?'Simulation complete':'Sandbox payment reconciled'})[state];
+ const status=!project?'Start a project':dirty&&!frozen?'Preview changed':statusText(project);
+ renderLibrary();$('library').hidden=view!=='projects';$('project-workspace').hidden=view==='projects';
+ $('nav-projects').disabled=busy||!config;if(view==='projects')$('nav-projects').setAttribute('aria-current','page');else $('nav-projects').removeAttribute('aria-current');
+ $('breadcrumb-stage').textContent=({projects:'All projects',scope:'Scope',delivery:'Delivery review',payment:'Payment & receipt'})[view];
+ $('intro-card').hidden=!!project;$('summary-project').hidden=!project;$('project-progress').hidden=!project;
+ const checkpoints=[project&&state!=='DRAFT',v?.passed&&!dirty,project?.approval&&!dirty,receipt].filter(Boolean).length;
+ $('progress-meter').value=checkpoints;$('progress-label').textContent=checkpoints+' of 4 checkpoints';
+ $('brief-count').textContent=$('brief').value.length.toLocaleString('en-US')+' / 6,000';
+ $('step-scope-note').textContent=project?(state==='DRAFT'?'Review the requirements':'Scope agreed'):'Define the outcome';
+ $('step-delivery-note').textContent=dirty?'Recheck this preview':v?v.passed?'Checks passed':'Changes needed':'Review the proof';
+ $('step-payment-note').textContent=receipt?'Receipt recorded':project?.approval?'Delivery approved':'Close the loop';
+ $('nav-scope').setAttribute('data-complete',String(!!project&&state!=='DRAFT'));
+ $('nav-delivery').setAttribute('data-complete',String(!!v?.passed&&!dirty));$('nav-payment').setAttribute('data-complete',String(!!receipt));
+ $('result-tools').hidden=!v;
+ for(const filter of ['all','failed']){const button=$('filter-'+filter);button.disabled=busy;button.setAttribute('aria-pressed',String(resultFilter===filter));}
+ $('filter-all').textContent='All checks'+(v?' ('+v.checks.length+')':'');
+ $('filter-failed').textContent='Needs attention'+(v?' ('+v.checks.filter(c=>!c.passed).length+')':'');
  $('busy-note').hidden=!busy;['brief','price'].forEach(id=>$(id).readOnly=busy||!!project||!config);
  ['draft','sample'].forEach(id=>$(id).disabled=busy||!!project||!config);$('new-project').disabled=busy||!config;$('projects').disabled=busy||!config;$('projects').value=project?.id||'';
- $('project-title').textContent=project?.plan.title||'Agree on the work. See the proof.';$('project-subtitle').textContent=project?'CSV delivery · Saved locally':'Review the delivery before you pay.';
+ $('project-title').textContent=project?.plan.title||'A clear brief. A better handoff.';$('project-subtitle').textContent=project?'CSV delivery · Saved locally':'Turn your expectations into a delivery you can review.';
  $('status').textContent=status;$('status').className='status '+(state==='BLOCKED'?'fail':state==='PAID'?'pass':'');$('rail-status').textContent=status;
  $('money').textContent=project?usd(project.cents):'—';$('money-label').textContent=project?(state==='DRAFT'?'Proposed payment · USD':'Agreed payment · USD'):'Your USD price';$('project-amount').textContent=project?usd(project.cents):'USD';$('amount-label').textContent=project?(state==='DRAFT'?'Proposed':'Agreed'):'Set your price';
  $('mode-title').textContent=mode?(mode.ai_mode==='sample'?'Sample AI fixture':'Gemini AI'):'Connecting…';$('mode-detail').textContent=mode?(mode.payment_mode==='simulation'?'Simulated payments':'PayPal sandbox'):'Local app';
- $('mode-warning').hidden=!mismatch;$('mode-warning').textContent=mismatch?'This saved project uses '+project.payment_mode+' payments; the app is configured for '+config.payment_mode+'. Start a new project, or restore the original mode to reconcile an unpaid order.':'';
- for(const stage of ['scope','delivery','payment']){const nav=$('nav-'+stage);nav.disabled=busy||stage!=='scope'&&(!project||state==='DRAFT');if(stage===view)nav.setAttribute('aria-current','step');else nav.removeAttribute('aria-current');}
+ $('mode-warning').hidden=!mismatch||view==='projects';$('mode-warning').textContent=mismatch?'This saved project uses '+project.payment_mode+' payments; the app is configured for '+config.payment_mode+'. Start a new project, or restore the original mode to reconcile an unpaid order.':'';
+ for(const stage of ['scope','delivery','payment']){const nav=$('nav-'+stage);nav.disabled=busy||!config||stage!=='scope'&&(!project||state==='DRAFT');if(stage===view)nav.setAttribute('aria-current','step');else nav.removeAttribute('aria-current');}
  $('scope-stage').hidden=view!=='scope';$('delivery').hidden=view!=='delivery';$('payment').hidden=view!=='payment';$('scope-form').hidden=!!project;$('scope').hidden=!project;
  $('scope-heading').textContent=project?(state==='DRAFT'?'Review the proposed outcome.':'Review the agreed outcome.'):'Make the outcome clear.';$('scope-subtitle').textContent=project?'Check the requirements, source quotations and USD price.':'Describe the CSV work and set your USD price.';
  $('ai-note').textContent=config?.ai_mode==='sample'?'Sample mode uses a fixed acceptance plan. Configure Gemini for your own briefs.':'Only the brief goes to Gemini. Review the proposed checks; free-tier inputs may be used by Google to improve products.';
@@ -84,7 +412,7 @@ function render(){
  $('file-name').textContent=filename||(v?'Checked CSV snapshot':'Choose your delivery');$('file-meta').textContent=dirty?'Preview changed; run checks on this version.':v?v.rows+' checked rows'+($('csv').value?' / Current checked version.':' / Preview not saved.'):'UTF-8 CSV / up to 300 KB / 5,000 rows';
  $('dirty-note').hidden=!dirty;$('preview-note').textContent=frozen?'Checkout has started. This delivery snapshot is frozen; its CSV preview is not stored.':'CSV previews are not saved. Switching projects clears unsaved changes.';
  $('delivery-heading').textContent=dirty?'Review the current preview.':v?(v.passed?'Every agreed check passed.':'Delivery needs changes.'):'Check the work before you pay.';
- $('results').innerHTML=v?'<div class="summary '+(dirty?'':v.passed?'passed':'blocked')+'"><b>'+escapeHTML(dirty?'Results from the previous check':v.passed?'All '+v.checks.length+' checks passed':v.checks.filter(c=>!c.passed).length+' checks need attention')+'</b><small>'+v.rows+' data rows · '+(dirty?'Run checks on the changed preview.':v.passed?'Review the evidence before approving.':'Correct the listed CSV lines, then run checks again.')+'</small></div><table><caption class="sr-only">Acceptance check results'+(dirty?' from the previous version':'')+'</caption><thead><tr><th scope="col">Agreed rule</th><th scope="col">Result</th><th scope="col">Evidence</th></tr></thead><tbody>'+v.checks.slice().sort((a,b)=>Number(a.passed)-Number(b.passed)).map(c=>'<tr><th scope="row">'+escapeHTML(label(c))+'</th><td><span class="pill '+(c.passed?'pass':'fail')+'">'+(c.passed?'PASS':'FAIL')+'</span></td><td>'+escapeHTML(c.detail)+(c.failed_rows.length?'<span class="line-detail">CSV lines '+c.failed_rows.join(', ')+'</span>':'')+'</td></tr>').join('')+'</tbody></table><details><summary>Checked delivery SHA-256</summary><div class="hash">'+escapeHTML(v.sha256)+'</div></details>':'';
+ $('results').innerHTML=v?'<div class="summary '+(dirty?'':v.passed?'passed':'blocked')+'"><b>'+escapeHTML(dirty?'Results from the previous check':v.passed?'All '+v.checks.length+' checks passed':v.checks.filter(c=>!c.passed).length+' checks need attention')+'</b><small>'+v.rows+' data rows · '+(dirty?'Run checks on the changed preview.':v.passed?'Review the evidence before approving.':'Correct the listed CSV lines, then run checks again.')+'</small></div><table'+(resultFilter==='failed'&&v.passed?' hidden':'')+'><caption class="sr-only">Acceptance check results'+(dirty?' from the previous version':'')+'</caption><thead><tr><th scope="col">Agreed rule</th><th scope="col">Result</th><th scope="col">Evidence</th></tr></thead><tbody>'+v.checks.filter(c=>resultFilter==='all'||!c.passed).sort((a,b)=>Number(a.passed)-Number(b.passed)).map(c=>'<tr><th scope="row">'+escapeHTML(label(c))+'</th><td><span class="pill '+(c.passed?'pass':'fail')+'">'+(c.passed?'PASS':'FAIL')+'</span></td><td>'+escapeHTML(c.detail)+(c.failed_rows.length?'<span class="line-detail">CSV lines '+c.failed_rows.join(', ')+'</span>':'')+'</td></tr>').join('')+'</tbody></table>'+((resultFilter==='failed'&&v.passed)?'<p class="notice">No failing checks in this checked snapshot. Select All checks to review the passing evidence.</p>':'')+'<details><summary>Checked delivery SHA-256</summary><div class="hash">'+escapeHTML(v.sha256)+'</div></details>':'';
  $('verify').textContent=v?'Run checks again':'Run acceptance checks';$('verify').hidden=frozen;$('verify').className=dirty||!v?.passed?'primary':'secondary';$('approve').hidden=state!=='VERIFIED';$('approve').disabled=busy||dirty;$('approve').className=dirty?'secondary':'primary';$('to-payment').hidden=state!=='APPROVED';$('to-payment').disabled=busy||dirty;
  $('review-note').textContent=frozen?'This checked delivery is frozen for checkout.':dirty?'Recheck this version before approval or checkout.':state==='APPROVED'?'You approved this exact checked version.':v?.passed?'Your approval is required before checkout.':'Every agreed check must pass before your approval.';
  const checkoutPending=state==='CHECKOUT_PENDING'||!!project.checkout_attempted_at&&!project.order,hasOrder=!!project.order&&!receipt;
@@ -97,17 +425,30 @@ function render(){
  $('proof-trail').innerHTML=[{title:state==='DRAFT'?'Scope review':'Scope agreed',detail:project.plan.checks.length+' reviewable requirements',done:state!=='DRAFT'},{title:v?.passed?'Delivery checks passed':'Delivery review',detail:dirty?'Preview changed; recheck required.':v?v.passed?'Every agreed check passed.':'Correction required.':'Waiting for a CSV.',done:!!v?.passed&&!dirty,issue:!!v&&!v.passed},{title:'Human approval',detail:project.approval&&!dirty?'Exact checked version approved.':'Waiting for a passing delivery.',done:!!project.approval&&!dirty},{title:project.payment_mode==='simulation'?'Simulated payment':'Sandbox payment',detail:receipt?'Receipt recorded.':hasOrder?'Awaiting completion.':'Not recorded.',done:!!receipt}].map(item=>'<li class="'+(item.done?'done':item.issue?'issue':'')+'"><div><b>'+item.title+'</b>'+escapeHTML(item.detail)+'</div></li>').join('');
  $('activity').innerHTML='<ul class="timeline">'+project.events.slice().reverse().map(e=>'<li><b>'+escapeHTML(e.action.replaceAll('_',' '))+'</b><time>'+escapeHTML(new Date(e.at).toLocaleString())+'</time><div class="hash">'+escapeHTML(e.detail)+'</div></li>').join('')+'</ul>';
 }
-async function action(name,body={}){const path='/api/projects/'+project.id;try{project=await api(path+'/'+name,body);if(name==='verify'){dirty=false;$('preview').open=false;$('delivery-inputs').open=false;}}catch(e){try{project=await api(path);view=defaultView();await refreshProjects();}catch{}throw e;}view=defaultView();await refreshProjects();render();}
-$('new-project').onclick=()=>{project=null;dirty=false;filename='';view='scope';history.replaceState(null,'','/');$('brief').value=config.sample_brief;$('price').value='120.00';$('csv').value='';$('upload').value='';$('preview').open=false;$('delivery-inputs').open=true;$('error').hidden=true;render();heading().focus();};
+async function action(name,body={}){const path='/api/projects/'+project.id;try{project=await api(path+'/'+name,body);if(name==='verify'){dirty=false;resultFilter='all';$('preview').open=false;$('delivery-inputs').open=false;}}catch(e){try{project=await api(path);view=defaultView();await refreshProjects();}catch{}throw e;}view=defaultView();await refreshProjects();render();}
+$('new-project').onclick=()=>{project=null;dirty=false;filename='';resultFilter='all';view='scope';history.replaceState(null,'','/');$('brief').value=config.sample_brief;$('price').value='120.00';$('csv').value='';$('upload').value='';$('preview').open=false;$('delivery-inputs').open=true;$('error').hidden=true;render();heading().focus();};
 for(const stage of ['scope','delivery','payment'])$('nav-'+stage).onclick=()=>navigate(stage);
+$('nav-projects').onclick=()=>{if(!busy)navigate('projects');};
+for(const id of ['library-start','empty-new'])$(id).onclick=()=>$('new-project').onclick();
+for(const filter of ['all','review','paid'])$('projects-'+filter).onclick=()=>{if(busy)return;libraryFilter=filter;renderLibrary();};
+$('project-search').oninput=()=>renderLibrary();
+$('clear-project-filter').onclick=()=>{libraryFilter='all';$('project-search').value='';renderLibrary();$('project-search').focus();};
+$('project-grid').onclick=event=>{const button=event.target.closest('button[data-project]');if(!button||busy)return;return run(async()=>showProject(await api('/api/projects/'+encodeURIComponent(button.getAttribute('data-project')))));};
+for(const filter of ['all','failed'])$('filter-'+filter).onclick=()=>{if(busy)return;resultFilter=filter;render();};
+$('brief').oninput=()=>{$('brief-count').textContent=$('brief').value.length.toLocaleString('en-US')+' / 6,000';};
 $('to-payment').onclick=()=>navigate('payment');$('back-delivery').onclick=()=>navigate('delivery');$('view-evidence').onclick=()=>navigate('payment');
 $('draft').onclick=()=>run(async()=>{showProject(await api('/api/projects',{brief:$('brief').value,price:$('price').value}));await refreshProjects();});
 $('projects').onchange=()=>{const id=$('projects').value;return run(async()=>{if(id)showProject(await api('/api/projects/'+encodeURIComponent(id)));});};
-$('sample').onclick=()=>{$('brief').value=config.sample_brief;};$('agree').onclick=()=>run(()=>action('agree'));$('verify').onclick=()=>run(()=>action('verify',{csv:$('csv').value}));$('approve').onclick=()=>run(()=>action('approve'));
+$('sample').onclick=()=>{$('brief').value=config.sample_brief;$('brief').oninput();};$('agree').onclick=()=>run(()=>action('agree'));$('verify').onclick=()=>run(()=>action('verify',{csv:$('csv').value}));$('approve').onclick=()=>run(()=>action('approve'));
 for(const [id,file] of [['failed','failed'],['passed','passed']])$(id).onclick=()=>run(async()=>{$('csv').value=await(await fetch('/examples/'+file+'.csv')).text();filename=file==='failed'?'Faulty sample CSV':'Corrected sample CSV';dirty=true;$('preview').open=true;});
-$('upload').onchange=()=>run(async()=>{const file=$('upload').files[0];if(!file)return;if(file.size>300000)throw Error('Use a CSV smaller than 300 KB.');$('csv').value=await file.text();filename=file.name;dirty=true;$('preview').open=true;});
+function loadFile(file){if(!file||busy||!project||project.status==='DRAFT'||deliveryFrozen())return;return run(async()=>{if(file.size>300000)throw Error('Use a CSV smaller than 300 KB.');$('csv').value=await file.text();filename=file.name;dirty=true;$('preview').open=true;});}
+$('upload').onchange=()=>loadFile($('upload').files[0]);
+$('dropzone').ondragover=event=>{event.preventDefault();if(!busy&&project&&project.status!=='DRAFT'&&!deliveryFrozen())$('dropzone').setAttribute('data-dragging','true');};
+$('dropzone').ondragleave=()=>$('dropzone').removeAttribute('data-dragging');
+$('dropzone').ondrop=event=>{event.preventDefault();$('dropzone').removeAttribute('data-dragging');return loadFile(event.dataTransfer.files[0]);};
 $('csv').oninput=()=>{dirty=true;render();};$('order').onclick=()=>run(async()=>{await action('order');if(project.order.approve_url)location.assign(project.order.approve_url);});$('capture').onclick=()=>run(()=>action('capture',{order_id:project.order.id}));$('reopen').onclick=()=>{if(project.order?.approve_url)location.assign(project.order.approve_url);};
 $('evidence').onclick=()=>{const link=document.createElement('a');link.href='/api/projects/'+project.id+'/evidence';link.download='prooflane-'+project.id+'-evidence.json';link.click();};
+render();
 (async()=>{try{config=await api('/api/config');$('brief').value=config.sample_brief;const returning=location.pathname==='/return',params=new URLSearchParams(location.search);await refreshProjects();if(params.get('project'))showProject(await api('/api/projects/'+encodeURIComponent(params.get('project'))));render();if(returning&&project){if(params.get('token')!==project.order?.id)throw Error('Return token does not match this stored order. Payment was not captured.');await run(()=>action('capture',{order_id:project.order.id}));}if(params.has('cancelled'))error('PayPal checkout was cancelled. No new payment was recorded; any existing completed receipt is unchanged.');}catch(e){error(e.message);}finally{render();}})();
 </script>
 </body></html>
