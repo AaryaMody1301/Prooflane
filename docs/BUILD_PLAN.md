@@ -1,6 +1,6 @@
 # Prooflane: phased build plan
 
-Updated 21 October 2026. Work through one phase at a time. A phase advances only when its completion gate has evidence; a fixture or test double does not complete a real-service gate.
+Updated 22 October 2026. Work through one phase at a time. A phase advances only when its completion gate has evidence; a fixture or test double does not complete a real-service gate.
 
 **Product:** a client agrees to measurable CSV work and a USD price. AI proposes reviewable acceptance checks; code tests the delivery; a human approves the exact checked file; PayPal sandbox checkout connects that snapshot to a reconciled capture receipt.
 
@@ -155,6 +155,10 @@ Public hosting is a separate decision after Phase 3. Choose it only if it materi
 Gate: working fresh setup, independent walkthrough, browser findings resolved and payment evidence verified. Feature freeze begins 5 November.
 
 21 October workspace upgrade: the [research plan](UI_UPGRADE_PLAN_2026-10-21.md) is implemented as Scope, Delivery and Payment views using the existing APIs and saved-project format. The [QA record](UI_WORKSPACE_RESULTS_2026-10-21.json) covers the sample checkout, failure-first results, stale-preview approval guards, persisted modes, receipts and return recovery. All 22 Python tests, the extended controller and Linux/Windows CI pass for the code commit. Twenty DOM layout checks span 320–1440px; selected receipt text/control contrast is at least 5.19:1. These results do not certify accessibility or close the independent-user and real-service gates above.
+
+22 October [interface redesign](UI_REDESIGN_2026-10-22.md): modern project library, search/filter controls, sidebar navigation, recorded progress, CSV drop zone, result filters and redesigned project/receipt surfaces are implemented. Backend and expanded controller checks pass locally. Fresh Chrome sample checkout, native upload/download, 20 layout checks at 320–1440px and 21 axe scans pass after repairing narrow text-spacing navigation. The downloaded receipt matches the checked/approved CSV. Screen-reader speech, physical devices and native 200% zoom remain unverified for this revision; the earlier evidence stays historical.
+
+The later [component-focused judging review](UI_COMPONENT_REVIEW_2026-10-22.md) adds the current ink-and-mint presentation, live saved-evidence preview, quoted source disclosures, workflow cards and safer reopening of changed previews. A fresh sample checkout, actual evidence download, 30 axe scans and 20 layout measurements pass. This improves the Design and Presentation evidence; target-user feedback, independent setup and the second real-service case remain required.
 
 ## Phase 5 — submit
 

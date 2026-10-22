@@ -4,6 +4,10 @@
 
 Prooflane is an outcome checkout for independent data freelancers and small analytics agencies. An AI model drafts reviewable acceptance checks from a client brief. A deterministic CSV evaluator checks the delivery. A human approves the exact delivery snapshot, then a PayPal sandbox order connects that snapshot to a reconciled payment receipt.
 
+![Prooflane's proof-before-payment overview and saved scope preview](docs/images/prooflane-workspace.jpg)
+
+Actual local interface with synthetic projects, a fixed sample AI plan and simulated payments. No PayPal transaction is shown in this screenshot.
+
 New project started on 11 October 2026 for the [PayPal AI Hackathon](https://paypalaihackathon.devpost.com/). Built with the Ponytail approach: Python's standard library, SQLite, and a buildless HTML client.
 
 Follow the [five-phase build plan](docs/BUILD_PLAN.md): local MVP → real AI → PayPal sandbox → usability/reliability → submission. **Phases 1–3 are complete for the reviewed inventory flow. Phase 4 has started:** Gemini 3.6 Flash drafts the reviewed checks, an actual USD 1.00 sandbox capture matches the approved delivery, repeated reconciliation keeps one capture, and a separate cancelled checkout stays unpaid. The paid receipt and frozen evidence survive restart. See the [AI completion evidence](docs/PHASE2_AI_COMPLETION_2026-10-20.json) and [sandbox completion evidence](docs/PHASE3_SANDBOX_COMPLETION_2026-10-20.json). Independent setup, user feedback and the remaining usability checks are still open.
@@ -18,13 +22,13 @@ python3 app.py
 
 Open **http://127.0.0.1:8787**. On Windows, use `python app.py` if `python3` is unavailable; `py app.py` also works when the launcher has an interpreter configured. Stop with Ctrl+C. Restarting keeps locally saved projects in `prooflane.sqlite3`.
 
-1. Choose **New project**, then draft the sample brief at USD 120.00.
+1. The app opens **All projects**. Choose **New project**, then draft the sample brief at USD 120.00.
 2. In **Scope**, review the five proposed checks and their source quotations, then agree on them.
-3. In **Delivery**, open **Choose or replace CSV**, load the faulty example, run checks, and inspect the three failures listed first.
-4. Open the same control, load the corrected example and run checks again. **View or edit CSV preview** reveals the raw preview; edits require fresh checks.
+3. In **Delivery**, open **Choose or replace CSV**, load the faulty example, run checks, and inspect the three failures listed first. **Needs attention** filters the results to failures; **All checks** restores the full evidence.
+4. Open the same control, drop or choose a corrected CSV (or load the corrected example), then run checks again. **View or edit CSV preview** reveals the raw preview; edits require fresh checks.
 5. Approve that delivery. The workspace moves to **Payment**, where you create checkout and complete the simulated payment.
 6. Inspect the receipt and activity ledger, then download the evidence JSON. Its delivery hash matches the approved CSV; the export contains the plan and results, without CSV contents.
-7. Restart the app, then use **Resume a saved project** to reopen the receipt directly. Its brief, price, checks and payment state are restored. Use the stage buttons to revisit the agreed scope or delivery evidence. CSV previews are not saved; upload again if you need to replace a delivery before checkout starts. Switching projects clears unsaved CSV previews. **New project** opens a separate brief; saved terms stay read-only.
+7. Restart the app, then open the receipt from **All projects** or **Resume a saved project**. Search by project name or ID, or filter to **Need review** and **Receipts**. Its brief, price, checks and payment state are restored. Use the stage buttons to revisit the agreed scope or delivery evidence. Visiting **All projects** keeps the current preview; opening another project or choosing **New project** clears it. CSV previews are not saved across reloads. Upload again to replace a delivery before checkout starts; saved terms stay read-only.
 
 **Default mode is a fixed acceptance-plan fixture plus a payment simulator. It does not call an AI model or PayPal.** The UI and receipts label both modes. The CSV evaluation, state transitions, hashes, persistence, and HTTP requests work in either mode.
 
@@ -132,6 +136,10 @@ The initial buyer and merchant were both India-registered; checkout failed with 
 
 The [workspace upgrade](docs/UI_WORKSPACE_RESULTS_2026-10-21.json) implements the [researched UI plan](docs/UI_UPGRADE_PLAN_2026-10-21.md): compact Scope, Delivery and Payment views; failure-first results; visible price/mode context; read-only saved terms; and a receipt showing whether its hash matches the checked and approved version. Twenty layout checks cover four views at 320/390/768/1280/1440px, with an additional 640px reflow check. The [accessibility follow-up](docs/UI_ACCESSIBILITY_RESULTS_2026-10-21.json) adds a keyboard skip link, complete main landmark, named modes, stronger control borders and removal of a transient button-contrast failure. Thirty-four standard axe scans have zero violations; keyboard, error focus, mobile table semantics, text spacing and reflow pass. Native 200% Chrome zoom also passes across six views, with visible error/export focus and no horizontal overflow; 100% was restored afterward. Actual screen-reader speech and physical-device acceptance remain open; this is not a full conformance claim.
 
+The [22 October redesign](docs/UI_REDESIGN_2026-10-22.md) adds a project library, search and filters, responsive sidebar, evidence-based progress, CSV drag-and-drop, result filters and a refreshed scope/payment/receipt design. All 22 backend tests, the expanded controller checks and compilation pass. A new Chrome sample checkout, native CSV selection and evidence download pass, with matching receipt hashes. Twenty layout checks span 320–1440px, and 21 fresh axe scans have zero violations. Text-spacing review caught and fixed cramped navigation at 320px. Spoken screen readers, physical devices and native 200% zoom have not been retested for this revision; the 21 October report remains historical.
+
+The later [component and judging review](docs/UI_COMPONENT_REVIEW_2026-10-22.md) adds the current ink-and-mint design, an interactive saved-outcome preview, source requirement disclosures and expandable workflow cards. The preview's Scope, Checks and Payment controls inspect saved evidence; opening the current outcome preserves a changed CSV. Thirty fresh axe scans, a 20-layout matrix and a new USD 85.00 simulated receipt/download pass. The review maps these changes to the official judging criteria and records the remaining acceptance limits.
+
 If order creation times out, the delivery freezes immediately in `CHECKOUT_PENDING`. Retry the same checkout within 15 minutes; its request ID and approved hash remain unchanged. After that window, inspect orders in the sandbox dashboard before starting another project. Editing or replacing a CSV preview requires fresh checks before the UI permits approval or checkout.
 
 ## Verify
@@ -150,7 +158,7 @@ node test_client.cjs
 
 On Windows, select the interpreter explicitly if `python3` is unavailable: `$env:PYTHON = (Get-Command python).Source; node test_client.cjs`.
 
-This starts a temporary Python HTTP server and runs the actual client handlers against it using DOM stubs. It checks simulated checkout, saved-project selection, restored brief/price/receipt, cleared previews, fresh-page resume, return reconciliation, invalid-return recovery, input locks during verification, changed-preview approval guards and error focus. It also checks nine lifecycle view defaults, failure ordering, navigation without requests or lost previews, saved receipt modes, hash-mismatch display, file-handler behavior and oversized-file recovery. Lifecycle fixtures are frontend checks, not new provider acceptance. It does not validate browser layout, native controls or accessibility. The Python app and core test suite do not require Node.
+This starts a temporary Python HTTP server and runs the actual client handlers against it using DOM stubs. It checks simulated checkout, saved-project selection, restored brief/price/receipt, cleared previews, fresh-page resume, return reconciliation, invalid-return recovery, input locks during verification, changed-preview approval guards and error focus. It also checks nine lifecycle view defaults, project search/filter counts and escaped titles, result filters, recorded progress, navigation without requests or lost previews, saved receipt modes, hash-mismatch display, shared file/drop validation and oversized-file recovery. Lifecycle fixtures are frontend checks, not new provider acceptance. It does not validate browser layout, native controls or accessibility. The Python app and core test suite do not require Node.
 
 [GitHub Actions checks](.github/workflows/checks.yml) run the 22 Python tests, Node controller check and Python compilation on Ubuntu with Python 3.11 and Windows with Python 3.14, using Node 24. They run for pull requests and pushes to `main`, without provider credentials, npm packages or external-service calls. Both jobs [passed for the Phase 4 code changes](https://github.com/AaryaMody1301/Prooflane/actions/runs/39547552760). Browser review and real-service acceptance remain separate checks.
 

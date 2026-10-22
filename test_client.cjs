@@ -43,6 +43,18 @@ async function main() {
     const first = await client(base);
     const e = first.elements;
     assert.match(e.projects.innerHTML,/No saved projects yet/);
+    assert.equal(e.library.hidden,false);
+    assert.equal(e['project-workspace'].hidden,true);
+    const guideRequests=first.requests.length;
+    for(const step of ['scope','delivery','payment']){
+      await e['studio-'+step].onclick();
+      assert.equal(e['studio-'+step].attributes['aria-pressed'],'true');
+      assert.match(e['studio-caption'].textContent,/No verification or payment recorded/);
+      assert.doesNotMatch(e['studio-body'].innerHTML,/Receipt recorded|Checks passed/);
+    }
+    await e['studio-open'].onclick();
+    assert.equal(first.requests.length,guideRequests);
+    assert.equal(e['scope-stage'].hidden,false);
     await e.draft.onclick();
     const paidId = first.id;
     assert.equal(e['scope-stage'].hidden,false);
@@ -50,6 +62,7 @@ async function main() {
     assert.equal(e.brief.readOnly,true);
     await e.agree.onclick();
     assert.equal(e.delivery.hidden,false);
+    assert.equal(e['progress-meter'].value,1);
     const beforeNavigation=first.requests.length;
     await e['nav-scope'].onclick();
     assert.equal(e['scope-stage'].hidden,false);
@@ -59,15 +72,40 @@ async function main() {
     await e.verify.onclick();
     const blocked=await(await fetch(base+'/api/projects/'+paidId)).json();
     assert.ok(e.results.innerHTML.indexOf('Unique values')<e.results.innerHTML.indexOf('Required columns'));
+    assert.match(e.results.innerHTML,/<details class="rule-detail"><summary>Source requirement/);
+    await e['nav-projects'].onclick();
+    const studioRequests=first.requests.length,blockedPreview=e.csv.value;
+    await e['studio-delivery'].onclick();
+    assert.match(e['studio-body'].innerHTML,/FAIL/);
+    assert.match(e['studio-body'].innerHTML,/CSV lines 3/);
+    await e['nav-delivery'].onclick();
+    assert.equal(e.csv.value,blockedPreview);
+    assert.equal(e.delivery.hidden,false);
+    assert.equal(first.requests.length,studioRequests);
+    const filterRequests=first.requests.length;
+    await e['filter-failed'].onclick();
+    assert.doesNotMatch(e.results.innerHTML,/Required columns/);
+    assert.match(e.results.innerHTML,/Unique values/);
+    assert.equal(e['filter-failed'].attributes['aria-pressed'],'true');
+    await e['filter-all'].onclick();
+    assert.match(e.results.innerHTML,/Required columns/);
+    assert.equal(first.requests.length,filterRequests);
     await e.passed.onclick();
     await e.verify.onclick();
     assert.equal(e.status.textContent,'Ready for approval');
+    assert.equal(e['progress-meter'].value,2);
+    await e['filter-failed'].onclick();
+    assert.match(e.results.innerHTML,/No failing checks in this checked snapshot/);
+    assert.match(e.results.innerHTML,/<table hidden>/);
+    assert.equal(e.approve.disabled,false);
+    await e['filter-all'].onclick();
     await e.approve.onclick();
     assert.equal(e.payment.hidden,false);
     assert.equal(e.delivery.hidden,true);
     await e.order.onclick();
     await e.capture.onclick();
     assert.equal(e.status.textContent,'Simulation complete');
+    assert.equal(e['progress-meter'].value,4);
     assert.match(e.receipt.innerHTML,/120.00/);
 
     await e['new-project'].onclick();
@@ -93,6 +131,31 @@ async function main() {
 
     const fresh=await client(base);
     assert.equal(fresh.id,null);
+    assert.equal(fresh.elements.library.hidden,false);
+    assert.equal(String(fresh.elements['library-total'].textContent),'2');
+    assert.equal(String(fresh.elements['library-review'].textContent),'1');
+    assert.equal(String(fresh.elements['library-paid'].textContent),'1');
+    const libraryRequests=fresh.requests.length;
+    let previewUpdates=0,previewHTML=fresh.elements['studio-body'].innerHTML;
+    Object.defineProperty(fresh.elements['studio-body'],'innerHTML',{
+      get(){return previewHTML;},set(value){previewHTML=value;previewUpdates++;},
+    });
+    fresh.elements['project-search'].value='no matching project';
+    fresh.elements['project-search'].oninput();
+    assert.equal(fresh.elements['project-grid'].innerHTML,'');
+    assert.equal(fresh.elements['library-empty'].hidden,false);
+    await fresh.elements['clear-project-filter'].onclick();
+    await fresh.elements['projects-paid'].onclick();
+    assert.match(fresh.elements['project-grid'].innerHTML,new RegExp(paidId));
+    assert.doesNotMatch(fresh.elements['project-grid'].innerHTML,new RegExp(draftId));
+    await fresh.elements['projects-review'].onclick();
+    assert.match(fresh.elements['project-grid'].innerHTML,new RegExp(draftId));
+    assert.doesNotMatch(fresh.elements['project-grid'].innerHTML,new RegExp(paidId));
+    assert.equal(fresh.requests.length,libraryRequests);
+    assert.equal(previewUpdates,0,'Search and facets must not rewrite the unrelated live preview');
+    await fresh.elements['project-grid'].onclick({target:{closest:()=>({getAttribute:()=>draftId})}});
+    assert.equal(fresh.id,draftId);
+    assert.equal(fresh.elements['scope-stage'].hidden,false);
     fresh.elements.projects.value=paidId;
     await fresh.elements.projects.onchange();
     assert.equal(fresh.elements.status.textContent,'Simulation complete');
@@ -180,6 +243,7 @@ async function main() {
       return response;
     });
     const pending=delayed.elements;
+    await pending['new-project'].onclick();
     await pending.draft.onclick();
     await pending.agree.onclick();
     await pending.passed.onclick();
@@ -193,6 +257,12 @@ async function main() {
       assert.equal(pending.brief.readOnly,true);
       assert.equal(pending.price.readOnly,true);
       assert.equal(pending['busy-note'].hidden,false);
+      assert.equal(pending['studio-delivery'].disabled,true);
+      const pendingRequests=delayed.requests.length;
+      await pending['studio-open'].onclick();
+      assert.equal(delayed.requests.length,pendingRequests);
+      await pending.dropzone.ondrop({preventDefault(){},dataTransfer:{files:[{text:async()=>{throw Error('Pending drop must not read the file');}}]}});
+      assert.equal(pending.csv.value,checkedPreview);
     } finally {
       releaseVerification();
       await checking;
@@ -207,12 +277,19 @@ async function main() {
     pending.csv.value+='\nBROKEN';
     pending.csv.oninput();
     assert.equal(pending.approve.disabled,true);
+    assert.equal(pending['progress-meter'].value,1);
     assert.match(pending.results.innerHTML,/Results from the previous check/);
     const changedPreview=pending.csv.value;
     const navigationRequests=delayed.requests.length;
     await pending['nav-scope'].onclick();
-    await pending['nav-delivery'].onclick();
+    await pending['nav-projects'].onclick();
+    assert.equal(pending.library.hidden,false);
+    assert.match(pending['library-note'].textContent,/changed CSV preview/);
+    await pending['studio-delivery'].onclick();
+    assert.match(pending['studio-body'].innerHTML,/Previous snapshot/);
+    await pending['studio-open'].onclick();
     assert.equal(pending.csv.value,changedPreview);
+    assert.equal(pending.approve.disabled,true);
     assert.equal(delayed.requests.length,navigationRequests);
     const draftRequests=delayed.requests.length;
     await pending['new-project'].onclick();
@@ -221,6 +298,7 @@ async function main() {
     assert.equal(pending.brief.readOnly,false);
 
     const uploaded=await client(base);
+    await uploaded.elements['new-project'].onclick();
     await uploaded.elements.draft.onclick();
     await uploaded.elements.agree.onclick();
     const fileText=fs.readFileSync(path.join(__dirname,'examples/passed.csv'),'utf8');
@@ -235,8 +313,22 @@ async function main() {
     assert.match(uploaded.elements.error.textContent,/smaller than 300 KB/);
     assert.equal(uploaded.elements.csv.value,fileText);
     assert.equal(uploaded.elements.upload.disabled,false);
+    let prevented=0;
+    uploaded.elements.dropzone.ondragover({preventDefault(){prevented++;}});
+    assert.equal(uploaded.elements.dropzone.attributes['data-dragging'],'true');
+    const dropRequests=uploaded.requests.length;
+    await uploaded.elements.dropzone.ondrop({preventDefault(){prevented++;},dataTransfer:{files:[{name:'dropped.csv',size:120,text:async()=>fileText+'\n'}]}});
+    assert.equal(prevented,2);
+    assert.equal(uploaded.elements.dropzone.attributes['data-dragging'],undefined);
+    assert.equal(uploaded.elements['file-name'].textContent,'dropped.csv');
+    assert.equal(uploaded.elements.csv.value,fileText+'\n');
+    assert.equal(uploaded.requests.length,dropRequests);
+    const frozenPreview=e.csv.value;
+    await e.dropzone.ondrop({preventDefault(){},dataTransfer:{files:[{text:async()=>{throw Error('Frozen drop must not read the file');}}]}});
+    assert.equal(e.csv.value,frozenPreview);
 
     const invalidPrice=await client(base);
+    await invalidPrice.elements['new-project'].onclick();
     invalidPrice.elements.price.value='12.345';
     await invalidPrice.elements.draft.onclick();
     assert.match(invalidPrice.elements.error.textContent,/at most two decimals/);
@@ -244,7 +336,25 @@ async function main() {
     assert.equal(invalidPrice.elements.error.focused,true);
     assert.equal(invalidPrice.elements.price.readOnly,false);
     assert.equal(invalidPrice.elements['busy-note'].hidden,true);
-    console.log('PASS: nine lifecycle views, failure ordering, navigation, sample checkout, persisted modes, dirty-preview guards, pending locks, error focus and return recovery. DOM stubs; browser/layout checks are separate.');
+    const unsafeTitle=structuredClone(saved);
+    unsafeTitle.plan.title='<img src=x onerror="alert(1)">';
+    unsafeTitle.plan.checks[0].source='<img src=x onerror="alert(1)">';
+    unsafeTitle.verification.checks[0].source='<img src=x onerror="alert(1)">';
+    const escapedLibrary=await client(base,'/',async(url,options)=>url.pathname==='/api/projects'?new Response(JSON.stringify([unsafeTitle])):fetch(url,options));
+    assert.match(escapedLibrary.elements['project-grid'].innerHTML,/&lt;img/);
+    assert.doesNotMatch(escapedLibrary.elements['project-grid'].innerHTML,/<img/);
+    assert.match(escapedLibrary.elements['studio-body'].innerHTML,/&lt;img/);
+    assert.doesNotMatch(escapedLibrary.elements['studio-body'].innerHTML,/<img/);
+    const escapedEvidence=await fixtureClient(unsafeTitle);
+    assert.match(escapedEvidence.elements.results.innerHTML,/&lt;img/);
+    assert.doesNotMatch(escapedEvidence.elements.results.innerHTML,/<img/);
+    const mismatchedSpot=structuredClone(saved);
+    mismatchedSpot.receipt.delivery_sha256='0'.repeat(64);
+    const studioMismatch=await fixtureClient(mismatchedSpot);
+    await studioMismatch.elements['studio-payment'].onclick();
+    assert.match(studioMismatch.elements['studio-body'].innerHTML,/Hash mismatch/);
+    assert.match(studioMismatch.elements.receipt.innerHTML,/Hash mismatch/);
+    console.log('PASS: evidence preview without extra requests, source disclosures/escaping, project library/search, result filters, shared file/drop validation, nine lifecycle views, sample checkout, dirty-preview preservation, pending locks and return recovery. DOM stubs; browser/layout checks are separate.');
   } finally {
     server.kill('SIGTERM');
   }
