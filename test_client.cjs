@@ -45,7 +45,15 @@ async function main() {
     assert.match(e.projects.innerHTML,/No saved projects yet/);
     assert.equal(e.library.hidden,false);
     assert.equal(e['project-workspace'].hidden,true);
-    await e['empty-new'].onclick();
+    const guideRequests=first.requests.length;
+    for(const step of ['scope','delivery','payment']){
+      await e['studio-'+step].onclick();
+      assert.equal(e['studio-'+step].attributes['aria-pressed'],'true');
+      assert.match(e['studio-caption'].textContent,/No verification or payment recorded/);
+      assert.doesNotMatch(e['studio-body'].innerHTML,/Receipt recorded|Checks passed/);
+    }
+    await e['studio-open'].onclick();
+    assert.equal(first.requests.length,guideRequests);
     assert.equal(e['scope-stage'].hidden,false);
     await e.draft.onclick();
     const paidId = first.id;
@@ -64,6 +72,16 @@ async function main() {
     await e.verify.onclick();
     const blocked=await(await fetch(base+'/api/projects/'+paidId)).json();
     assert.ok(e.results.innerHTML.indexOf('Unique values')<e.results.innerHTML.indexOf('Required columns'));
+    assert.match(e.results.innerHTML,/<details class="rule-detail"><summary>Source requirement/);
+    await e['nav-projects'].onclick();
+    const studioRequests=first.requests.length,blockedPreview=e.csv.value;
+    await e['studio-delivery'].onclick();
+    assert.match(e['studio-body'].innerHTML,/FAIL/);
+    assert.match(e['studio-body'].innerHTML,/CSV lines 3/);
+    await e['nav-delivery'].onclick();
+    assert.equal(e.csv.value,blockedPreview);
+    assert.equal(e.delivery.hidden,false);
+    assert.equal(first.requests.length,studioRequests);
     const filterRequests=first.requests.length;
     await e['filter-failed'].onclick();
     assert.doesNotMatch(e.results.innerHTML,/Required columns/);
@@ -118,6 +136,10 @@ async function main() {
     assert.equal(String(fresh.elements['library-review'].textContent),'1');
     assert.equal(String(fresh.elements['library-paid'].textContent),'1');
     const libraryRequests=fresh.requests.length;
+    let previewUpdates=0,previewHTML=fresh.elements['studio-body'].innerHTML;
+    Object.defineProperty(fresh.elements['studio-body'],'innerHTML',{
+      get(){return previewHTML;},set(value){previewHTML=value;previewUpdates++;},
+    });
     fresh.elements['project-search'].value='no matching project';
     fresh.elements['project-search'].oninput();
     assert.equal(fresh.elements['project-grid'].innerHTML,'');
@@ -130,6 +152,7 @@ async function main() {
     assert.match(fresh.elements['project-grid'].innerHTML,new RegExp(draftId));
     assert.doesNotMatch(fresh.elements['project-grid'].innerHTML,new RegExp(paidId));
     assert.equal(fresh.requests.length,libraryRequests);
+    assert.equal(previewUpdates,0,'Search and facets must not rewrite the unrelated live preview');
     await fresh.elements['project-grid'].onclick({target:{closest:()=>({getAttribute:()=>draftId})}});
     assert.equal(fresh.id,draftId);
     assert.equal(fresh.elements['scope-stage'].hidden,false);
@@ -234,6 +257,10 @@ async function main() {
       assert.equal(pending.brief.readOnly,true);
       assert.equal(pending.price.readOnly,true);
       assert.equal(pending['busy-note'].hidden,false);
+      assert.equal(pending['studio-delivery'].disabled,true);
+      const pendingRequests=delayed.requests.length;
+      await pending['studio-open'].onclick();
+      assert.equal(delayed.requests.length,pendingRequests);
       await pending.dropzone.ondrop({preventDefault(){},dataTransfer:{files:[{text:async()=>{throw Error('Pending drop must not read the file');}}]}});
       assert.equal(pending.csv.value,checkedPreview);
     } finally {
@@ -258,8 +285,11 @@ async function main() {
     await pending['nav-projects'].onclick();
     assert.equal(pending.library.hidden,false);
     assert.match(pending['library-note'].textContent,/changed CSV preview/);
-    await pending['nav-delivery'].onclick();
+    await pending['studio-delivery'].onclick();
+    assert.match(pending['studio-body'].innerHTML,/Previous snapshot/);
+    await pending['studio-open'].onclick();
     assert.equal(pending.csv.value,changedPreview);
+    assert.equal(pending.approve.disabled,true);
     assert.equal(delayed.requests.length,navigationRequests);
     const draftRequests=delayed.requests.length;
     await pending['new-project'].onclick();
@@ -308,10 +338,23 @@ async function main() {
     assert.equal(invalidPrice.elements['busy-note'].hidden,true);
     const unsafeTitle=structuredClone(saved);
     unsafeTitle.plan.title='<img src=x onerror="alert(1)">';
+    unsafeTitle.plan.checks[0].source='<img src=x onerror="alert(1)">';
+    unsafeTitle.verification.checks[0].source='<img src=x onerror="alert(1)">';
     const escapedLibrary=await client(base,'/',async(url,options)=>url.pathname==='/api/projects'?new Response(JSON.stringify([unsafeTitle])):fetch(url,options));
     assert.match(escapedLibrary.elements['project-grid'].innerHTML,/&lt;img/);
     assert.doesNotMatch(escapedLibrary.elements['project-grid'].innerHTML,/<img/);
-    console.log('PASS: project library/search, result filters, shared file/drop validation, nine lifecycle views, sample checkout, persisted modes, dirty-preview guards, pending locks, error focus and return recovery. DOM stubs; browser/layout checks are separate.');
+    assert.match(escapedLibrary.elements['studio-body'].innerHTML,/&lt;img/);
+    assert.doesNotMatch(escapedLibrary.elements['studio-body'].innerHTML,/<img/);
+    const escapedEvidence=await fixtureClient(unsafeTitle);
+    assert.match(escapedEvidence.elements.results.innerHTML,/&lt;img/);
+    assert.doesNotMatch(escapedEvidence.elements.results.innerHTML,/<img/);
+    const mismatchedSpot=structuredClone(saved);
+    mismatchedSpot.receipt.delivery_sha256='0'.repeat(64);
+    const studioMismatch=await fixtureClient(mismatchedSpot);
+    await studioMismatch.elements['studio-payment'].onclick();
+    assert.match(studioMismatch.elements['studio-body'].innerHTML,/Hash mismatch/);
+    assert.match(studioMismatch.elements.receipt.innerHTML,/Hash mismatch/);
+    console.log('PASS: evidence preview without extra requests, source disclosures/escaping, project library/search, result filters, shared file/drop validation, nine lifecycle views, sample checkout, dirty-preview preservation, pending locks and return recovery. DOM stubs; browser/layout checks are separate.');
   } finally {
     server.kill('SIGTERM');
   }

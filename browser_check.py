@@ -92,7 +92,9 @@ def main():
                 assert page.get_by_role("main").count() == 1
                 layout("initial")
                 expect(page.locator("#library")).to_be_visible()
-                page.locator("#new-project").click()
+                page.locator("#studio-payment").click()
+                expect(page.locator("#studio-caption")).to_contain_text("No verification or payment recorded")
+                page.locator("#studio-open").click()
                 page.locator("#draft").click()
                 expect(page.locator("#status")).to_have_text("Review scope")
                 project_id = parse_qs(urlparse(page.url).query)["project"][0]
@@ -104,6 +106,8 @@ def main():
                 expect(page.locator("#results .pill.fail")).to_have_count(3)
                 expect(page.locator("#order")).to_be_disabled()
                 expect(page.locator("#approve")).to_be_hidden()
+                page.locator("#results .rule-detail > summary").first.click()
+                expect(page.locator("#results .rule-detail[open] q")).to_have_text("Every order_id must be unique.")
                 page.locator("#filter-failed").click()
                 expect(page.locator("#results .pill.fail")).to_have_count(3)
                 expect(page.locator("#results .pill.pass")).to_have_count(0)
