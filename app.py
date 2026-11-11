@@ -522,13 +522,31 @@ class PayPal:
 
 
 def validate_order(order, project):
-    units = order.get("purchase_units", [])
-    if order.get("id") != project["order"]["id"] or len(units) != 1:
+    units = order.get("purchase_units") if isinstance(order, dict) else None
+    if not isinstance(units, list) or len(units) != 1 or not isinstance(units[0], dict) or order.get("id") != project["order"]["id"]:
         raise Problem("PayPal order identity mismatch; payment blocked.", 502)
     unit = units[0]
     total = unit.get("amount")
     if unit.get("custom_id") != payment_reference(project) or not isinstance(total, dict) or total.get("currency_code") != "USD" or total.get("value") != amount(project["cents"]):
         raise Problem("PayPal order amount or project mismatch; payment blocked.", 502)
+
+
+def order_capture(order, project):
+    """Validate provider data before either recording or independently confirming payment."""
+    validate_order(order, project)
+    payments = order["purchase_units"][0].get("payments")
+    captures = payments.get("captures") if isinstance(payments, dict) else None
+    if not isinstance(captures, list) or len(captures) != 1 or not isinstance(captures[0], dict):
+        raise Problem("PayPal did not return a single capture; inspect the sandbox order.", 502)
+    capture = captures[0]
+    total = capture.get("amount")
+    if not isinstance(total, dict) or total.get("currency_code") != "USD" or total.get("value") != amount(project["cents"]):
+        raise Problem("Capture amount mismatch; payment not marked paid.", 502)
+    if not isinstance(capture.get("id"), str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", capture["id"]) or not isinstance(capture.get("status"), str):
+        raise Problem("PayPal returned an unusable capture identity or status; payment not marked paid.", 502)
+    if capture["status"] == "COMPLETED" and order.get("status") != "COMPLETED":
+        raise Problem("PayPal order is not completed; reconcile before relying on this capture.", 502)
+    return capture
 
 
 def verify_evidence(evidence, csv_raw, source_raw=None, paypal=None):
@@ -570,9 +588,8 @@ def verify_evidence(evidence, csv_raw, source_raw=None, paypal=None):
             if p["payment_mode"] != "sandbox":
                 raise Problem("A simulated receipt is not a PayPal transaction.")
             order = paypal.call("/v2/checkout/orders/" + receipt["order_id"])
-            validate_order(order, p)
-            captures = order["purchase_units"][0].get("payments", {}).get("captures", [])
-            if order["status"] != "COMPLETED" or len(captures) != 1 or captures[0].get("id") != receipt["capture_id"] or captures[0].get("status") != "COMPLETED" or captures[0].get("amount", {}).get("currency_code") != "USD" or captures[0].get("amount", {}).get("value") != amount(p["cents"]):
+            capture = order_capture(order, p)
+            if capture["id"] != receipt["capture_id"] or capture["status"] != "COMPLETED":
                 raise Problem("PayPal does not confirm this completed capture and amount.", 409)
             status = "confirmed_sandbox"
         return {"local_checks_passed": True, "project_id": p["id"], "manifest_sha256": digest, "delivery_sha256": checked["sha256"], "source_sha256": p.get("source", {}).get("sha256") if p.get("source") else None, "checks": len(checked["checks"]), "amount": amount(p["cents"]), "currency": "USD", "payment_status": status, "payment_verified": status == "confirmed_sandbox", "note": "Local consistency alone does not authenticate a payment. PayPal lookup is read-only; the provider records the reference and Prooflane checks the work."}
@@ -692,13 +709,7 @@ class Store:
                 raise Problem("Payment mode changed. Restore the original mode to reconcile.", 409)
             if self.payment_mode == "sandbox":
                 result = self.paypal.capture(project)
-                validate_order(result, project)
-                captures = result["purchase_units"][0].get("payments", {}).get("captures", [])
-                if len(captures) != 1:
-                    raise Problem("PayPal did not return a single capture; inspect the sandbox order.", 502)
-                capture = captures[0]
-                if capture.get("amount") != {"currency_code": "USD", "value": amount(project["cents"])}:
-                    raise Problem("Capture amount mismatch; payment not marked paid.", 502)
+                capture = order_capture(result, project)
                 if capture["status"] != "COMPLETED":
                     project["status"] = "PAYMENT_PENDING"
                     self.event(project, "PAYMENT_PENDING", "PayPal capture is not completed; reconcile again.")
