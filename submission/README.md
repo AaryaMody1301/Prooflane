@@ -1,5 +1,7 @@
 # Prooflane submission package
 
+**Status update — 11 November 2026:** The entrant confirmed that Prooflane was submitted to the PayPal AI Hackathon. The [YouTube demonstration](https://youtu.be/OgW8BQ-HbLY) has an uploaded URL. The public Devpost project URL and public video accessibility have not yet been independently verified. The linked final report preserves the earlier, pre-submission verification snapshot.
+
 Start with [FINAL_REPORT.md](FINAL_REPORT.md) for verified completion and remaining account actions.
 
 - [PROJECT_FIELDS.json](PROJECT_FIELDS.json): title, tagline, summary, tags, integration answers and public URL slots.
