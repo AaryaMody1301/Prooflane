@@ -6,7 +6,7 @@ For independent data freelancers, small analytics agencies, and their clients. G
 
 ![Prooflane catches a substituted source record](submission/media/03-source-failure.png)
 
-Actual current interface: live Gemini, synthetic CSVs, and blocked incorrect delivery. **[Watch the captioned functional demo (2:44.8 MP4)](submission/media/prooflane-demo.mp4)** or open the [submission package](submission/). **YouTube publication and final Devpost submission are pending**; no public YouTube URL or submitted entry is claimed.
+Actual current interface: live Gemini, synthetic CSVs, and blocked incorrect delivery. **[Watch the 2:44.8 functional demo on YouTube](https://youtu.be/OgW8BQ-HbLY)**, [view the original MP4](submission/media/prooflane-demo.mp4), or explore the [submission package](submission/). **PayPal AI Hackathon 2026: submitted (entrant-confirmed on 11 November 2026).** The public Devpost project URL will be linked when available.
 
 ## Five-minute quick start
 
