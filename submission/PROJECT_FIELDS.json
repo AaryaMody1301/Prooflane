@@ -1,0 +1,17 @@
+{
+  "project_name": "Prooflane — Proof Before Payment",
+  "tagline": "AI drafts the checks. Evidence verifies the work. Humans approve. PayPal completes the checkout.",
+  "short_summary": "Prooflane checks freelance CSV deliveries against human-reviewed requirements and the agreed source, blocks incorrect work, and connects the exact approved version to a reconciled PayPal sandbox payment.",
+  "repository_url": "https://github.com/AaryaMody1301/Prooflane",
+  "functional_demo": "Runnable repository; Python 3.11+ only; README and submission/JUDGE_GUIDE.md",
+  "story_file": "DEVPOST_STORY.md",
+  "testing_instructions_file": "JUDGE_GUIDE.md",
+  "technology_tags": ["Python", "SQLite", "JavaScript", "HTML5", "CSS3", "Google Gemini", "PayPal", "GitHub Actions"],
+  "ai_role": "Gemini drafts constrained acceptance checks from the brief. The server validates them and a person reviews scope. It cannot authorize payment; CSV rows stay local.",
+  "paypal_role": "Sandbox Orders v2 creation, buyer approval, capture and authenticated readback with exact amount and frozen manifest reference in custom_id.",
+  "team_information": "Account owner must confirm entrants, team membership, eligibility and representative authority; no extra teammates invented.",
+  "youtube_url": null,
+  "devpost_url": null,
+  "submitted": false,
+  "account_form_inspected": false
+}

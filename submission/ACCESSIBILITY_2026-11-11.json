@@ -1,0 +1,333 @@
+{
+  "browser": "Chrome 157.0.8103.50",
+  "modes": "sample/simulation",
+  "scans": [
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "target": [
+                ".hero-copy > .section-kicker"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "#library-title"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "em"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".hero-copy > p"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".hero-link"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "#library-mode"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 42,
+      "stage": "library",
+      "width": 1280,
+      "no_horizontal_overflow": true
+    },
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "target": [
+                ".hero-copy > .section-kicker"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "#library-title"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "em"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".hero-copy > p"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".hero-link"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "#library-mode"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 42,
+      "stage": "library",
+      "width": 320,
+      "no_horizontal_overflow": true
+    },
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [],
+      "passes": 43,
+      "stage": "source-scope",
+      "width": 1280,
+      "no_horizontal_overflow": true
+    },
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [],
+      "passes": 41,
+      "stage": "source-scope",
+      "width": 320,
+      "no_horizontal_overflow": true
+    },
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [],
+      "passes": 48,
+      "stage": "source-blocked",
+      "width": 1280,
+      "no_horizontal_overflow": true
+    },
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [],
+      "passes": 46,
+      "stage": "source-blocked",
+      "width": 320,
+      "no_horizontal_overflow": true
+    },
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [],
+      "passes": 48,
+      "stage": "correction-preview",
+      "width": 1280,
+      "no_horizontal_overflow": true
+    },
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [],
+      "passes": 46,
+      "stage": "correction-preview",
+      "width": 320,
+      "no_horizontal_overflow": true
+    },
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [],
+      "passes": 48,
+      "stage": "seven-passes",
+      "width": 1280,
+      "no_horizontal_overflow": true
+    },
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [],
+      "passes": 46,
+      "stage": "seven-passes",
+      "width": 320,
+      "no_horizontal_overflow": true
+    },
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "target": [
+                ".receipt-mark"
+              ],
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            }
+          ]
+        }
+      ],
+      "passes": 42,
+      "stage": "receipt",
+      "width": 1280,
+      "no_horizontal_overflow": true
+    },
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "target": [
+                ".receipt-mark"
+              ],
+              "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+            }
+          ]
+        }
+      ],
+      "passes": 40,
+      "stage": "receipt",
+      "width": 320,
+      "no_horizontal_overflow": true
+    },
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "target": [
+                ".hero-copy > .section-kicker"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "#library-title"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "em"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".hero-copy > p"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".hero-link"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "#library-mode"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 42,
+      "stage": "verifier-error",
+      "width": 1280,
+      "no_horizontal_overflow": true
+    },
+    {
+      "version": "4.14.0",
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "target": [
+                ".hero-copy > .section-kicker"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "#library-title"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "em"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".hero-copy > p"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                ".hero-link"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            },
+            {
+              "target": [
+                "#library-mode"
+              ],
+              "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+            }
+          ]
+        }
+      ],
+      "passes": 42,
+      "stage": "verifier-error",
+      "width": 320,
+      "no_horizontal_overflow": true
+    }
+  ],
+  "violation_count": 0,
+  "all_layouts_pass": true,
+  "limitations": "Automated axe and viewport emulation only. Incomplete rules require manual review; no screen-reader speech or physical-device certification."
+}

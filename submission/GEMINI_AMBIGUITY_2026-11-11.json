@@ -1,0 +1,49 @@
+{
+  "at": "2026-11-11T05:47:56+00:00",
+  "model": "gemini-3.8-flash",
+  "brief": "Deliver a sales CSV with order_id, customer_email and revenue columns. Every order_id must be unique. Every customer_email must be present. Revenue must be a number greater than or equal to 0. Include at least 3 rows. Keep the source data intact.",
+  "paypal_calls": 0,
+  "plan": {
+    "title": "Sales CSV Acceptance Plan",
+    "checks": [
+      {
+        "kind": "required_columns",
+        "source": "Deliver a sales CSV with order_id, customer_email and revenue columns.",
+        "columns": [
+          "order_id",
+          "customer_email",
+          "revenue"
+        ]
+      },
+      {
+        "kind": "unique",
+        "source": "Every order_id must be unique.",
+        "column": "order_id"
+      },
+      {
+        "kind": "not_empty",
+        "source": "Every customer_email must be present.",
+        "column": "customer_email"
+      },
+      {
+        "kind": "number_range",
+        "source": "Revenue must be a number greater than or equal to 0.",
+        "column": "revenue",
+        "min": 0
+      },
+      {
+        "kind": "row_count",
+        "source": "Include at least 3 rows.",
+        "min": 3
+      }
+    ],
+    "clarifications": [
+      "The requirement 'Keep the source data intact.' is vague and does not specify target comparison keys, columns, or source datasets."
+    ]
+  },
+  "project_id": "f212e1feebb04f23b0f7b1a45aae67fd",
+  "agreement_rejected_status": 409,
+  "passed": true,
+  "status": "DRAFT",
+  "order_created": false
+}

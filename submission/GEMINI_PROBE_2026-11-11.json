@@ -1,0 +1,11 @@
+{
+  "at": "2026-11-11T05:21:46+00:00",
+  "model": "gemini-3.8-flash",
+  "brief": "Deliver a sales CSV with order_id, customer_email and revenue columns. Every order_id must be unique. Every customer_email must be present. Revenue must be a number greater than or equal to 0. Include at least 3 rows. The delivery must contain exactly the source order_id values. For each order_id, revenue must equal the source revenue.",
+  "payment_mode": "simulation",
+  "paypal_credentials_present": false,
+  "ok": false,
+  "error": "Provider response unavailable. Retry the same action; payment status has not been assumed.",
+  "provider_status": null,
+  "elapsed_seconds": 0.2
+}

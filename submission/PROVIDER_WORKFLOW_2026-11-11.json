@@ -1,0 +1,326 @@
+{
+  "at": "2026-11-11T05:29:33+00:00",
+  "mode": "fresh Gemini + actual PayPal sandbox capture",
+  "steps": {
+    "substituted": {
+      "status": "BLOCKED",
+      "checks": [
+        {
+          "kind": "required_columns",
+          "source": "Deliver a sales CSV with order_id, customer_email and revenue columns.",
+          "columns": [
+            "order_id",
+            "customer_email",
+            "revenue"
+          ],
+          "passed": true,
+          "detail": "All required columns present.",
+          "failed_rows": []
+        },
+        {
+          "kind": "unique",
+          "source": "Every order_id must be unique.",
+          "column": "order_id",
+          "passed": true,
+          "detail": "Every row satisfies this check.",
+          "failed_rows": []
+        },
+        {
+          "kind": "not_empty",
+          "source": "Every customer_email must be present.",
+          "column": "customer_email",
+          "passed": true,
+          "detail": "Every row satisfies this check.",
+          "failed_rows": []
+        },
+        {
+          "kind": "number_range",
+          "source": "Revenue must be a number greater than or equal to 0.",
+          "column": "revenue",
+          "min": 0,
+          "passed": true,
+          "detail": "Every row satisfies this check.",
+          "failed_rows": []
+        },
+        {
+          "kind": "row_count",
+          "source": "Include at least 3 rows.",
+          "min": 3,
+          "passed": true,
+          "detail": "3 rows; agreed range 3\u20135000.",
+          "failed_rows": []
+        },
+        {
+          "kind": "source_keys",
+          "source": "The delivery must contain exactly the source order_id values.",
+          "column": "order_id",
+          "passed": false,
+          "detail": "1 missing, 1 unexpected, 0 duplicate keys; 3 source records.",
+          "failed_rows": [
+            3
+          ]
+        },
+        {
+          "kind": "source_values",
+          "source": "For each order_id, revenue must equal the source revenue.",
+          "columns": [
+            "order_id",
+            "revenue"
+          ],
+          "passed": false,
+          "detail": "1 changed or unmatched numeric values; 1 missing, 1 unexpected keys. Decimal comparison against the agreed source. Source total 285; delivery total 285; difference 0.",
+          "failed_rows": [
+            3
+          ]
+        }
+      ]
+    },
+    "changed-value": {
+      "status": "BLOCKED",
+      "checks": [
+        {
+          "kind": "required_columns",
+          "source": "Deliver a sales CSV with order_id, customer_email and revenue columns.",
+          "columns": [
+            "order_id",
+            "customer_email",
+            "revenue"
+          ],
+          "passed": true,
+          "detail": "All required columns present.",
+          "failed_rows": []
+        },
+        {
+          "kind": "unique",
+          "source": "Every order_id must be unique.",
+          "column": "order_id",
+          "passed": true,
+          "detail": "Every row satisfies this check.",
+          "failed_rows": []
+        },
+        {
+          "kind": "not_empty",
+          "source": "Every customer_email must be present.",
+          "column": "customer_email",
+          "passed": true,
+          "detail": "Every row satisfies this check.",
+          "failed_rows": []
+        },
+        {
+          "kind": "number_range",
+          "source": "Revenue must be a number greater than or equal to 0.",
+          "column": "revenue",
+          "min": 0,
+          "passed": true,
+          "detail": "Every row satisfies this check.",
+          "failed_rows": []
+        },
+        {
+          "kind": "row_count",
+          "source": "Include at least 3 rows.",
+          "min": 3,
+          "passed": true,
+          "detail": "3 rows; agreed range 3\u20135000.",
+          "failed_rows": []
+        },
+        {
+          "kind": "source_keys",
+          "source": "The delivery must contain exactly the source order_id values.",
+          "column": "order_id",
+          "passed": true,
+          "detail": "0 missing, 0 unexpected, 0 duplicate keys; 3 source records.",
+          "failed_rows": []
+        },
+        {
+          "kind": "source_values",
+          "source": "For each order_id, revenue must equal the source revenue.",
+          "columns": [
+            "order_id",
+            "revenue"
+          ],
+          "passed": false,
+          "detail": "1 changed or unmatched numeric values; 0 missing, 0 unexpected keys. Decimal comparison against the agreed source. Source total 285; delivery total 284.99; difference -0.01.",
+          "failed_rows": [
+            3
+          ]
+        }
+      ]
+    },
+    "correction": {
+      "changes": [
+        {
+          "operation": "Restore source value",
+          "column": "revenue",
+          "delivery_line": 3,
+          "source_line": 3,
+          "before": "84.99",
+          "after": "85"
+        }
+      ],
+      "checks_pass": true
+    }
+  },
+  "project_id": "87d86b76eb0b4f82a27b0469520d1860",
+  "model": "gemini-3.8-flash",
+  "plan": {
+    "title": "Sales CSV Acceptance Plan",
+    "checks": [
+      {
+        "kind": "required_columns",
+        "source": "Deliver a sales CSV with order_id, customer_email and revenue columns.",
+        "columns": [
+          "order_id",
+          "customer_email",
+          "revenue"
+        ]
+      },
+      {
+        "kind": "unique",
+        "source": "Every order_id must be unique.",
+        "column": "order_id"
+      },
+      {
+        "kind": "not_empty",
+        "source": "Every customer_email must be present.",
+        "column": "customer_email"
+      },
+      {
+        "kind": "number_range",
+        "source": "Revenue must be a number greater than or equal to 0.",
+        "column": "revenue",
+        "min": 0
+      },
+      {
+        "kind": "row_count",
+        "source": "Include at least 3 rows.",
+        "min": 3
+      },
+      {
+        "kind": "source_keys",
+        "source": "The delivery must contain exactly the source order_id values.",
+        "column": "order_id"
+      },
+      {
+        "kind": "source_values",
+        "source": "For each order_id, revenue must equal the source revenue.",
+        "columns": [
+          "order_id",
+          "revenue"
+        ]
+      }
+    ],
+    "clarifications": []
+  },
+  "source": {
+    "sha256": "63b500480384b3cc711da1596f901eda79ffa3599ceefa5c9d01f706f2e6cd0c",
+    "rows": 3,
+    "columns": [
+      "order_id",
+      "customer_email",
+      "revenue"
+    ]
+  },
+  "approval": {
+    "sha256": "63b500480384b3cc711da1596f901eda79ffa3599ceefa5c9d01f706f2e6cd0c",
+    "at": "2026-11-11T05:29:42+00:00",
+    "manifest_sha256": "082391a6a387ae59eb5587c281f9bf64d4cbf70b6b5fc19fa0de8fd00377e959"
+  },
+  "manifest": {
+    "format": "prooflane-manifest-v2",
+    "project_id": "87d86b76eb0b4f82a27b0469520d1860",
+    "brief": "Deliver a sales CSV with order_id, customer_email and revenue columns. Every order_id must be unique. Every customer_email must be present. Revenue must be a number greater than or equal to 0. Include at least 3 rows. The delivery must contain exactly the source order_id values. For each order_id, revenue must equal the source revenue.",
+    "plan": {
+      "title": "Sales CSV Acceptance Plan",
+      "checks": [
+        {
+          "kind": "required_columns",
+          "source": "Deliver a sales CSV with order_id, customer_email and revenue columns.",
+          "columns": [
+            "order_id",
+            "customer_email",
+            "revenue"
+          ]
+        },
+        {
+          "kind": "unique",
+          "source": "Every order_id must be unique.",
+          "column": "order_id"
+        },
+        {
+          "kind": "not_empty",
+          "source": "Every customer_email must be present.",
+          "column": "customer_email"
+        },
+        {
+          "kind": "number_range",
+          "source": "Revenue must be a number greater than or equal to 0.",
+          "column": "revenue",
+          "min": 0
+        },
+        {
+          "kind": "row_count",
+          "source": "Include at least 3 rows.",
+          "min": 3
+        },
+        {
+          "kind": "source_keys",
+          "source": "The delivery must contain exactly the source order_id values.",
+          "column": "order_id"
+        },
+        {
+          "kind": "source_values",
+          "source": "For each order_id, revenue must equal the source revenue.",
+          "columns": [
+            "order_id",
+            "revenue"
+          ]
+        }
+      ],
+      "clarifications": []
+    },
+    "cents": 100,
+    "currency": "USD",
+    "ai_mode": "gemini",
+    "payment_mode": "sandbox",
+    "source": {
+      "sha256": "63b500480384b3cc711da1596f901eda79ffa3599ceefa5c9d01f706f2e6cd0c",
+      "rows": 3,
+      "columns": [
+        "order_id",
+        "customer_email",
+        "revenue"
+      ]
+    },
+    "delivery_sha256": "63b500480384b3cc711da1596f901eda79ffa3599ceefa5c9d01f706f2e6cd0c",
+    "csv_normalization": "UTF-8 text; leading BOM removed; LF newlines"
+  },
+  "order_id": "04747585K1881580B",
+  "status": "PAID",
+  "capture_completed": true,
+  "receipt": {
+    "capture_id": "0G756482T8710834K",
+    "order_id": "04747585K1881580B",
+    "amount": "1.00",
+    "currency": "USD",
+    "delivery_sha256": "63b500480384b3cc711da1596f901eda79ffa3599ceefa5c9d01f706f2e6cd0c",
+    "mode": "sandbox",
+    "ai_mode": "gemini",
+    "at": "2026-11-11T05:31:30+00:00",
+    "manifest_sha256": "082391a6a387ae59eb5587c281f9bf64d4cbf70b6b5fc19fa0de8fd00377e959",
+    "provider_reference": "pl2:87d86b76eb0b4f82a27b0469520d1860:082391a6a387ae59eb5587c281f9bf64d4cbf70b6b5fc19fa0de8fd00377e959"
+  },
+  "completed_at": "2026-11-11T05:31:55+00:00",
+  "independent_provider_verification": {
+    "command": "python verify_receipt.py submission/sandbox-evidence.json .venv/sandbox-reviewed-delivery.csv --source examples/source.csv --paypal",
+    "exit_code": 0,
+    "local_checks_passed": true,
+    "payment_verified": true,
+    "payment_status": "confirmed_sandbox",
+    "checks": 7,
+    "amount": "1.00",
+    "currency": "USD",
+    "manifest_sha256": "082391a6a387ae59eb5587c281f9bf64d4cbf70b6b5fc19fa0de8fd00377e959",
+    "delivery_sha256": "63b500480384b3cc711da1596f901eda79ffa3599ceefa5c9d01f706f2e6cd0c",
+    "note": "Actual CLI command returned this authenticated confirmation on 11 November; no provider credentials or buyer information saved."
+  }
+}

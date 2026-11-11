@@ -1,0 +1,99 @@
+{
+  "format": "prooflane-media-v1",
+  "main_workflow": "live Gemini + sandbox configuration, no order created",
+  "separate_receipt_project": "87d86b76eb0b4f82a27b0469520d1860",
+  "captioned": true,
+  "music": false,
+  "duration_target_seconds": 165,
+  "screenshots": [
+    "01-overview.png",
+    "02-gemini-checks.png",
+    "03-source-failure.png",
+    "04-one-cent.png",
+    "05-correction.png",
+    "06-seven-passes.png",
+    "07-approval.png",
+    "08-sandbox-receipt.png",
+    "09-independent-confirmation.png",
+    "10-tamper-rejected.png"
+  ],
+  "steps": [
+    {
+      "stage": "opening",
+      "actions_finished_seconds": 0.78,
+      "hold_until": 12
+    },
+    {
+      "stage": "live-gemini-plan",
+      "actions_finished_seconds": 21.16,
+      "hold_until": 24
+    },
+    {
+      "stage": "source-agreement",
+      "actions_finished_seconds": 24.83,
+      "hold_until": 35
+    },
+    {
+      "stage": "substituted-order-blocked",
+      "actions_finished_seconds": 35.86,
+      "hold_until": 48
+    },
+    {
+      "stage": "source-failure-explanation",
+      "actions_finished_seconds": 48.57,
+      "hold_until": 60
+    },
+    {
+      "stage": "one-cent-rejected",
+      "actions_finished_seconds": 61.38,
+      "hold_until": 74
+    },
+    {
+      "stage": "correction-preview",
+      "actions_finished_seconds": 74.59,
+      "hold_until": 87
+    },
+    {
+      "stage": "apply-and-undo",
+      "actions_finished_seconds": 88.64,
+      "hold_until": 99
+    },
+    {
+      "stage": "seven-passes",
+      "actions_finished_seconds": 99.59,
+      "hold_until": 107
+    },
+    {
+      "stage": "approved-checkout-eligible",
+      "actions_finished_seconds": 107.62,
+      "hold_until": 122
+    },
+    {
+      "stage": "separate-real-sandbox-receipt",
+      "actions_finished_seconds": 122.67,
+      "hold_until": 136
+    },
+    {
+      "stage": "export-and-independent-files",
+      "actions_finished_seconds": 137.73,
+      "hold_until": 148
+    },
+    {
+      "stage": "authenticated-provider-verifier",
+      "actions_finished_seconds": 150.29,
+      "hold_until": 157
+    },
+    {
+      "stage": "changed-delivery-rejected",
+      "actions_finished_seconds": 157.9,
+      "hold_until": 165
+    }
+  ],
+  "main_project_id": "ab9f39c822a34298953227274106d32a",
+  "video": "prooflane-demo.mp4",
+  "bytes": 3380003,
+  "sha256": "1ee5dd6083b0ff4398d800b8e532228a9358130d41a9a5e0f2453332b59f6863",
+  "browser": "chrome",
+  "playback_speed": 1.0,
+  "render": "H.264, 1440x810, 30fps; burned English captions; no soundtrack; uniformly time-compressed if provider latency exceeds the target"
+}

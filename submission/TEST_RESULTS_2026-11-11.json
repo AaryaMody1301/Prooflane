@@ -1,0 +1,61 @@
+{
+  "python": "3.14.7",
+  "platform": "win32",
+  "commands": [
+    {
+      "check": "python-tests",
+      "command": [
+        "python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_app.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.5,
+      "result": "h) ... ok\ntest_source_agreement_and_reattachment_are_frozen_without_saving_raw_rows (test_app.Checks.test_source_agreement_and_reattachment_are_frozen_without_saving_raw_rows) ... ok\ntest_source_comparison_catches_valid_looking_substitution_and_decimal_change (test_app.Checks.test_source_comparison_catches_valid_looking_substitution_and_decimal_change) ... ok\ntest_source_correction_preview_is_read_only_and_never_guesses_conflicting_keys (test_app.Checks.test_source_correction_preview_is_read_only_and_never_guesses_conflicting_keys) ... ok\ntest_uncertain_checkout_freezes_delivery_before_retry (test_app.Checks.test_uncertain_checkout_freezes_delivery_before_retry) ... ok\ntest_uncertain_checkout_stops_after_retry_window (test_app.Checks.test_uncertain_checkout_stops_after_retry_window) ... ok\n\n----------------------------------------------------------------------\nRan 34 tests in 1.159s\n\nOK"
+    },
+    {
+      "check": "client-checks",
+      "command": [
+        "node",
+        "test_client.cjs"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.53,
+      "result": "PASS: source comparisons, correction preview/apply/undo, clarification revisions, independent receipt verification, evidence escaping, library/search, result filters, file/drop validation, nine lifecycle views, sample checkout, dirty previews, pending locks and return recovery. DOM stubs; browser/layout checks are separate."
+    },
+    {
+      "check": "compilation",
+      "command": [
+        "python",
+        "-m",
+        "py_compile",
+        "app.py",
+        "test_app.py",
+        "browser_check.py",
+        "verify_receipt.py",
+        "submission/check_clean_install.py",
+        "submission/check_accessibility.py",
+        "submission/record_demo.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.15,
+      "result": ""
+    },
+    {
+      "check": "whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.05,
+      "result": ""
+    }
+  ],
+  "all_passed": true,
+  "python_tests": 34,
+  "limitations": "Offline suites and client DOM stubs; real browsers/providers have separate reports. Remote CI is not inferred from local tests."
+}

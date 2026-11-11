@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-11T05:41:24+00:00",
+  "historical_blobs_scanned": 105,
+  "checks": [
+    "exact current provider credential values",
+    "Google key pattern",
+    "private key headers",
+    "tracked .env/database/development environment",
+    "submission text credential matches"
+  ],
+  "findings": [],
+  "tracked_forbidden_files": [],
+  "passed": true,
+  "limitations": "Targeted scan; not a guarantee that every possible historical secret format is detected. .env and databases remain local and ignored."
+}
