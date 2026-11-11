@@ -1,0 +1,46 @@
+{
+  "code_commit": "05044f2f7046dce6b58fa0e8f9fd26a4374ea6f1",
+  "modes": "sample AI + simulation only",
+  "browsers": [
+    {
+      "channel": "chrome",
+      "version": "157.0.8103.50",
+      "passed": true
+    },
+    {
+      "channel": "msedge",
+      "version": "157.0.4341.42",
+      "passed": true
+    },
+    {
+      "channel": "chromium",
+      "version": "156.0.8078.4",
+      "passed": true
+    }
+  ],
+  "widths": [
+    320,
+    390,
+    768,
+    1280
+  ],
+  "layout_states_per_browser": 12,
+  "layout_checks_per_browser": 48,
+  "verified": [
+    "five- and seven-check UI workflows",
+    "actual browser file inputs and evidence/CSV downloads",
+    "source substitution and one-cent value attacks",
+    "correction preview, Apply, Undo and recheck guard",
+    "seven passes, approval, manifest receipt and simulated capture",
+    "independent browser verifier and stale-success clearing/tamper rejection",
+    "saved-project and real server restart recovery",
+    "valid, replayed and foreign return tokens",
+    "keyboard skip link, one main landmark, visible focus, focused errors",
+    "no page exceptions or unexpected external requests"
+  ],
+  "limitations": [
+    "viewport emulation is not physical-device QA",
+    "spoken screen reader and OS file-dialog/drag operation not freshly tested",
+    "browser regression runners do not contact real providers; those have separate evidence"
+  ]
+}

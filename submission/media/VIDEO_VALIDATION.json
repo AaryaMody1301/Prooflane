@@ -1,0 +1,16 @@
+{
+  "ffmpeg_version": "9.0.2-essentials_build-www.gyan.dev built with gcc 16.2.0 (Rev3, Built by MSYS2 project)",
+  "codec": "h264",
+  "pix_fmt": "yuv420p(progressive)",
+  "fps": 30.0,
+  "source_size": [
+    1440,
+    810
+  ],
+  "size": [
+    1440,
+    810
+  ],
+  "rotate": 0,
+  "duration": 164.8
+}

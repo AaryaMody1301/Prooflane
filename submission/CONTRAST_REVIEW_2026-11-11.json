@@ -1,0 +1,37 @@
+{
+  "method": "WCAG relative luminance calculation from current CSS. For the translucent radial gradient, use the brightest possible composited stop; intermediate colors are bounded by these dark, monotonic endpoints. Receipt mark uses a solid background. This supplements axe incomplete items, not screen-reader/physical-device acceptance.",
+  "checks": [
+    {
+      "foreground": "#cae6d2",
+      "background": "radial gradient bounded by #14271e and #326b45 at alpha 77/255",
+      "minimum_contrast": 9.15
+    },
+    {
+      "foreground": "#ffffff",
+      "background": "radial gradient bounded by #14271e and #326b45 at alpha 77/255",
+      "minimum_contrast": 12.19
+    },
+    {
+      "foreground": "#c9f1d6",
+      "background": "radial gradient bounded by #14271e and #326b45 at alpha 77/255",
+      "minimum_contrast": 9.89
+    },
+    {
+      "foreground": "#c4d9cb",
+      "background": "radial gradient bounded by #14271e and #326b45 at alpha 77/255",
+      "minimum_contrast": 8.21
+    },
+    {
+      "foreground": "#e0f2e5",
+      "background": "radial gradient bounded by #14271e and #326b45 at alpha 77/255",
+      "minimum_contrast": 10.45
+    },
+    {
+      "foreground": "#08715b",
+      "background": "#e3f3ec",
+      "element": ".receipt-mark",
+      "minimum_contrast": 5.19
+    }
+  ],
+  "all_at_least_4_5": true
+}

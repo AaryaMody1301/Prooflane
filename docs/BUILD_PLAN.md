@@ -1,5 +1,7 @@
 # Prooflane: phased build plan
 
+**11 November release update:** this document preserves the dated build history. Current verified results, provider capture, judge instructions, video and remaining submission gates are in [the final submission report](../submission/FINAL_REPORT.md). The current internal deadline is 12 November, 8:00 PM IST.
+
 Updated 22 October 2026. Work through one phase at a time. A phase advances only when its completion gate has evidence; a fixture or test double does not complete a real-service gate.
 
 **Product:** a client agrees to measurable CSV work and a USD price. AI proposes reviewable acceptance checks; code tests the delivery; a human approves the exact checked file; PayPal sandbox checkout connects that snapshot to a reconciled capture receipt.

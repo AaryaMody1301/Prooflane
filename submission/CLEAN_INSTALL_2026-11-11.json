@@ -1,0 +1,36 @@
+{
+  "python": "3.14.7",
+  "platform": "win32",
+  "clone_commit": "05044f2f7046dce6b58fa0e8f9fd26a4374ea6f1",
+  "env_file_present": false,
+  "initial_database_present": false,
+  "package_installs": 0,
+  "provider_calls": 0,
+  "port_override_for_isolation": 53332,
+  "steps": {
+    "substituted": "blocked",
+    "changed-value": "blocked",
+    "invalid_upload_preserves_state": true,
+    "seven_checks_correction_approval_simulation_export": true,
+    "reject_changed_delivery": true,
+    "reject_changed_source": true,
+    "reject_changed_amount": true,
+    "reject_changed_manifest": true,
+    "missing_provider_credentials_fail_honestly_no_database": true,
+    "persisted_receipt_after_actual_server_restart": true
+  },
+  "independent_verifier": {
+    "local_checks_passed": true,
+    "project_id": "20ad4fe6162941af873bef35bc1010d1",
+    "manifest_sha256": "45bbdefefd5e677c3ecba0207e84c1442208443b03aac5b68311cfe7f8431715",
+    "delivery_sha256": "63b500480384b3cc711da1596f901eda79ffa3599ceefa5c9d01f706f2e6cd0c",
+    "source_sha256": "63b500480384b3cc711da1596f901eda79ffa3599ceefa5c9d01f706f2e6cd0c",
+    "checks": 7,
+    "amount": "1.00",
+    "currency": "USD",
+    "payment_status": "simulated",
+    "payment_verified": false,
+    "note": "Local consistency alone does not authenticate a payment. PayPal lookup is read-only; the provider records the reference and Prooflane checks the work."
+  },
+  "passed": true
+}

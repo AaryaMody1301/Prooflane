@@ -1,0 +1,69 @@
+1
+00:00:00,000 --> 00:00:12,000
+Prooflane — Proof Before Payment.
+A CSV can look valid and still contain the wrong records.
+
+2
+00:00:12,000 --> 00:00:24,000
+Live Gemini drafts measurable checks from the brief.
+The client sets the price. AI cannot approve work or payment.
+
+3
+00:00:24,000 --> 00:00:35,000
+Review all seven requirements and attach the original source.
+Agree explicitly. CSV rows stay local.
+
+4
+00:00:35,000 --> 00:00:48,000
+This delivery substitutes an order.
+The five structural checks pass; source reconciliation fails.
+
+5
+00:00:48,000 --> 00:01:00,000
+The total still matches: 285.
+Missing and unexpected source keys block approval and checkout.
+
+6
+00:01:00,000 --> 00:01:14,000
+Now change revenue by just one cent.
+Decimal comparison detects the exact -0.01 difference.
+
+7
+00:01:14,000 --> 00:01:27,000
+Review the proposed correction against the agreed source.
+No invented data, generated code or silent file changes.
+
+8
+00:01:27,000 --> 00:01:39,000
+Apply is explicit. Undo restores the previous preview.
+Both require fresh verification before approval.
+
+9
+00:01:39,000 --> 00:01:52,000
+All seven checks pass on the corrected version.
+Explicit approval freezes the agreement, source, price and delivery hash.
+
+10
+00:01:52,000 --> 00:02:02,000
+Checkout is now eligible for this approved delivery.
+The following receipt is from a SEPARATE verified sandbox run.
+
+11
+00:02:02,000 --> 00:02:16,000
+Separate run: actual USD 1.00 PayPal sandbox capture.
+The same seven-check workflow; a distinct project and transaction.
+
+12
+00:02:16,000 --> 00:02:28,000
+Export its evidence and verify the original files separately.
+The verifier does not need the original project database.
+
+13
+00:02:28,000 --> 00:02:37,000
+Authenticated, read-only PayPal lookup confirms this capture,
+exact USD amount and version 2 manifest reference.
+
+14
+00:02:37,000 --> 00:02:45,000
+A changed delivery fails verification.
+Prooflane connects reviewed work, approval and checkout. github.com/AaryaMody1301/Prooflane

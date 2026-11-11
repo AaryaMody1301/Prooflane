@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-11T05:52:55+00:00",
+  "project_id": "87d86b76eb0b4f82a27b0469520d1860",
+  "actual_server_process_restarted": true,
+  "restart_note": "The prior test-server process had exited and no listener remained; a new process reopened the persisted database.",
+  "persisted_status": "PAID",
+  "receipt_preserved": true,
+  "capture_id": "0G756482T8710834K",
+  "amount": "1.00",
+  "manifest_sha256": "082391a6a387ae59eb5587c281f9bf64d4cbf70b6b5fc19fa0de8fd00377e959",
+  "reconciliation_replays": 3,
+  "replays_preserve_exact_receipt": true,
+  "new_orders_created": 0,
+  "passed": true
+}

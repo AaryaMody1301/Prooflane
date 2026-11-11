@@ -300,6 +300,42 @@ class Checks(unittest.TestCase):
             adapter.capture(p)
         self.assertEqual(call.call_count, 1)
 
+    def test_inconsistent_or_malformed_capture_never_records_payment(self):
+        self.store.payment_mode, self.store.paypal = "sandbox", FakePayPal()
+        p = ready(self.store)
+        p = self.store.act(p["id"], "order", {}, "http://127.0.0.1:8787")
+        completed = order_result(p)
+        invalid = []
+        for status in (None, "APPROVED", "PAYER_ACTION_REQUIRED"):
+            response = copy.deepcopy(completed)
+            response["status"] = status
+            invalid.append(response)
+        for capture_id in (None, "", "../../foreign"):
+            response = copy.deepcopy(completed)
+            response["purchase_units"][0]["payments"]["captures"][0]["id"] = capture_id
+            invalid.append(response)
+        for units in (None, {}, [None]):
+            response = copy.deepcopy(completed)
+            response["purchase_units"] = units
+            invalid.append(response)
+        for response in invalid:
+            with self.subTest(response=response), patch.object(self.store.paypal, "capture", return_value=response), self.assertRaises(Problem):
+                self.store.act(p["id"], "capture", {"order_id": p["order"]["id"]}, "")
+            saved = self.store.get(p["id"])
+            self.assertEqual(saved["status"], "ORDER_CREATED")
+            self.assertIsNone(saved["receipt"])
+
+    def test_capture_money_accepts_provider_metadata_without_weakening_value_checks(self):
+        self.store.payment_mode, self.store.paypal = "sandbox", FakePayPal()
+        p = ready(self.store)
+        p = self.store.act(p["id"], "order", {}, "http://127.0.0.1:8787")
+        completed = order_result(p)
+        completed["purchase_units"][0]["payments"]["captures"][0]["amount"]["breakdown"] = {}
+        with patch.object(self.store.paypal, "capture", return_value=completed):
+            paid = self.store.act(p["id"], "capture", {"order_id": p["order"]["id"]}, "")
+        self.assertEqual(paid["status"], "PAID")
+        self.assertEqual(paid["receipt"]["amount"], "120.00")
+
     def test_order_readback_accepts_breakdown_but_blocks_money_mismatch(self):
         p = ready(self.store)
         p = self.store.act(p["id"], "order", {}, "")

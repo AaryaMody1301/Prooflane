@@ -1,0 +1,17 @@
+Prooflane — Proof Before Payment
+
+Catch incorrect data delivery before payment, and verify exactly what the payment was for.
+
+Prooflane connects human-reviewed requirements, source-based CSV checks, frozen approval evidence and PayPal sandbox transaction reconciliation. This demonstration shows a live Gemini acceptance plan, a substituted order, a one-cent revenue error, reviewed correction with Undo, explicit approval, a real sandbox receipt, independent provider confirmation and rejection of a changed delivery.
+
+Transaction disclosure: at 2:02 the video explicitly switches to a SEPARATE completed seven-check sandbox project, captured during the same verification session. The initial on-screen review project does not create an order. The recorded receipt is an actual USD 1.00 sandbox capture, not live money or a simulated payment. External buyer approval happened manually outside this recording; it is not shown. The separate verifier performs an actual authenticated, read-only PayPal lookup on screen.
+
+Runtime: 2:44.8. Burned English captions; no music or voice track. Footage shows the working local application with synthetic CSV records. No credentials or buyer account information are included.
+
+Source and setup: https://github.com/AaryaMody1301/Prooflane
+Judge instructions: submission/JUDGE_GUIDE.md in the repository.
+Hackathon: https://paypalaihackathon.devpost.com/
+
+Stack: Python standard library, SQLite, buildless HTML/CSS/JavaScript, Gemini structured-output REST API and PayPal Orders v2 sandbox. Codex assisted development and preparation; Playwright/FFmpeg produced actual interaction footage. The default no-key mode is an explicitly labeled fixture plus payment simulation and is distinct from this real-provider recording.
+
+Limitations: localhost single-operator prototype; no escrow, live payments, independent user accounts or guarantee that source data reflects real-world truth. Offline evidence consistency alone does not authenticate a payment.
