@@ -1,5 +1,7 @@
 # Prooflane completion report — 11 November 2026
 
+**Later status update (11 November 2026):** [PR #7](https://github.com/AaryaMody1301/Prooflane/pull/7) was merged into `main` at commit `fe2f07c00407`. The entrant confirmed completing the Devpost submission and provided the [YouTube demo URL](https://youtu.be/OgW8BQ-HbLY). The public Devpost URL and video visibility are not independently verified. GitHub Actions remain blocked before job execution at the account level. The checklist and evidence below preserve the earlier pre-submission state; they are not a newer account-status check.
+
 **The working product, fresh provider acceptance, functional demo file and submission text are complete. The hackathon submission is not complete.** Public YouTube publication, the actual Devpost account/form/submission and passing remote CI remain unresolved.
 
 Feature branch: `codex/hackathon-submission-2026-11-11`. [PR #7](https://github.com/AaryaMody1301/Prooflane/pull/7) is intentionally a draft. Core application/browser changes are in [05044f2](https://github.com/AaryaMody1301/Prooflane/commit/05044f2f7046dce6b58fa0e8f9fd26a4374ea6f1). Packaging commits follow on the same branch; use `git rev-parse HEAD` or the PR head to identify the final candidate. No merge, tag or submission is claimed.
