@@ -6,12 +6,22 @@
   "functional_demo": "Runnable repository; Python 3.11+ only; README and submission/JUDGE_GUIDE.md",
   "story_file": "DEVPOST_STORY.md",
   "testing_instructions_file": "JUDGE_GUIDE.md",
-  "technology_tags": ["Python", "SQLite", "JavaScript", "HTML5", "CSS3", "Google Gemini", "PayPal", "GitHub Actions"],
+  "technology_tags": [
+    "Python",
+    "SQLite",
+    "JavaScript",
+    "HTML5",
+    "CSS3",
+    "Google Gemini",
+    "PayPal",
+    "GitHub Actions"
+  ],
   "ai_role": "Gemini drafts constrained acceptance checks from the brief. The server validates them and a person reviews scope. It cannot authorize payment; CSV rows stay local.",
   "paypal_role": "Sandbox Orders v2 creation, buyer approval, capture and authenticated readback with exact amount and frozen manifest reference in custom_id.",
   "team_information": "Account owner must confirm entrants, team membership, eligibility and representative authority; no extra teammates invented.",
-  "youtube_url": null,
+  "youtube_url": "https://youtu.be/OgW8BQ-HbLY",
   "devpost_url": null,
-  "submitted": false,
-  "account_form_inspected": false
+  "submitted": true,
+  "account_form_inspected": false,
+  "submission_confirmation": "Entrant confirmed submitting to Devpost on 11 November 2026; public Devpost URL and video visibility not independently verified."
 }
